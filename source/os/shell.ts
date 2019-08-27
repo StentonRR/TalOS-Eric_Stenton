@@ -27,7 +27,7 @@ module TSOS {
         }
 
         public init() {
-            var sc;
+            let sc;
             //
             // Load the command list.
 
@@ -232,12 +232,32 @@ module TSOS {
 
         public shellMan(args) {
             if (args.length > 0) {
-                var topic = args[0];
+                let topic = args[0];
                 switch (topic) {
+                    case "ver":
+                        _StdOut.putText("Ver displays the OS's name and version number.");
+                        break;
                     case "help":
                         _StdOut.putText("Help displays a list of (hopefully) valid commands.");
                         break;
-                    // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
+                    case "shutdown":
+                        _StdOut.putText("Shutdown turns off the Aperture virtual OS.");
+                        break;
+                    case "cls":
+                        _StdOut.putText("Cls clears the console and resets the cursor position so GlaDOS won't get angry.");
+                        break;
+                    case "man":
+                        _StdOut.putText("Man shows the Aperture archives' MANual page for the requested command.");
+                        break;
+                    case "trace":
+                        _StdOut.putText("Trace enables or disables the OS trace so that GlaDOS doesn't have to explain what you are doing wrong.");
+                        break;
+                    case "rot13":
+                        _StdOut.putText("Rot13 applies the rot13 encryption to a given string. The companion cube finds meaning in it even though no one else does.");
+                        break;
+                    case "prompt":
+                        _StdOut.putText("Prompt sets the prompt text. Luckily GlaDOS did not set it.");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
