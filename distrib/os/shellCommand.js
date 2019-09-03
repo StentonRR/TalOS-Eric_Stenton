@@ -1,12 +1,14 @@
 var TSOS;
 (function (TSOS) {
     var ShellCommand = /** @class */ (function () {
-        function ShellCommand(func, command, description) {
-            if (command === void 0) { command = ""; }
+        function ShellCommand(func, name, description, usage) {
+            if (name === void 0) { name = ""; }
             if (description === void 0) { description = ""; }
+            if (usage === void 0) { usage = ""; }
             this.func = func;
-            this.command = command;
+            this.name = name;
             this.description = description;
+            this.usage = usage;
         }
         return ShellCommand;
     }());

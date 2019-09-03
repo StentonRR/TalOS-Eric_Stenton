@@ -13,52 +13,52 @@
 // TODO: Write a base class / prototype for system services and let Shell inherit from it.
 var TSOS;
 (function (TSOS) {
-    class Shell {
-        constructor() {
+    var Shell = /** @class */ (function () {
+        function Shell() {
             // Properties
             this.promptStr = ">";
             this.commandList = [];
             this.curses = "[fuvg],[cvff],[shpx],[phag],[pbpxfhpxre],[zbgureshpxre],[gvgf]";
             this.apologies = "[sorry]";
         }
-        init() {
-            let sc;
+        Shell.prototype.init = function () {
+            var sc;
             //
             // Load the command list.
             // ver
-            sc = new TSOS.ShellCommand(this.shellVer, "ver", "- Displays the current version data.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellVer, "ver", "Displays the current version data.", "ver");
+            this.commandList.push(sc);
             // help
-            sc = new TSOS.ShellCommand(this.shellHelp, "help", "- This is the help command. Seek help.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellHelp, "help", "This is the help command. Seek help.", "help");
+            this.commandList.push(sc);
             // shutdown
-            sc = new TSOS.ShellCommand(this.shellShutdown, "shutdown", "- Shuts down the virtual OS but leaves the underlying host / hardware simulation running.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellShutdown, "shutdown", "Shuts down the virtual OS but leaves the underlying host / hardware simulation running.", "shutdown");
+            this.commandList.push(sc);
             // cls
-            sc = new TSOS.ShellCommand(this.shellCls, "cls", "- Clears the screen and resets the cursor position.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellCls, "cls", "Clears the screen and resets the cursor position.", "cls");
+            this.commandList.push(sc);
             // man <topic>
-            sc = new TSOS.ShellCommand(this.shellMan, "man", "<topic> - Displays the MANual page for <topic>.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellMan, "man", "Displays the MANual page for <topic>.", "man <topic>");
+            this.commandList.push(sc);
             // trace <on | off>
-            sc = new TSOS.ShellCommand(this.shellTrace, "trace", "<on | off> - Turns the OS trace on or off.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellTrace, "trace", "Turns the OS trace on or off.", "trace <on | off>");
+            this.commandList.push(sc);
             // rot13 <string>
-            sc = new TSOS.ShellCommand(this.shellRot13, "rot13", "<string> - Does rot13 obfuscation on <string>.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellRot13, "rot13", "Does rot13 obfuscation on <string>.", "rot13 <string>");
+            this.commandList.push(sc);
             // prompt <string>
-            sc = new TSOS.ShellCommand(this.shellPrompt, "prompt", "<string> - Sets the prompt.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellPrompt, "prompt", "Sets the prompt.", "prompt <string>");
+            this.commandList.push(sc);
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             //
             // Display the initial prompt.
             this.putPrompt();
-        }
-        putPrompt() {
+        };
+        Shell.prototype.putPrompt = function () {
             _StdOut.putText(this.promptStr);
-        }
-        handleInput(buffer) {
+        };
+        Shell.prototype.handleInput = function (buffer) {
             _Kernel.krnTrace("Shell Command~" + buffer);
             //
             // Parse the input...
@@ -76,7 +76,7 @@ var TSOS;
             var found = false;
             var fn = undefined;
             while (!found && index < this.commandList.length) {
-                if (this.commandList[index].command === cmd) {
+                if (this.commandList[index].name === cmd) {
                     found = true;
                     fn = this.commandList[index].func;
                 }
@@ -99,9 +99,9 @@ var TSOS;
                     this.execute(this.shellInvalidCommand);
                 }
             }
-        }
+        };
         // Note: args is an option parameter, ergo the ? which allows TypeScript to understand that.
-        execute(fn, args) {
+        Shell.prototype.execute = function (fn, args) {
             // We just got a command, so advance the line...
             _StdOut.advanceLine();
             // ... call the command function passing in the args with some über-cool functional programming ...
@@ -112,8 +112,8 @@ var TSOS;
             }
             // ... and finally write the prompt again.
             this.putPrompt();
-        }
-        parseInput(buffer) {
+        };
+        Shell.prototype.parseInput = function (buffer) {
             var retVal = new TSOS.UserCommand();
             // 1. Remove leading and trailing spaces.
             buffer = TSOS.Utils.trim(buffer);
@@ -135,12 +135,12 @@ var TSOS;
                 }
             }
             return retVal;
-        }
+        };
         //
         // Shell Command Functions.  Kinda not part of Shell() class exactly, but
         // called from here, so kept here to avoid violating the law of least astonishment.
         //
-        shellInvalidCommand() {
+        Shell.prototype.shellInvalidCommand = function () {
             _StdOut.putText("Invalid Command. ");
             if (_SarcasticMode) {
                 _StdOut.putText("Unbelievable. You, [subject name here],");
@@ -150,14 +150,14 @@ var TSOS;
             else {
                 _StdOut.putText("Type 'help' for, well... help.");
             }
-        }
-        shellCurse() {
+        };
+        Shell.prototype.shellCurse = function () {
             _StdOut.putText("Oh, so that's how it's going to be, eh? Fine.");
             _StdOut.advanceLine();
             _StdOut.putText("Bitch.");
             _SarcasticMode = true;
-        }
-        shellApology() {
+        };
+        Shell.prototype.shellApology = function () {
             if (_SarcasticMode) {
                 _StdOut.putText("I think we can put our differences behind us.");
                 _StdOut.advanceLine();
@@ -167,72 +167,51 @@ var TSOS;
             else {
                 _StdOut.putText("For what?");
             }
-        }
-        shellVer(args) {
+        };
+        Shell.prototype.shellVer = function (args) {
             _StdOut.putText(APP_NAME + " version " + APP_VERSION);
-        }
-        shellHelp(args) {
+        };
+        Shell.prototype.shellHelp = function (args) {
             _StdOut.putText("Commands:");
             for (var i in _OsShell.commandList) {
                 _StdOut.advanceLine();
-                _StdOut.putText("  " + _OsShell.commandList[i].command + " " + _OsShell.commandList[i].description);
+                _StdOut.putText("  " + _OsShell.commandList[i].name + " - " + _OsShell.commandList[i].description);
             }
-        }
-        shellShutdown(args) {
+        };
+        Shell.prototype.shellShutdown = function (args) {
             _StdOut.putText("Shutting down...");
             // Call Kernel shutdown routine.
             _Kernel.krnShutdown();
             // TODO: Stop the final prompt from being displayed.  If possible.  Not a high priority.  (Damn OCD!)
-        }
-        shellCls(args) {
+        };
+        Shell.prototype.shellCls = function (args) {
             _StdOut.clearScreen();
             _StdOut.resetXY();
-        }
-        shellMan(args) {
+        };
+        Shell.prototype.shellMan = function (args) {
             if (args.length > 0) {
-                let topic = args[0];
-                switch (topic) {
-                    case "ver":
-                        _StdOut.putText("Description: Ver displays the OS's name and version number.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}ver`);
+                var topic = args[0];
+                // Loop through command list and return requested command information
+                var found = false;
+                for (var _i = 0, _a = _OsShell.commandList; _i < _a.length; _i++) {
+                    var command = _a[_i];
+                    console.log("Given: " + topic + "    Command: " + command.name);
+                    if (topic == command.name) {
+                        _StdOut.putText("Description: " + command.description);
+                        _StdOut.putText("\nUsage: " + _OsShell.promptStr + command.usage);
+                        found = true;
                         break;
-                    case "help":
-                        _StdOut.putText("Description: Help displays a list of (hopefully) valid commands.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}help`);
-                        break;
-                    case "shutdown":
-                        _StdOut.putText("Description: Shutdown turns off the Aperture virtual OS.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}shutdown`);
-                        break;
-                    case "cls":
-                        _StdOut.putText("Description: Cls clears the console and resets the cursor position so GlaDOS won't get angry.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}cls`);
-                        break;
-                    case "man":
-                        _StdOut.putText("Description: Man shows the Aperture archives' MANual page for the requested command.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}man [command name]`);
-                        break;
-                    case "trace":
-                        _StdOut.putText("Description: Trace enables or disables the OS trace so that GlaDOS doesn't have to explain what you are doing wrong.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}trace [on/off]`);
-                        break;
-                    case "rot13":
-                        _StdOut.putText("Description: Rot13 applies the rot13 encryption to a given string. The companion cube finds meaning in it even though no one else does.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}rot13 [string]`);
-                        break;
-                    case "prompt":
-                        _StdOut.putText("Description: Prompt sets the prompt text. Luckily GlaDOS did not set it.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}prompt [new prompt string]`);
-                        break;
-                    default:
-                        _StdOut.putText("No manual entry for " + args[0] + ".");
+                    }
                 }
+                // Command not found
+                if (!found)
+                    _StdOut.putText("No manual entry for " + topic + ".");
             }
             else {
                 _StdOut.putText("Usage: man <topic>  Please supply a topic.");
             }
-        }
-        shellTrace(args) {
+        };
+        Shell.prototype.shellTrace = function (args) {
             if (args.length > 0) {
                 var setting = args[0];
                 switch (setting) {
@@ -256,8 +235,8 @@ var TSOS;
             else {
                 _StdOut.putText("Usage: trace <on | off>");
             }
-        }
-        shellRot13(args) {
+        };
+        Shell.prototype.shellRot13 = function (args) {
             if (args.length > 0) {
                 // Requires Utils.ts for rot13() function.
                 _StdOut.putText(args.join(' ') + " = '" + TSOS.Utils.rot13(args.join(' ')) + "'");
@@ -265,16 +244,16 @@ var TSOS;
             else {
                 _StdOut.putText("Usage: rot13 <string>  Please supply a string.");
             }
-        }
-        shellPrompt(args) {
+        };
+        Shell.prototype.shellPrompt = function (args) {
             if (args.length > 0) {
                 _OsShell.promptStr = args[0];
             }
             else {
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
             }
-        }
-    }
+        };
+        return Shell;
+    }());
     TSOS.Shell = Shell;
 })(TSOS || (TSOS = {}));
-//# sourceMappingURL=shell.js.map

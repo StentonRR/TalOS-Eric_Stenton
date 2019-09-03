@@ -34,50 +34,58 @@ module TSOS {
             // ver
             sc = new ShellCommand(this.shellVer,
                                   "ver",
-                                  "- Displays the current version data.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Displays the current version data.",
+                                  "ver");
+            this.commandList.push(sc);
 
             // help
             sc = new ShellCommand(this.shellHelp,
                                   "help",
-                                  "- This is the help command. Seek help.");
-            this.commandList[this.commandList.length] = sc;
+                                  "This is the help command. Seek help.",
+                                  "help");
+            this.commandList.push(sc);
 
             // shutdown
             sc = new ShellCommand(this.shellShutdown,
                                   "shutdown",
-                                  "- Shuts down the virtual OS but leaves the underlying host / hardware simulation running.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Shuts down the virtual OS but leaves the underlying host / hardware simulation running.",
+                                  "shutdown");
+            this.commandList.push(sc);
 
             // cls
             sc = new ShellCommand(this.shellCls,
                                   "cls",
-                                  "- Clears the screen and resets the cursor position.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Clears the screen and resets the cursor position.",
+                                  "cls");
+            this.commandList.push(sc);
 
             // man <topic>
             sc = new ShellCommand(this.shellMan,
                                   "man",
-                                  "<topic> - Displays the MANual page for <topic>.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Displays the MANual page for <topic>.",
+                                  "man <topic>");
+            this.commandList.push(sc);
 
             // trace <on | off>
             sc = new ShellCommand(this.shellTrace,
                                   "trace",
-                                  "<on | off> - Turns the OS trace on or off.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Turns the OS trace on or off.",
+                                  "trace <on | off>");
+            this.commandList.push(sc);
 
             // rot13 <string>
             sc = new ShellCommand(this.shellRot13,
                                   "rot13",
-                                  "<string> - Does rot13 obfuscation on <string>.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Does rot13 obfuscation on <string>.",
+                                  "rot13 <string>");
+            this.commandList.push(sc);
 
             // prompt <string>
             sc = new ShellCommand(this.shellPrompt,
                                   "prompt",
-                                  "<string> - Sets the prompt.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Sets the prompt.",
+                                  "prompt <string>");
+            this.commandList.push(sc);
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -109,7 +117,7 @@ module TSOS {
             var found: boolean = false;
             var fn = undefined;
             while (!found && index < this.commandList.length) {
-                if (this.commandList[index].command === cmd) {
+                if (this.commandList[index].name === cmd) {
                     found = true;
                     fn = this.commandList[index].func;
                 } else {
@@ -212,9 +220,9 @@ module TSOS {
 
         public shellHelp(args) {
             _StdOut.putText("Commands:");
-            for (var i in _OsShell.commandList) {
+            for (let i in _OsShell.commandList) {
                 _StdOut.advanceLine();
-                _StdOut.putText("  " + _OsShell.commandList[i].command + " " + _OsShell.commandList[i].description);
+                _StdOut.putText("  " + _OsShell.commandList[i].name + " - " + _OsShell.commandList[i].description);
             }
         }
 
@@ -233,42 +241,22 @@ module TSOS {
         public shellMan(args) {
             if (args.length > 0) {
                 let topic = args[0];
-                switch (topic) {
-                    case "ver":
-                        _StdOut.putText("Description: Ver displays the OS's name and version number.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}ver`);
+
+                // Loop through command list and return requested command information
+                let found = false;
+                for (let command of _OsShell.commandList) {
+                    console.log(`Given: ${topic}    Command: ${command.name}`);
+                    if (topic == command.name) {
+                        _StdOut.putText(`Description: ${command.description}`);
+                        _StdOut.putText(`\nUsage: ${_OsShell.promptStr}${command.usage}`);
+                        found = true;
                         break;
-                    case "help":
-                        _StdOut.putText("Description: Help displays a list of (hopefully) valid commands.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}help`);
-                        break;
-                    case "shutdown":
-                        _StdOut.putText("Description: Shutdown turns off the Aperture virtual OS.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}shutdown`);
-                        break;
-                    case "cls":
-                        _StdOut.putText("Description: Cls clears the console and resets the cursor position so GlaDOS won't get angry.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}cls`);
-                        break;
-                    case "man":
-                        _StdOut.putText("Description: Man shows the Aperture archives' MANual page for the requested command.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}man [command name]`);
-                        break;
-                    case "trace":
-                        _StdOut.putText("Description: Trace enables or disables the OS trace so that GlaDOS doesn't have to explain what you are doing wrong.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}trace [on/off]`);
-                        break;
-                    case "rot13":
-                        _StdOut.putText("Description: Rot13 applies the rot13 encryption to a given string. The companion cube finds meaning in it even though no one else does.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}rot13 [string]`);
-                        break;
-                    case "prompt":
-                        _StdOut.putText("Description: Prompt sets the prompt text. Luckily GlaDOS did not set it.");
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}prompt [new prompt string]`);
-                        break;
-                    default:
-                        _StdOut.putText("No manual entry for " + args[0] + ".");
+                    }
                 }
+
+                // Command not found
+                if(!found) _StdOut.putText("No manual entry for " + topic + ".");
+
             } else {
                 _StdOut.putText("Usage: man <topic>  Please supply a topic.");
             }
