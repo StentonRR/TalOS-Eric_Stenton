@@ -11,8 +11,9 @@
 //
 // Global CONSTANTS (TypeScript 1.5 introduced const. Very cool.)
 //
-const APP_NAME: string    = "TSOS";   // 'cause Bob and I were at a loss for a better name.
-const APP_VERSION: string = "0.07";   // What did you expect?
+const APP_NAME: string    = "TalOS";   // The Talos Pinciple...good game
+const APP_VERSION: string = "5.4";     // Start of hex value to the word 'garden'
+const ANDROID_VERSION : string = `${Math.floor(Math.random() * 90 + 10)}.${Math.floor(Math.random() * 9)}.${Math.floor(Math.random() * 9999)}`; // Your robot number
 
 const CPU_CLOCK_INTERVAL: number = 100;   // This is in ms (milliseconds) so 1000 = 1 second.
 
