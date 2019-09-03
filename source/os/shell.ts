@@ -235,28 +235,36 @@ module TSOS {
                 let topic = args[0];
                 switch (topic) {
                     case "ver":
-                        _StdOut.putText("Ver displays the OS's name and version number.");
+                        _StdOut.putText("Description: Ver displays the OS's name and version number.");
+                        _StdOut.putText(`Usage: ${_OsShell.promptStr}ver`);
                         break;
                     case "help":
-                        _StdOut.putText("Help displays a list of (hopefully) valid commands.");
+                        _StdOut.putText("Description: Help displays a list of (hopefully) valid commands.");
+                        _StdOut.putText(`Usage: ${_OsShell.promptStr}help`);
                         break;
                     case "shutdown":
-                        _StdOut.putText("Shutdown turns off the Aperture virtual OS.");
+                        _StdOut.putText("Description: Shutdown turns off the Aperture virtual OS.");
+                        _StdOut.putText(`Usage: ${_OsShell.promptStr}shutdown`);
                         break;
                     case "cls":
-                        _StdOut.putText("Cls clears the console and resets the cursor position so GlaDOS won't get angry.");
+                        _StdOut.putText("Description: Cls clears the console and resets the cursor position so GlaDOS won't get angry.");
+                        _StdOut.putText(`Usage: ${_OsShell.promptStr}cls`);
                         break;
                     case "man":
-                        _StdOut.putText("Man shows the Aperture archives' MANual page for the requested command.");
+                        _StdOut.putText("Description: Man shows the Aperture archives' MANual page for the requested command.");
+                        _StdOut.putText(`Usage: ${_OsShell.promptStr}man [command name]`);
                         break;
                     case "trace":
-                        _StdOut.putText("Trace enables or disables the OS trace so that GlaDOS doesn't have to explain what you are doing wrong.");
+                        _StdOut.putText("Description: Trace enables or disables the OS trace so that GlaDOS doesn't have to explain what you are doing wrong.");
+                        _StdOut.putText(`Usage: ${_OsShell.promptStr}trace [on/off]`);
                         break;
                     case "rot13":
-                        _StdOut.putText("Rot13 applies the rot13 encryption to a given string. The companion cube finds meaning in it even though no one else does.");
+                        _StdOut.putText("Description: Rot13 applies the rot13 encryption to a given string. The companion cube finds meaning in it even though no one else does.");
+                        _StdOut.putText(`Usage: ${_OsShell.promptStr}rot13 [string]`);
                         break;
                     case "prompt":
-                        _StdOut.putText("Prompt sets the prompt text. Luckily GlaDOS did not set it.");
+                        _StdOut.putText("Description: Prompt sets the prompt text. Luckily GlaDOS did not set it.");
+                        _StdOut.putText(`Usage: ${_OsShell.promptStr}prompt [new prompt string]`);
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
