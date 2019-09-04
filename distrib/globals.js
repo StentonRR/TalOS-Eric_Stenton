@@ -10,13 +10,13 @@
 //
 // Global CONSTANTS (TypeScript 1.5 introduced const. Very cool.)
 //
-var APP_NAME = "TalOS"; // The Talos Pinciple...good game
-var APP_VERSION = "5.4"; // Start of hex value to the word 'garden'
-var ANDROID_VERSION = Math.floor(Math.random() * 90 + 10) + "." + Math.floor(Math.random() * 9) + "." + Math.floor(Math.random() * 9999); // Your robot number
-var CPU_CLOCK_INTERVAL = 100; // This is in ms (milliseconds) so 1000 = 1 second.
-var TIMER_IRQ = 0; // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority).
+const APP_NAME = "TalOS"; // The Talos Pinciple...good game
+const APP_VERSION = "5.4"; // Start of hex value to the word 'garden'
+const ANDROID_VERSION = `${Math.floor(Math.random() * 90 + 10)}.${Math.floor(Math.random() * 9)}.${Math.floor(Math.random() * 9999)}`; // Your robot number
+const CPU_CLOCK_INTERVAL = 100; // This is in ms (milliseconds) so 1000 = 1 second.
+const TIMER_IRQ = 0; // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority).
 // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
-var KEYBOARD_IRQ = 1;
+const KEYBOARD_IRQ = 1;
 //
 // Global Variables
 // TODO: Make a global object and use that instead of the "_" naming convention in the global namespace.
@@ -52,3 +52,4 @@ var _GLaDOS = null; // If the above is linked in, this is the instantiated insta
 var onDocumentLoad = function () {
     TSOS.Control.hostInit();
 };
+//# sourceMappingURL=globals.js.map

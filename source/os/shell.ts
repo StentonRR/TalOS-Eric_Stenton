@@ -87,6 +87,27 @@ module TSOS {
                                   "prompt <string>");
             this.commandList.push(sc);
 
+            // date
+            sc = new shellCommand(this.shellDate,
+                                  "date",
+                                  "Displays the current date.",
+                                  "date");
+            this.commandList.push(sc);
+
+            // whereami
+            sc = new shellCommand(this.shellWhereami,
+                "whereami",
+                "Displays your current location",
+                "whereami");
+            this.commandList.push(sc);
+
+            // // something interesting and creative
+            // sc = new shellCommand(this.shell,
+            //     "",
+            //     "",
+            //     "")
+            // this.commandList.push(sc);
+
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -301,6 +322,14 @@ module TSOS {
             } else {
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
             }
+        }
+
+        public shellDate(args){
+
+        }
+
+        public shellWhereami(args){
+
         }
 
     }
