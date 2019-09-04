@@ -88,14 +88,14 @@ module TSOS {
             this.commandList.push(sc);
 
             // date
-            sc = new shellCommand(this.shellDate,
+            sc = new ShellCommand(this.shellDate,
                                   "date",
                                   "Displays the current date.",
                                   "date");
             this.commandList.push(sc);
 
             // whereami
-            sc = new shellCommand(this.shellWhereami,
+            sc = new ShellCommand(this.shellWhereami,
                 "whereami",
                 "Displays your current location",
                 "whereami");
@@ -264,7 +264,7 @@ module TSOS {
                 let topic = args[0];
 
                 // Loop through command list and return requested command information
-                let found = false;
+                let found: Boolean = false;
                 for (let command of _OsShell.commandList) {
                     console.log(`Given: ${topic}    Command: ${command.name}`);
                     if (topic == command.name) {
@@ -325,11 +325,15 @@ module TSOS {
         }
 
         public shellDate(args){
+            let date: Date = new Date();
+            let days: String[] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+            let months: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+            _StdOut.putText(`Today is ${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`);
         }
 
         public shellWhereami(args){
-
+            _StdOut.putText(`You are currently in the drive 0 simulation managed by EL-0 HIM`);
         }
 
     }
