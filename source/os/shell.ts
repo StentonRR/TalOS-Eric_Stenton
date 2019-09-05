@@ -125,18 +125,18 @@ module TSOS {
             //
             // Parse the input...
             //
-            var userCommand = this.parseInput(buffer);
+            let userCommand = this.parseInput(buffer);
             // ... and assign the command and args to local variables.
-            var cmd = userCommand.command;
-            var args = userCommand.args;
+            let cmd = userCommand.command;
+            let args = userCommand.args;
             //
             // Determine the command and execute it.
             //
             // TypeScript/JavaScript may not support associative arrays in all browsers so we have to iterate over the
             // command list in attempt to find a match.  TODO: Is there a better way? Probably. Someone work it out and tell me in class.
-            var index: number = 0;
-            var found: boolean = false;
-            var fn = undefined;
+            let index: number = 0;
+            let found: boolean = false;
+            let fn = undefined;
             while (!found && index < this.commandList.length) {
                 if (this.commandList[index].name === cmd) {
                     found = true;
@@ -174,7 +174,7 @@ module TSOS {
         }
 
         public parseInput(buffer): UserCommand {
-            var retVal = new UserCommand();
+            let retVal = new UserCommand();
 
             // 1. Remove leading and trailing spaces.
             buffer = Utils.trim(buffer);
@@ -183,18 +183,18 @@ module TSOS {
             buffer = buffer.toLowerCase();
 
             // 3. Separate on spaces so we can determine the command and command-line args, if any.
-            var tempList = buffer.split(" ");
+            let tempList = buffer.split(" ");
 
             // 4. Take the first (zeroth) element and use that as the command.
-            var cmd = tempList.shift();  // Yes, you can do that to an array in JavaScript.  See the Queue class.
+            let cmd = tempList.shift();  // Yes, you can do that to an array in JavaScript.  See the Queue class.
             // 4.1 Remove any left-over spaces.
             cmd = Utils.trim(cmd);
             // 4.2 Record it in the return value.
             retVal.command = cmd;
 
             // 5. Now create the args array from what's left.
-            for (var i in tempList) {
-                var arg = Utils.trim(tempList[i]);
+            for (let i in tempList) {
+                let arg = Utils.trim(tempList[i]);
                 if (arg != "") {
                     retVal.args[retVal.args.length] = tempList[i];
                 }
@@ -266,10 +266,10 @@ module TSOS {
                 // Loop through command list and return requested command information
                 let found: Boolean = false;
                 for (let command of _OsShell.commandList) {
-                    console.log(`Given: ${topic}    Command: ${command.name}`);
-                    if (topic == command.name) {
+                    if (topic === command.name) {
                         _StdOut.putText(`Description: ${command.description}`);
-                        _StdOut.putText(`\nUsage: ${_OsShell.promptStr}${command.usage}`);
+                        _StdOut.advanceLine();
+                        _StdOut.putText(`Usage: ${_OsShell.promptStr}${command.usage}`);
                         found = true;
                         break;
                     }
@@ -285,7 +285,7 @@ module TSOS {
 
         public shellTrace(args) {
             if (args.length > 0) {
-                var setting = args[0];
+                let setting = args[0];
                 switch (setting) {
                     case "on":
                         if (_Trace && _SarcasticMode) {
@@ -324,7 +324,7 @@ module TSOS {
             }
         }
 
-        public shellDate(args){
+        public shellDate(){
             let date: Date = new Date();
             let days: String[] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
             let months: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -332,7 +332,7 @@ module TSOS {
             _StdOut.putText(`Today is ${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`);
         }
 
-        public shellWhereami(args){
+        public shellWhereami(){
             _StdOut.putText(`You are currently in the drive 0 simulation managed by EL-0 HIM`);
         }
 

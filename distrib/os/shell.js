@@ -207,10 +207,10 @@ var TSOS;
                 var found = false;
                 for (var _i = 0, _a = _OsShell.commandList; _i < _a.length; _i++) {
                     var command = _a[_i];
-                    console.log("Given: " + topic + "    Command: " + command.name);
-                    if (topic == command.name) {
+                    if (topic === command.name) {
                         _StdOut.putText("Description: " + command.description);
-                        _StdOut.putText("\nUsage: " + _OsShell.promptStr + command.usage);
+                        _StdOut.advanceLine();
+                        _StdOut.putText("Usage: " + _OsShell.promptStr + command.usage);
                         found = true;
                         break;
                     }
@@ -265,13 +265,13 @@ var TSOS;
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
             }
         };
-        Shell.prototype.shellDate = function (args) {
+        Shell.prototype.shellDate = function () {
             var date = new Date();
             var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
             var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             _StdOut.putText("Today is " + days[date.getDay()] + ", " + months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear());
         };
-        Shell.prototype.shellWhereami = function (args) {
+        Shell.prototype.shellWhereami = function () {
             _StdOut.putText("You are currently in the drive 0 simulation managed by EL-0 HIM");
         };
         return Shell;
