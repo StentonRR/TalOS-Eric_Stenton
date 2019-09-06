@@ -101,12 +101,12 @@ module TSOS {
                 "whereami");
             this.commandList.push(sc);
 
-            // // something interesting and creative
-            // sc = new shellCommand(this.shell,
-            //     "",
-            //     "",
-            //     "")
-            // this.commandList.push(sc);
+            // quote
+            sc = new ShellCommand(this.shellQuote,
+                "quote",
+                "Displays a random programmer quote in labeled text area",
+                "quote");
+            this.commandList.push(sc);
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -203,7 +203,7 @@ module TSOS {
         }
 
         //
-        // Shell Command Functions.  Kinda not part of Shell() class exactly, but
+        // Shell Command Functions. Kinda not part of Shell() class exactly, but
         // called from here, so kept here to avoid violating the law of least astonishment.
         //
         public shellInvalidCommand() {
@@ -334,6 +334,16 @@ module TSOS {
 
         public shellWhereami(){
             _StdOut.putText(`You are currently in the drive 0 simulation managed by EL-0 HIM`);
+        }
+
+        public async shellQuote() {
+            let res = await fetch("https://programming-quotes-api.herokuapp.com/quotes/random/lang/en");
+            if (!res.ok) {
+                throw new Error(res.statusText);
+            } else {
+                let data = await res.json();
+                document.getElementById("taQuoteLog").value = `${data.en} ~ ${data.author}`;
+            }
         }
 
     }
