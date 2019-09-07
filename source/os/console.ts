@@ -87,5 +87,10 @@ module TSOS {
 
             // TODO: Handle scrolling. (iProject 1)
         }
+
+        public death(): void {
+            _DrawingContext.fillStyle = "rgba(0, 0, 255, 0.5)";
+            _DrawingContext.fillRect(0, 0, _Canvas.width, _Canvas.height);
+        }
     }
  }

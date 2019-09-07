@@ -173,7 +173,8 @@ module TSOS {
 
         public krnTrapError(msg) {
             Control.hostLog("OS ERROR - TRAP: " + msg);
-            // TODO: Display error on console, perhaps in some sort of colored screen. (Maybe blue?)
+            _StdOut.putText(msg);
+            _Console.death();
             this.krnShutdown();
         }
     }

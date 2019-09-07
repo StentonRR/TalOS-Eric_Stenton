@@ -73,6 +73,13 @@ module TSOS {
                                   "cls");
             this.commandList.push(sc);
 
+            // death
+            sc = new ShellCommand(this.shellDeath,
+                "death",
+                "Death is only a new beginning, except for this kernal. This ones done for.",
+                "death");
+            this.commandList.push(sc);
+
             // man <topic>
             sc = new ShellCommand(this.shellMan,
                                   "man",
@@ -295,6 +302,10 @@ module TSOS {
         public shellCls() {
             _StdOut.clearScreen();
             _StdOut.resetXY();
+        }
+
+        public shellDeath() {
+            _Kernel.krnTrapError("Kernal death");
         }
 
         public shellMan(args) {
