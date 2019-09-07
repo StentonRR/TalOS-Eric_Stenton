@@ -45,6 +45,13 @@ module TSOS {
                                   "help");
             this.commandList.push(sc);
 
+            // load
+            sc = new ShellCommand(this.shellLoad,
+                                  "load",
+                                  "Loads user program and validates hexadecimal code.",
+                                  "load <priority>");
+            this.commandList.push(sc);
+
             // shutdown
             sc = new ShellCommand(this.shellShutdown,
                                   "shutdown",
@@ -235,26 +242,42 @@ module TSOS {
            }
         }
 
-        public shellVer(args) {
+        public shellVer() {
             _StdOut.putText(`${APP_NAME} version ${APP_VERSION} android @v${ANDROID_VERSION}`);
         }
 
-        public shellHelp(args) {
+        public shellHelp() {
             _StdOut.putText("Commands:");
             for (let i in _OsShell.commandList) {
                 _StdOut.advanceLine();
-                _StdOut.putText("  " + _OsShell.commandList[i].name + " - " + _OsShell.commandList[i].description);
+                _StdOut.putText("  " + _OsShell.commandList[i].usage + " - " + _OsShell.commandList[i].description);
             }
         }
 
-        public shellShutdown(args) {
+        public shellLoad() {
+            let programInput = (<HTMLInputElement>document.getElementById("taProgramInput")).value;
+
+            // Remove whitespace from string
+            programInput = programInput.replace(/\s/g, "");
+
+            // Hexidecimal must have either digits 0 through 9 or letters A through F whether lowercase or uppercase
+            let regex = /^[A-Fa-f0-9]+$/;
+
+            // Test if input passes hexidecimal requirements
+            let validity = regex.test(programInput);
+
+            // Output result for Project 1
+            _StdOut.putText(`User program is ${validity ? "" : "NOT "}valid hexidecimal`);
+        }
+
+        public shellShutdown() {
              _StdOut.putText("Shutting down...");
              // Call Kernel shutdown routine.
             _Kernel.krnShutdown();
             // TODO: Stop the final prompt from being displayed.  If possible.  Not a high priority.  (Damn OCD!)
         }
 
-        public shellCls(args) {
+        public shellCls() {
             _StdOut.clearScreen();
             _StdOut.resetXY();
         }
@@ -337,12 +360,16 @@ module TSOS {
         }
 
         public async shellQuote() {
+            // Query a public and free quote api
             let res = await fetch("https://programming-quotes-api.herokuapp.com/quotes/random/lang/en");
             if (!res.ok) {
                 throw new Error(res.statusText);
             } else {
                 let data = await res.json();
-                document.getElementById("taQuoteLog").value = `${data.en} ~ ${data.author}`;
+
+                // Put the quote into a text area because the async nature of this function messes up the console lines
+                let inputElement = <HTMLInputElement>document.getElementById("taQuoteLog");
+                inputElement.value = `${data.en} ~ ${data.author}`;
             }
         }
 
