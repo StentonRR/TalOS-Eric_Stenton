@@ -52,6 +52,13 @@ module TSOS {
                                   "load <priority>");
             this.commandList.push(sc);
 
+            // status
+            sc = new ShellCommand(this.shellStatus,
+                                  "status",
+                                  "Updates the user's status.",
+                                  "status <string>");
+            this.commandList.push(sc);
+
             // shutdown
             sc = new ShellCommand(this.shellShutdown,
                                   "shutdown",
@@ -268,6 +275,14 @@ module TSOS {
 
             // Output result for Project 1
             _StdOut.putText(`User program is ${validity ? "" : "NOT "}valid hexidecimal`);
+        }
+
+        public shellStatus(args) {
+            if (args.length > 0) {
+                document.getElementById("status").innerHTML = args.join(" ");
+            } else {
+                _StdOut.putText("Usage: status <string> Please supply a string.");
+            }
         }
 
         public shellShutdown() {
