@@ -5,10 +5,8 @@
    -------- */
 var TSOS;
 (function (TSOS) {
-    var Utils = /** @class */ (function () {
-        function Utils() {
-        }
-        Utils.trim = function (str) {
+    class Utils {
+        static trim(str) {
             // Use a regular expression to remove leading and trailing spaces.
             return str.replace(/^\s+ | \s+$/g, "");
             /*
@@ -19,15 +17,15 @@ var TSOS;
             - "g" makes is global, so we get all the whitespace.
             - "" is nothing, which is what we replace the whitespace with.
             */
-        };
-        Utils.rot13 = function (str) {
+        }
+        static rot13(str) {
             /*
                This is an easy-to understand implementation of the famous and common Rot13 obfuscator.
                You can do this in three lines with a complex regular expression, but I'd have
                trouble explaining it in the future.  There's a lot to be said for obvious code.
             */
             var retVal = "";
-            for (var i in str) {
+            for (var i in str) { // We need to cast the string to any for use in the for...in construct.
                 var ch = str[i];
                 var code = 0;
                 if ("abcedfghijklmABCDEFGHIJKLM".indexOf(ch) >= 0) {
@@ -43,8 +41,8 @@ var TSOS;
                 }
             }
             return retVal;
-        };
-        return Utils;
-    }());
+        }
+    }
     TSOS.Utils = Utils;
 })(TSOS || (TSOS = {}));
+//# sourceMappingURL=utils.js.map

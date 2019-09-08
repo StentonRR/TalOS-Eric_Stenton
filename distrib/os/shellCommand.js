@@ -1,14 +1,13 @@
 var TSOS;
 (function (TSOS) {
-    var ShellCommand = /** @class */ (function () {
-        function ShellCommand(func, command, description) {
-            if (command === void 0) { command = ""; }
-            if (description === void 0) { description = ""; }
+    class ShellCommand {
+        constructor(func, name = "", description = "", usage = "") {
             this.func = func;
-            this.command = command;
+            this.name = name;
             this.description = description;
+            this.usage = usage;
         }
-        return ShellCommand;
-    }());
+    }
     TSOS.ShellCommand = ShellCommand;
 })(TSOS || (TSOS = {}));
+//# sourceMappingURL=shellCommand.js.map

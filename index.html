@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html>
+<html lang="en">
 <head>
    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
    <meta name="author"             content="Alan G. Labouseur" />
@@ -38,6 +38,10 @@
 <body onload="onDocumentLoad()">
 
 <div id="divMain" style="width:100%;">
+
+   <div id="divBanner">
+      <h3>Status: <span id="status"></span></h3>
+   </div>
 
    <div id="divButtonBar" style="margin:4px;">
       <input type="button"
@@ -98,6 +102,19 @@
          ></textarea>
       </label>
    </div>
+
+   <div id="divQuote">
+      <label>
+         Quotes
+         <br>
+         <textarea name="taQuoteLog"
+                   id  ="taQuoteLog"
+                   rows="8"
+                   cols="48"
+         ></textarea>
+      </label>
+   </div>
+
 </div>
 
 <p class="footerText" style="clear:both;">
