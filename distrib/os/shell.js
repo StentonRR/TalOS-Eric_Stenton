@@ -2,6 +2,41 @@
 ///<reference path="../utils.ts" />
 ///<reference path="shellCommand.ts" />
 ///<reference path="userCommand.ts" />
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 /* ------------
    Shell.ts
 
@@ -13,16 +48,16 @@
 // TODO: Write a base class / prototype for system services and let Shell inherit from it.
 var TSOS;
 (function (TSOS) {
-    class Shell {
-        constructor() {
+    var Shell = /** @class */ (function () {
+        function Shell() {
             // Properties
             this.promptStr = ">";
             this.commandList = [];
             this.curses = "[fuvg],[cvff],[shpx],[phag],[pbpxfhpxre],[zbgureshpxre],[gvgf]";
             this.apologies = "[sorry]";
         }
-        init() {
-            let sc;
+        Shell.prototype.init = function () {
+            var sc;
             //
             // Load the command list.
             // ver
@@ -72,27 +107,27 @@ var TSOS;
             //
             // Display the initial prompt.
             this.putPrompt();
-        }
-        putPrompt() {
+        };
+        Shell.prototype.putPrompt = function () {
             _StdOut.putText(this.promptStr);
-        }
-        handleInput(buffer) {
+        };
+        Shell.prototype.handleInput = function (buffer) {
             _Kernel.krnTrace("Shell Command~" + buffer);
             //
             // Parse the input...
             //
-            let userCommand = this.parseInput(buffer);
+            var userCommand = this.parseInput(buffer);
             // ... and assign the command and args to local variables.
-            let cmd = userCommand.command;
-            let args = userCommand.args;
+            var cmd = userCommand.command;
+            var args = userCommand.args;
             //
             // Determine the command and execute it.
             //
             // TypeScript/JavaScript may not support associative arrays in all browsers so we have to iterate over the
             // command list in attempt to find a match.  TODO: Is there a better way? Probably. Someone work it out and tell me in class.
-            let index = 0;
-            let found = false;
-            let fn = undefined;
+            var index = 0;
+            var found = false;
+            var fn = undefined;
             while (!found && index < this.commandList.length) {
                 if (this.commandList[index].name === cmd) {
                     found = true;
@@ -117,9 +152,9 @@ var TSOS;
                     this.execute(this.shellInvalidCommand);
                 }
             }
-        }
+        };
         // Note: args is an option parameter, ergo the ? which allows TypeScript to understand that.
-        execute(fn, args) {
+        Shell.prototype.execute = function (fn, args) {
             // We just got a command, so advance the line...
             _StdOut.advanceLine();
             // ... call the command function passing in the args with some über-cool functional programming ...
@@ -130,35 +165,35 @@ var TSOS;
             }
             // ... and finally write the prompt again.
             this.putPrompt();
-        }
-        parseInput(buffer) {
-            let retVal = new TSOS.UserCommand();
+        };
+        Shell.prototype.parseInput = function (buffer) {
+            var retVal = new TSOS.UserCommand();
             // 1. Remove leading and trailing spaces.
             buffer = TSOS.Utils.trim(buffer);
             // 2. Lower-case it.
             buffer = buffer.toLowerCase();
             // 3. Separate on spaces so we can determine the command and command-line args, if any.
-            let tempList = buffer.split(" ");
+            var tempList = buffer.split(" ");
             // 4. Take the first (zeroth) element and use that as the command.
-            let cmd = tempList.shift(); // Yes, you can do that to an array in JavaScript.  See the Queue class.
+            var cmd = tempList.shift(); // Yes, you can do that to an array in JavaScript.  See the Queue class.
             // 4.1 Remove any left-over spaces.
             cmd = TSOS.Utils.trim(cmd);
             // 4.2 Record it in the return value.
             retVal.command = cmd;
             // 5. Now create the args array from what's left.
-            for (let i in tempList) {
-                let arg = TSOS.Utils.trim(tempList[i]);
+            for (var i in tempList) {
+                var arg = TSOS.Utils.trim(tempList[i]);
                 if (arg != "") {
                     retVal.args[retVal.args.length] = tempList[i];
                 }
             }
             return retVal;
-        }
+        };
         //
         // Shell Command Functions. Kinda not part of Shell() class exactly, but
         // called from here, so kept here to avoid violating the law of least astonishment.
         //
-        shellInvalidCommand() {
+        Shell.prototype.shellInvalidCommand = function () {
             _StdOut.putText("Invalid Command. ");
             if (_SarcasticMode) {
                 _StdOut.putText("Unbelievable. You, [subject name here],");
@@ -168,14 +203,14 @@ var TSOS;
             else {
                 _StdOut.putText("Type 'help' for, well... help.");
             }
-        }
-        shellCurse() {
+        };
+        Shell.prototype.shellCurse = function () {
             _StdOut.putText("Oh, so that's how it's going to be, eh? Fine.");
             _StdOut.advanceLine();
             _StdOut.putText("Bitch.");
             _SarcasticMode = true;
-        }
-        shellApology() {
+        };
+        Shell.prototype.shellApology = function () {
             if (_SarcasticMode) {
                 _StdOut.putText("I think we can put our differences behind us.");
                 _StdOut.advanceLine();
@@ -185,59 +220,60 @@ var TSOS;
             else {
                 _StdOut.putText("For what?");
             }
-        }
-        shellVer() {
-            _StdOut.putText(`${APP_NAME} version ${APP_VERSION} android @v${ANDROID_VERSION}`);
-        }
-        shellHelp() {
+        };
+        Shell.prototype.shellVer = function () {
+            _StdOut.putText(APP_NAME + " version " + APP_VERSION + " android @v" + ANDROID_VERSION);
+        };
+        Shell.prototype.shellHelp = function () {
             _StdOut.putText("Commands:");
-            for (let i in _OsShell.commandList) {
+            for (var i in _OsShell.commandList) {
                 _StdOut.advanceLine();
                 _StdOut.putText("  " + _OsShell.commandList[i].usage + " - " + _OsShell.commandList[i].description);
             }
-        }
-        shellLoad() {
-            let programInput = document.getElementById("taProgramInput").value;
+        };
+        Shell.prototype.shellLoad = function () {
+            var programInput = document.getElementById("taProgramInput").value;
             // Remove whitespace from string
             programInput = programInput.replace(/\s/g, "");
             // Hexidecimal must have either digits 0 through 9 or letters A through F whether lowercase or uppercase
-            let regex = /^[A-Fa-f0-9]+$/;
+            var regex = /^[A-Fa-f0-9]+$/;
             // Test if input passes hexidecimal requirements
-            let validity = regex.test(programInput);
+            var validity = regex.test(programInput);
             // Output result for Project 1
-            _StdOut.putText(`User program is ${validity ? "" : "NOT "}valid hexidecimal`);
-        }
-        shellStatus(args) {
+            _StdOut.putText("User program is " + (validity ? "" : "NOT ") + "valid hexidecimal");
+        };
+        Shell.prototype.shellStatus = function (args) {
             if (args.length > 0) {
                 document.getElementById("status").innerHTML = args.join(" ");
             }
             else {
                 _StdOut.putText("Usage: status <string> Please supply a string.");
             }
-        }
-        shellShutdown() {
+        };
+        Shell.prototype.shellShutdown = function () {
             _StdOut.putText("Shutting down...");
             // Call Kernel shutdown routine.
             _Kernel.krnShutdown();
             // TODO: Stop the final prompt from being displayed.  If possible.  Not a high priority.  (Damn OCD!)
-        }
-        shellCls() {
+        };
+        Shell.prototype.shellCls = function () {
             _StdOut.clearScreen();
             _StdOut.resetXY();
-        }
-        shellDeath() {
+        };
+        Shell.prototype.shellDeath = function () {
             _Kernel.krnTrapError("Kernal death");
-        }
-        shellMan(args) {
+        };
+        Shell.prototype.shellMan = function (args) {
             if (args.length > 0) {
-                let topic = args[0];
+                var topic = args[0];
                 // Loop through command list and return requested command information
-                let found = false;
-                for (let command of _OsShell.commandList) {
+                var found = false;
+                for (var _i = 0, _a = _OsShell.commandList; _i < _a.length; _i++) {
+                    var command = _a[_i];
                     if (topic === command.name) {
-                        _StdOut.putText(`Description: ${command.description}`);
+                        _StdOut.putText("Description: " + command.description);
                         _StdOut.advanceLine();
-                        _StdOut.putText(`Usage: ${_OsShell.promptStr}${command.usage}`);
+                        _StdOut.putText("Usage: " + _OsShell.promptStr + command.usage);
                         found = true;
                         break;
                     }
@@ -249,10 +285,10 @@ var TSOS;
             else {
                 _StdOut.putText("Usage: man <topic>  Please supply a topic.");
             }
-        }
-        shellTrace(args) {
+        };
+        Shell.prototype.shellTrace = function (args) {
             if (args.length > 0) {
-                let setting = args[0];
+                var setting = args[0];
                 switch (setting) {
                     case "on":
                         if (_Trace && _SarcasticMode) {
@@ -274,8 +310,8 @@ var TSOS;
             else {
                 _StdOut.putText("Usage: trace <on | off>");
             }
-        }
-        shellRot13(args) {
+        };
+        Shell.prototype.shellRot13 = function (args) {
             if (args.length > 0) {
                 // Requires Utils.ts for rot13() function.
                 _StdOut.putText(args.join(' ') + " = '" + TSOS.Utils.rot13(args.join(' ')) + "'");
@@ -283,38 +319,46 @@ var TSOS;
             else {
                 _StdOut.putText("Usage: rot13 <string>  Please supply a string.");
             }
-        }
-        shellPrompt(args) {
+        };
+        Shell.prototype.shellPrompt = function (args) {
             if (args.length > 0) {
                 _OsShell.promptStr = args[0];
             }
             else {
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
             }
-        }
-        shellDate() {
-            let date = new Date();
-            let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-            let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            _StdOut.putText(`Today is ${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`);
-        }
-        shellWhereami() {
-            _StdOut.putText(`You are currently in the drive 0 simulation managed by EL-0 HIM`);
-        }
-        async shellQuote() {
-            // Query a public and free quote api
-            let res = await fetch("https://programming-quotes-api.herokuapp.com/quotes/random/lang/en");
-            if (!res.ok) {
-                throw new Error(res.statusText);
-            }
-            else {
-                let data = await res.json();
-                // Put the quote into a text area because the async nature of this function messes up the console lines
-                let inputElement = document.getElementById("taQuoteLog");
-                inputElement.value = `${data.en} ~ ${data.author}`;
-            }
-        }
-    }
+        };
+        Shell.prototype.shellDate = function () {
+            var date = new Date();
+            var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            _StdOut.putText("Today is " + days[date.getDay()] + ", " + months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear());
+        };
+        Shell.prototype.shellWhereami = function () {
+            _StdOut.putText("You are currently in the drive 0 simulation managed by EL-0 HIM");
+        };
+        Shell.prototype.shellQuote = function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var res, data, inputElement;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, fetch("https://programming-quotes-api.herokuapp.com/quotes/random/lang/en")];
+                        case 1:
+                            res = _a.sent();
+                            if (!!res.ok) return [3 /*break*/, 2];
+                            throw new Error(res.statusText);
+                        case 2: return [4 /*yield*/, res.json()];
+                        case 3:
+                            data = _a.sent();
+                            inputElement = document.getElementById("taQuoteLog");
+                            inputElement.value = data.en + " ~ " + data.author;
+                            _a.label = 4;
+                        case 4: return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        return Shell;
+    }());
     TSOS.Shell = Shell;
 })(TSOS || (TSOS = {}));
-//# sourceMappingURL=shell.js.map
