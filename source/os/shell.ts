@@ -45,14 +45,14 @@ module TSOS {
                                   "help");
             this.commandList.push(sc);
 
-            // load
+            // load <priority>
             sc = new ShellCommand(this.shellLoad,
                                   "load",
                                   "Loads user program and validates hexadecimal code.",
                                   "load <priority>");
             this.commandList.push(sc);
 
-            // status
+            // status <string>
             sc = new ShellCommand(this.shellStatus,
                                   "status",
                                   "Updates the user's status.",
@@ -388,6 +388,7 @@ module TSOS {
         public async shellQuote() {
             // Query a public and free quote api
             let res = await fetch("https://programming-quotes-api.herokuapp.com/quotes/random/lang/en");
+
             if (!res.ok) {
                 throw new Error(res.statusText);
             } else {
