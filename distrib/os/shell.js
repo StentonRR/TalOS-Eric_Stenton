@@ -31,10 +31,10 @@ var TSOS;
             // help
             sc = new TSOS.ShellCommand(this.shellHelp, "help", "This is the help command. Seek help.", "help");
             this.commandList.push(sc);
-            // load
+            // load <priority>
             sc = new TSOS.ShellCommand(this.shellLoad, "load", "Loads user program and validates hexadecimal code.", "load <priority>");
             this.commandList.push(sc);
-            // status
+            // status <string>
             sc = new TSOS.ShellCommand(this.shellStatus, "status", "Updates the user's status.", "status <string>");
             this.commandList.push(sc);
             // shutdown
