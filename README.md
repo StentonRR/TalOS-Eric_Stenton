@@ -1,4 +1,4 @@
-Notes to Allen
+Notes to Alan
 ====================
 
 -The branch with the finalized code for each project will be the **Master branch**, so please focus on it when grading.
