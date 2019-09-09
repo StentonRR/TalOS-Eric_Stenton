@@ -2,6 +2,41 @@
 ///<reference path="../utils.ts" />
 ///<reference path="shellCommand.ts" />
 ///<reference path="userCommand.ts" />
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 /* ------------
    Shell.ts
 
@@ -26,29 +61,47 @@ var TSOS;
             //
             // Load the command list.
             // ver
-            sc = new TSOS.ShellCommand(this.shellVer, "ver", "- Displays the current version data.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellVer, "ver", "Displays the current version data.", "ver");
+            this.commandList.push(sc);
             // help
-            sc = new TSOS.ShellCommand(this.shellHelp, "help", "- This is the help command. Seek help.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellHelp, "help", "This is the help command. Seek help.", "help");
+            this.commandList.push(sc);
+            // load <priority>
+            sc = new TSOS.ShellCommand(this.shellLoad, "load", "Loads user program and validates hexadecimal code.", "load <priority>");
+            this.commandList.push(sc);
+            // status <string>
+            sc = new TSOS.ShellCommand(this.shellStatus, "status", "Updates the user's status.", "status <string>");
+            this.commandList.push(sc);
             // shutdown
-            sc = new TSOS.ShellCommand(this.shellShutdown, "shutdown", "- Shuts down the virtual OS but leaves the underlying host / hardware simulation running.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellShutdown, "shutdown", "Shuts down the virtual OS but leaves the underlying host / hardware simulation running.", "shutdown");
+            this.commandList.push(sc);
             // cls
-            sc = new TSOS.ShellCommand(this.shellCls, "cls", "- Clears the screen and resets the cursor position.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellCls, "cls", "Clears the screen and resets the cursor position.", "cls");
+            this.commandList.push(sc);
+            // death
+            sc = new TSOS.ShellCommand(this.shellDeath, "death", "Death is only a new beginning, except for this kernal. This ones done for.", "death");
+            this.commandList.push(sc);
             // man <topic>
-            sc = new TSOS.ShellCommand(this.shellMan, "man", "<topic> - Displays the MANual page for <topic>.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellMan, "man", "Displays the MANual page for <topic>.", "man <topic>");
+            this.commandList.push(sc);
             // trace <on | off>
-            sc = new TSOS.ShellCommand(this.shellTrace, "trace", "<on | off> - Turns the OS trace on or off.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellTrace, "trace", "Turns the OS trace on or off.", "trace <on | off>");
+            this.commandList.push(sc);
             // rot13 <string>
-            sc = new TSOS.ShellCommand(this.shellRot13, "rot13", "<string> - Does rot13 obfuscation on <string>.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellRot13, "rot13", "Does rot13 obfuscation on <string>.", "rot13 <string>");
+            this.commandList.push(sc);
             // prompt <string>
-            sc = new TSOS.ShellCommand(this.shellPrompt, "prompt", "<string> - Sets the prompt.");
-            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellPrompt, "prompt", "Sets the prompt.", "prompt <string>");
+            this.commandList.push(sc);
+            // date
+            sc = new TSOS.ShellCommand(this.shellDate, "date", "Displays the current date.", "date");
+            this.commandList.push(sc);
+            // whereami
+            sc = new TSOS.ShellCommand(this.shellWhereami, "whereami", "Displays your current location", "whereami");
+            this.commandList.push(sc);
+            // quote
+            sc = new TSOS.ShellCommand(this.shellQuote, "quote", "Displays a random programmer quote in labeled text area", "quote");
+            this.commandList.push(sc);
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             //
@@ -76,7 +129,7 @@ var TSOS;
             var found = false;
             var fn = undefined;
             while (!found && index < this.commandList.length) {
-                if (this.commandList[index].command === cmd) {
+                if (this.commandList[index].name === cmd) {
                     found = true;
                     fn = this.commandList[index].func;
                 }
@@ -137,7 +190,7 @@ var TSOS;
             return retVal;
         };
         //
-        // Shell Command Functions.  Kinda not part of Shell() class exactly, but
+        // Shell Command Functions. Kinda not part of Shell() class exactly, but
         // called from here, so kept here to avoid violating the law of least astonishment.
         //
         Shell.prototype.shellInvalidCommand = function () {
@@ -168,57 +221,66 @@ var TSOS;
                 _StdOut.putText("For what?");
             }
         };
-        Shell.prototype.shellVer = function (args) {
-            _StdOut.putText(APP_NAME + " version " + APP_VERSION);
+        Shell.prototype.shellVer = function () {
+            _StdOut.putText(APP_NAME + " version " + APP_VERSION + " android @v" + ANDROID_VERSION);
         };
-        Shell.prototype.shellHelp = function (args) {
+        Shell.prototype.shellHelp = function () {
             _StdOut.putText("Commands:");
             for (var i in _OsShell.commandList) {
                 _StdOut.advanceLine();
-                _StdOut.putText("  " + _OsShell.commandList[i].command + " " + _OsShell.commandList[i].description);
+                _StdOut.putText("  " + _OsShell.commandList[i].usage + " - " + _OsShell.commandList[i].description);
             }
         };
-        Shell.prototype.shellShutdown = function (args) {
+        Shell.prototype.shellLoad = function () {
+            var programInput = document.getElementById("taProgramInput").value;
+            // Remove whitespace from string
+            programInput = programInput.replace(/\s/g, "");
+            // Hexidecimal must have either digits 0 through 9 or letters A through F whether lowercase or uppercase
+            var regex = /^[A-Fa-f0-9]+$/;
+            // Test if input passes hexidecimal requirements
+            var validity = regex.test(programInput);
+            // Output result for Project 1
+            _StdOut.putText("User program is " + (validity ? "" : "NOT ") + "valid hexidecimal");
+        };
+        Shell.prototype.shellStatus = function (args) {
+            if (args.length > 0) {
+                document.getElementById("status").innerHTML = args.join(" ");
+            }
+            else {
+                _StdOut.putText("Usage: status <string> Please supply a string.");
+            }
+        };
+        Shell.prototype.shellShutdown = function () {
             _StdOut.putText("Shutting down...");
             // Call Kernel shutdown routine.
             _Kernel.krnShutdown();
             // TODO: Stop the final prompt from being displayed.  If possible.  Not a high priority.  (Damn OCD!)
         };
-        Shell.prototype.shellCls = function (args) {
+        Shell.prototype.shellCls = function () {
             _StdOut.clearScreen();
             _StdOut.resetXY();
+        };
+        Shell.prototype.shellDeath = function () {
+            _Kernel.krnTrapError("Kernal death");
         };
         Shell.prototype.shellMan = function (args) {
             if (args.length > 0) {
                 var topic = args[0];
-                switch (topic) {
-                    case "ver":
-                        _StdOut.putText("Ver displays the OS's name and version number.");
+                // Loop through command list and return requested command information
+                var found = false;
+                for (var _i = 0, _a = _OsShell.commandList; _i < _a.length; _i++) {
+                    var command = _a[_i];
+                    if (topic === command.name) {
+                        _StdOut.putText("Description: " + command.description);
+                        _StdOut.advanceLine();
+                        _StdOut.putText("Usage: " + _OsShell.promptStr + command.usage);
+                        found = true;
                         break;
-                    case "help":
-                        _StdOut.putText("Help displays a list of (hopefully) valid commands.");
-                        break;
-                    case "shutdown":
-                        _StdOut.putText("Shutdown turns off the Aperture virtual OS.");
-                        break;
-                    case "cls":
-                        _StdOut.putText("Cls clears the console and resets the cursor position so GlaDOS won't get angry.");
-                        break;
-                    case "man":
-                        _StdOut.putText("Man shows the Aperture archives' MANual page for the requested command.");
-                        break;
-                    case "trace":
-                        _StdOut.putText("Trace enables or disables the OS trace so that GlaDOS doesn't have to explain what you are doing wrong.");
-                        break;
-                    case "rot13":
-                        _StdOut.putText("Rot13 applies the rot13 encryption to a given string. The companion cube finds meaning in it even though no one else does.");
-                        break;
-                    case "prompt":
-                        _StdOut.putText("Prompt sets the prompt text. Luckily GlaDOS did not set it.");
-                        break;
-                    default:
-                        _StdOut.putText("No manual entry for " + args[0] + ".");
+                    }
                 }
+                // Command not found
+                if (!found)
+                    _StdOut.putText("No manual entry for " + topic + ".");
             }
             else {
                 _StdOut.putText("Usage: man <topic>  Please supply a topic.");
@@ -265,6 +327,36 @@ var TSOS;
             else {
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
             }
+        };
+        Shell.prototype.shellDate = function () {
+            var date = new Date();
+            var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            _StdOut.putText("Today is " + days[date.getDay()] + ", " + months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear());
+        };
+        Shell.prototype.shellWhereami = function () {
+            _StdOut.putText("You are currently in the drive 0 simulation managed by EL-0 HIM");
+        };
+        Shell.prototype.shellQuote = function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var res, data, inputElement;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, fetch("https://programming-quotes-api.herokuapp.com/quotes/random/lang/en")];
+                        case 1:
+                            res = _a.sent();
+                            if (!!res.ok) return [3 /*break*/, 2];
+                            throw new Error(res.statusText);
+                        case 2: return [4 /*yield*/, res.json()];
+                        case 3:
+                            data = _a.sent();
+                            inputElement = document.getElementById("taQuoteLog");
+                            inputElement.value = data.en + " ~ " + data.author;
+                            _a.label = 4;
+                        case 4: return [2 /*return*/];
+                    }
+                });
+            });
         };
         return Shell;
     }());

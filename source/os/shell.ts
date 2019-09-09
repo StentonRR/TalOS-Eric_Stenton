@@ -34,50 +34,100 @@ module TSOS {
             // ver
             sc = new ShellCommand(this.shellVer,
                                   "ver",
-                                  "- Displays the current version data.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Displays the current version data.",
+                                  "ver");
+            this.commandList.push(sc);
 
             // help
             sc = new ShellCommand(this.shellHelp,
                                   "help",
-                                  "- This is the help command. Seek help.");
-            this.commandList[this.commandList.length] = sc;
+                                  "This is the help command. Seek help.",
+                                  "help");
+            this.commandList.push(sc);
+
+            // load <priority>
+            sc = new ShellCommand(this.shellLoad,
+                                  "load",
+                                  "Loads user program and validates hexadecimal code.",
+                                  "load <priority>");
+            this.commandList.push(sc);
+
+            // status <string>
+            sc = new ShellCommand(this.shellStatus,
+                                  "status",
+                                  "Updates the user's status.",
+                                  "status <string>");
+            this.commandList.push(sc);
 
             // shutdown
             sc = new ShellCommand(this.shellShutdown,
                                   "shutdown",
-                                  "- Shuts down the virtual OS but leaves the underlying host / hardware simulation running.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Shuts down the virtual OS but leaves the underlying host / hardware simulation running.",
+                                  "shutdown");
+            this.commandList.push(sc);
 
             // cls
             sc = new ShellCommand(this.shellCls,
                                   "cls",
-                                  "- Clears the screen and resets the cursor position.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Clears the screen and resets the cursor position.",
+                                  "cls");
+            this.commandList.push(sc);
+
+            // death
+            sc = new ShellCommand(this.shellDeath,
+                "death",
+                "Death is only a new beginning, except for this kernal. This ones done for.",
+                "death");
+            this.commandList.push(sc);
 
             // man <topic>
             sc = new ShellCommand(this.shellMan,
                                   "man",
-                                  "<topic> - Displays the MANual page for <topic>.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Displays the MANual page for <topic>.",
+                                  "man <topic>");
+            this.commandList.push(sc);
 
             // trace <on | off>
             sc = new ShellCommand(this.shellTrace,
                                   "trace",
-                                  "<on | off> - Turns the OS trace on or off.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Turns the OS trace on or off.",
+                                  "trace <on | off>");
+            this.commandList.push(sc);
 
             // rot13 <string>
             sc = new ShellCommand(this.shellRot13,
                                   "rot13",
-                                  "<string> - Does rot13 obfuscation on <string>.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Does rot13 obfuscation on <string>.",
+                                  "rot13 <string>");
+            this.commandList.push(sc);
 
             // prompt <string>
             sc = new ShellCommand(this.shellPrompt,
                                   "prompt",
-                                  "<string> - Sets the prompt.");
-            this.commandList[this.commandList.length] = sc;
+                                  "Sets the prompt.",
+                                  "prompt <string>");
+            this.commandList.push(sc);
+
+            // date
+            sc = new ShellCommand(this.shellDate,
+                                  "date",
+                                  "Displays the current date.",
+                                  "date");
+            this.commandList.push(sc);
+
+            // whereami
+            sc = new ShellCommand(this.shellWhereami,
+                "whereami",
+                "Displays your current location",
+                "whereami");
+            this.commandList.push(sc);
+
+            // quote
+            sc = new ShellCommand(this.shellQuote,
+                "quote",
+                "Displays a random programmer quote in labeled text area",
+                "quote");
+            this.commandList.push(sc);
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -96,20 +146,20 @@ module TSOS {
             //
             // Parse the input...
             //
-            var userCommand = this.parseInput(buffer);
+            let userCommand = this.parseInput(buffer);
             // ... and assign the command and args to local variables.
-            var cmd = userCommand.command;
-            var args = userCommand.args;
+            let cmd = userCommand.command;
+            let args = userCommand.args;
             //
             // Determine the command and execute it.
             //
             // TypeScript/JavaScript may not support associative arrays in all browsers so we have to iterate over the
             // command list in attempt to find a match.  TODO: Is there a better way? Probably. Someone work it out and tell me in class.
-            var index: number = 0;
-            var found: boolean = false;
-            var fn = undefined;
+            let index: number = 0;
+            let found: boolean = false;
+            let fn = undefined;
             while (!found && index < this.commandList.length) {
-                if (this.commandList[index].command === cmd) {
+                if (this.commandList[index].name === cmd) {
                     found = true;
                     fn = this.commandList[index].func;
                 } else {
@@ -145,7 +195,7 @@ module TSOS {
         }
 
         public parseInput(buffer): UserCommand {
-            var retVal = new UserCommand();
+            let retVal = new UserCommand();
 
             // 1. Remove leading and trailing spaces.
             buffer = Utils.trim(buffer);
@@ -154,18 +204,18 @@ module TSOS {
             buffer = buffer.toLowerCase();
 
             // 3. Separate on spaces so we can determine the command and command-line args, if any.
-            var tempList = buffer.split(" ");
+            let tempList = buffer.split(" ");
 
             // 4. Take the first (zeroth) element and use that as the command.
-            var cmd = tempList.shift();  // Yes, you can do that to an array in JavaScript.  See the Queue class.
+            let cmd = tempList.shift();  // Yes, you can do that to an array in JavaScript.  See the Queue class.
             // 4.1 Remove any left-over spaces.
             cmd = Utils.trim(cmd);
             // 4.2 Record it in the return value.
             retVal.command = cmd;
 
             // 5. Now create the args array from what's left.
-            for (var i in tempList) {
-                var arg = Utils.trim(tempList[i]);
+            for (let i in tempList) {
+                let arg = Utils.trim(tempList[i]);
                 if (arg != "") {
                     retVal.args[retVal.args.length] = tempList[i];
                 }
@@ -174,7 +224,7 @@ module TSOS {
         }
 
         //
-        // Shell Command Functions.  Kinda not part of Shell() class exactly, but
+        // Shell Command Functions. Kinda not part of Shell() class exactly, but
         // called from here, so kept here to avoid violating the law of least astonishment.
         //
         public shellInvalidCommand() {
@@ -206,61 +256,77 @@ module TSOS {
            }
         }
 
-        public shellVer(args) {
-            _StdOut.putText(APP_NAME + " version " + APP_VERSION);
+        public shellVer() {
+            _StdOut.putText(`${APP_NAME} version ${APP_VERSION} android @v${ANDROID_VERSION}`);
         }
 
-        public shellHelp(args) {
+        public shellHelp() {
             _StdOut.putText("Commands:");
-            for (var i in _OsShell.commandList) {
+            for (let i in _OsShell.commandList) {
                 _StdOut.advanceLine();
-                _StdOut.putText("  " + _OsShell.commandList[i].command + " " + _OsShell.commandList[i].description);
+                _StdOut.putText("  " + _OsShell.commandList[i].usage + " - " + _OsShell.commandList[i].description);
             }
         }
 
-        public shellShutdown(args) {
+        public shellLoad() {
+            let programInput = (<HTMLInputElement>document.getElementById("taProgramInput")).value;
+
+            // Remove whitespace from string
+            programInput = programInput.replace(/\s/g, "");
+
+            // Hexidecimal must have either digits 0 through 9 or letters A through F whether lowercase or uppercase
+            let regex = /^[A-Fa-f0-9]+$/;
+
+            // Test if input passes hexidecimal requirements
+            let validity = regex.test(programInput);
+
+            // Output result for Project 1
+            _StdOut.putText(`User program is ${validity ? "" : "NOT "}valid hexidecimal`);
+        }
+
+        public shellStatus(args) {
+            if (args.length > 0) {
+                document.getElementById("status").innerHTML = args.join(" ");
+            } else {
+                _StdOut.putText("Usage: status <string> Please supply a string.");
+            }
+        }
+
+        public shellShutdown() {
              _StdOut.putText("Shutting down...");
              // Call Kernel shutdown routine.
             _Kernel.krnShutdown();
             // TODO: Stop the final prompt from being displayed.  If possible.  Not a high priority.  (Damn OCD!)
         }
 
-        public shellCls(args) {
+        public shellCls() {
             _StdOut.clearScreen();
             _StdOut.resetXY();
+        }
+
+        public shellDeath() {
+            _Kernel.krnTrapError("Kernal death");
         }
 
         public shellMan(args) {
             if (args.length > 0) {
                 let topic = args[0];
-                switch (topic) {
-                    case "ver":
-                        _StdOut.putText("Ver displays the OS's name and version number.");
+
+                // Loop through command list and return requested command information
+                let found: Boolean = false;
+                for (let command of _OsShell.commandList) {
+                    if (topic === command.name) {
+                        _StdOut.putText(`Description: ${command.description}`);
+                        _StdOut.advanceLine();
+                        _StdOut.putText(`Usage: ${_OsShell.promptStr}${command.usage}`);
+                        found = true;
                         break;
-                    case "help":
-                        _StdOut.putText("Help displays a list of (hopefully) valid commands.");
-                        break;
-                    case "shutdown":
-                        _StdOut.putText("Shutdown turns off the Aperture virtual OS.");
-                        break;
-                    case "cls":
-                        _StdOut.putText("Cls clears the console and resets the cursor position so GlaDOS won't get angry.");
-                        break;
-                    case "man":
-                        _StdOut.putText("Man shows the Aperture archives' MANual page for the requested command.");
-                        break;
-                    case "trace":
-                        _StdOut.putText("Trace enables or disables the OS trace so that GlaDOS doesn't have to explain what you are doing wrong.");
-                        break;
-                    case "rot13":
-                        _StdOut.putText("Rot13 applies the rot13 encryption to a given string. The companion cube finds meaning in it even though no one else does.");
-                        break;
-                    case "prompt":
-                        _StdOut.putText("Prompt sets the prompt text. Luckily GlaDOS did not set it.");
-                        break;
-                    default:
-                        _StdOut.putText("No manual entry for " + args[0] + ".");
+                    }
                 }
+
+                // Command not found
+                if(!found) _StdOut.putText("No manual entry for " + topic + ".");
+
             } else {
                 _StdOut.putText("Usage: man <topic>  Please supply a topic.");
             }
@@ -268,7 +334,7 @@ module TSOS {
 
         public shellTrace(args) {
             if (args.length > 0) {
-                var setting = args[0];
+                let setting = args[0];
                 switch (setting) {
                     case "on":
                         if (_Trace && _SarcasticMode) {
@@ -304,6 +370,33 @@ module TSOS {
                 _OsShell.promptStr = args[0];
             } else {
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
+            }
+        }
+
+        public shellDate(){
+            let date: Date = new Date();
+            let days: String[] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+            let months: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+            _StdOut.putText(`Today is ${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`);
+        }
+
+        public shellWhereami(){
+            _StdOut.putText(`You are currently in the drive 0 simulation managed by EL-0 HIM`);
+        }
+
+        public async shellQuote() {
+            // Query a public and free quote api
+            let res = await fetch("https://programming-quotes-api.herokuapp.com/quotes/random/lang/en");
+
+            if (!res.ok) {
+                throw new Error(res.statusText);
+            } else {
+                let data = await res.json();
+
+                // Put the quote into a text area because the async nature of this function messes up the console lines
+                let inputElement = <HTMLInputElement>document.getElementById("taQuoteLog");
+                inputElement.value = `${data.en} ~ ${data.author}`;
             }
         }
 

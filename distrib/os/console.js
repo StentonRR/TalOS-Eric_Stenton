@@ -84,6 +84,11 @@ var TSOS;
                 _FontHeightMargin;
             // TODO: Handle scrolling. (iProject 1)
         };
+        Console.prototype.death = function () {
+            // Color the console blue, but also make it see through for the message
+            _DrawingContext.fillStyle = "rgba(0, 0, 255, 0.5)";
+            _DrawingContext.fillRect(0, 0, _Canvas.width, _Canvas.height);
+        };
         return Console;
     }());
     TSOS.Console = Console;
