@@ -32,19 +32,22 @@ module TSOS {
         }
 
         public krnKbdDispatchKeyPress(params) {
+            console.log(params);
             // Parse the params.    TODO: Check that the params are valid and osTrapError if not.
-            var keyCode = params[0];
-            var isShifted = params[1];
-            _Kernel.krnTrace("Key code:" + keyCode + " shifted:" + isShifted);
-            var chr = "";
+            let keyCode = params[0];
+            let isShifted = params[1];
+            let capsLock = params[2];
+
+            _Kernel.krnTrace("Key code:" + keyCode + " Shifted:" + isShifted + " Caps Lock: " + capsLock);
+            let chr = "";
             // Check to see if we even want to deal with the key that was pressed.
             if ((keyCode >= 65) && (keyCode <= 90)) { // letter
-                if (isShifted === true) { 
+                if ((isShifted === true && capsLock === false) || (isShifted === false && capsLock === true)) {
                     chr = String.fromCharCode(keyCode); // Uppercase A-Z
                 } else {
                     chr = String.fromCharCode(keyCode + 32); // Lowercase a-z
                 }
-                // TODO: Check for caps-lock and handle as shifted if so.
+
                 _KernelInputQueue.enqueue(chr);
             } else if (((keyCode >= 48) && (keyCode <= 57)) ||   // digits
                         (keyCode == 32)                     ||   // space

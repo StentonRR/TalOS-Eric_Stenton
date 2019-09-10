@@ -1,18 +1,5 @@
 ///<reference path="../globals.ts" />
 ///<reference path="deviceDriver.ts" />
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 /* ----------------------------------
    DeviceDriverKeyboard.ts
 
@@ -23,39 +10,37 @@ var __extends = (this && this.__extends) || (function () {
 var TSOS;
 (function (TSOS) {
     // Extends DeviceDriver
-    var DeviceDriverKeyboard = /** @class */ (function (_super) {
-        __extends(DeviceDriverKeyboard, _super);
-        function DeviceDriverKeyboard() {
+    class DeviceDriverKeyboard extends TSOS.DeviceDriver {
+        constructor() {
             // Override the base method pointers.
-            var _this = 
             // The code below cannot run because "this" can only be
             // accessed after calling super.
             //super(this.krnKbdDriverEntry, this.krnKbdDispatchKeyPress);
-            _super.call(this) || this;
-            _this.driverEntry = _this.krnKbdDriverEntry;
-            _this.isr = _this.krnKbdDispatchKeyPress;
-            return _this;
+            super();
+            this.driverEntry = this.krnKbdDriverEntry;
+            this.isr = this.krnKbdDispatchKeyPress;
         }
-        DeviceDriverKeyboard.prototype.krnKbdDriverEntry = function () {
+        krnKbdDriverEntry() {
             // Initialization routine for this, the kernel-mode Keyboard Device Driver.
             this.status = "loaded";
             // More?
-        };
-        DeviceDriverKeyboard.prototype.krnKbdDispatchKeyPress = function (params) {
+        }
+        krnKbdDispatchKeyPress(params) {
+            console.log(params);
             // Parse the params.    TODO: Check that the params are valid and osTrapError if not.
-            var keyCode = params[0];
-            var isShifted = params[1];
-            _Kernel.krnTrace("Key code:" + keyCode + " shifted:" + isShifted);
-            var chr = "";
+            let keyCode = params[0];
+            let isShifted = params[1];
+            let capsLock = params[2];
+            _Kernel.krnTrace("Key code:" + keyCode + " Shifted:" + isShifted + " Caps Lock: " + capsLock);
+            let chr = "";
             // Check to see if we even want to deal with the key that was pressed.
             if ((keyCode >= 65) && (keyCode <= 90)) { // letter
-                if (isShifted === true) {
+                if ((isShifted === true && capsLock === false) || (isShifted === false && capsLock === true)) {
                     chr = String.fromCharCode(keyCode); // Uppercase A-Z
                 }
                 else {
                     chr = String.fromCharCode(keyCode + 32); // Lowercase a-z
                 }
-                // TODO: Check for caps-lock and handle as shifted if so.
                 _KernelInputQueue.enqueue(chr);
             }
             else if (((keyCode >= 48) && (keyCode <= 57)) || // digits
@@ -64,8 +49,8 @@ var TSOS;
                 chr = String.fromCharCode(keyCode);
                 _KernelInputQueue.enqueue(chr);
             }
-        };
-        return DeviceDriverKeyboard;
-    }(TSOS.DeviceDriver));
+        }
+    }
     TSOS.DeviceDriverKeyboard = DeviceDriverKeyboard;
 })(TSOS || (TSOS = {}));
+//# sourceMappingURL=deviceDriverKeyboard.js.map
