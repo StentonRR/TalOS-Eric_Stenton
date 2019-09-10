@@ -32,7 +32,6 @@ module TSOS {
         }
 
         public krnKbdDispatchKeyPress(params) {
-            console.log(params);
             // Parse the params.    TODO: Check that the params are valid and osTrapError if not.
             let keyCode = params[0];
             let isShifted = params[1];
@@ -51,6 +50,7 @@ module TSOS {
                 _KernelInputQueue.enqueue(chr);
             } else if (((keyCode >= 48) && (keyCode <= 57)) ||   // digits
                         (keyCode == 32)                     ||   // space
+                        (keyCode == 8)                      ||   // backspace
                         (keyCode == 13)) {                       // enter
                 chr = String.fromCharCode(keyCode);
                 _KernelInputQueue.enqueue(chr);

@@ -133,11 +133,11 @@ module TSOS {
         }
 
         public static measure(font, size, str) {
-            var total = 0;
-            var len = str.length;
+            let total = 0;
+            let len = str.length;
 
-            for (var i = 0; i < len; i++) {
-                var c = CanvasTextFunctions.letter(str.charAt(i));
+            for (let i = 0; i < len; i++) {
+                let c = CanvasTextFunctions.letter(str.charAt(i));
                 if (c) {
                     total += c.width * size / 25.0;
                 }
@@ -146,25 +146,25 @@ module TSOS {
         }
 
         public static draw(ctx, font, size, x, y, str) {
-            var total = 0;
-            var len = str.length;
-            var mag = size / 25.0;
+            let total = 0;
+            let len = str.length;
+            let mag = size / 25.0;
 
             ctx.save();
             ctx.lineCap = "round";
             ctx.lineWidth = 2.0 * mag;
             ctx.strokeStyle = "black";
 
-            for (var i = 0; i < len; i++) {
-                var c = CanvasTextFunctions.letter(str.charAt(i));
+            for (let i = 0; i < len; i++) {
+                let c = CanvasTextFunctions.letter(str.charAt(i));
                 if (!c) {
                     continue;
                 }
                 ctx.beginPath();
-                var penUp = true;
-                var needStroke = 0;
-                for (var j = 0; j < c.points.length; j++) {
-                    var a = c.points[j];
+                let penUp = true;
+                let needStroke = 0;
+                for (let j = 0; j < c.points.length; j++) {
+                    let a = c.points[j];
                     if (a[0] === -1 && a[1] === -1) {
                         penUp = true;
                         continue;
@@ -183,17 +183,22 @@ module TSOS {
             return total;
         }
 
+        public static erase(ctx, x, y, w, h){
+            ctx.clearRect(x, y, w, h);
+        }
+
         public static enable(ctx) {
             ctx.drawText = function(font,size,x,y,text) { return CanvasTextFunctions.draw( ctx, font,size,x,y,text); };
+            ctx.eraseText = function(ctx, x, y, w, h) { return CanvasTextFunctions.erase(ctx, x, y, w, h)}
             ctx.measureText = function(font,size,text) { return CanvasTextFunctions.measure( font,size,text); };
             ctx.fontAscent = function(font,size) { return CanvasTextFunctions.ascent(font,size); };
             ctx.fontDescent = function(font,size) { return CanvasTextFunctions.descent(font,size); };
             ctx.drawTextRight = function(font,size,x,y,text) {
-                var w = CanvasTextFunctions.measure(font,size,text);
+                let w = CanvasTextFunctions.measure(font,size,text);
                 return CanvasTextFunctions.draw( ctx, font,size,x-w,y,text);
             };
             ctx.drawTextCenter = function(font,size,x,y,text) {
-                var w = CanvasTextFunctions.measure(font,size,text);
+                let w = CanvasTextFunctions.measure(font,size,text);
                 return CanvasTextFunctions.draw( ctx, font,size,x-w/2,y,text);
             };
         }
