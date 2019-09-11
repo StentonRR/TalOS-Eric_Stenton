@@ -21,8 +21,9 @@ var TSOS;
             this.clearScreen();
             this.resetXY();
         }
-        clearScreen() {
-            _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
+        // Optional parameter to increase or decrease height of erasure
+        clearScreen(h) {
+            _DrawingContext.clearRect(0, 0, _Canvas.width, h ? h : _Canvas.height);
         }
         resetXY() {
             this.currentXPosition = 0;
@@ -95,10 +96,21 @@ var TSOS;
              * Font descent measures from the baseline to the lowest point in the font.
              * Font height margin is extra spacing between the lines.
              */
-            this.currentYPosition += _DefaultFontSize +
+            let advanceValue = _DefaultFontSize +
                 _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
                 _FontHeightMargin;
-            // TODO: Handle scrolling. (iProject 1)
+            this.currentYPosition += advanceValue;
+            // Check if the console needs to be scrolled upward
+            if (this.currentYPosition > _Canvas.height) {
+                // Grab snapshot of text on console and clear it
+                let consoleSnapshot = _DrawingContext.getImageData(0, 0, _Canvas.width, this.currentYPosition);
+                this.clearScreen(this.currentYPosition);
+                this.resetXY();
+                // Place snapshot higher on canvas
+                // Keep the last few lines of text on screen to make it clear the screen was scrolled
+                _DrawingContext.putImageData(consoleSnapshot, 0, -(_Canvas.height - (advanceValue * 2))); // Show 2 lines from previous command
+                this.currentYPosition = advanceValue * 3; // Move cursor down 3 lines
+            }
         }
         withdrawLine() {
             // Opposite of advanceLine function; The cursor will return to the previous line
