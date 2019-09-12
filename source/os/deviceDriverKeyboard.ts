@@ -52,7 +52,115 @@ module TSOS {
                         (keyCode == 32)                     ||   // space
                         (keyCode == 8)                      ||   // backspace
                         (keyCode == 13)) {                       // enter
+
                 chr = String.fromCharCode(keyCode);
+
+                // Account for shifted number keys
+                if (isShifted) {
+                    switch (keyCode) {
+                        case 48: {
+                            chr = ')';
+                            break;
+                        }
+                        case 49: {
+                            chr = '!';
+                            break;
+                        }
+                        case 50: {
+                            chr = '@';
+                            break;
+                        }
+                        case 51: {
+                            chr = '#';
+                            break;
+                        }
+                        case 52: {
+                            chr = '$';
+                            break;
+                        }
+                        case 53: {
+                            chr = '%';
+                            break;
+                        }
+                        case 54: {
+                            chr = '^';
+                            break;
+                        }
+                        case 55: {
+                            chr = '&';
+                            break;
+                        }
+                        case 56: {
+                            chr = '*';
+                            break;
+                        }
+                        case 57: {
+                            chr = '(';
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
+                    }
+                }
+
+                _KernelInputQueue.enqueue(chr);
+
+            // Symbol keys, both shifted and not shifted
+            } else if (((keyCode >= 186) && (keyCode <= 192)) ||
+                      ((keyCode >= 219) && (keyCode <= 222))) {
+
+                switch (keyCode) {
+                    case 186: {
+                        chr = isShifted ? ':' : ';';
+                        break;
+                    }
+                    case 187: {
+                        chr = isShifted ? '+' : '=';
+                        break;
+                    }
+                    case 188: {
+                        chr = isShifted ? '<' : ',';
+                        break;
+                    }
+                    case 189: {
+                        chr = isShifted ? '_' : '-';
+                        break;
+                    }
+                    case 190: {
+                        chr = isShifted ? '>' : '.';
+                        break;
+                    }
+                    case 191: {
+                        chr = isShifted ? '?' : '/';
+                        break;
+                    }
+                    case 192: {
+                        chr = isShifted ? '~' : '`';
+                        break;
+                    }
+                    case 219: {
+                        chr = isShifted ? '{' : '[';
+                        break;
+                    }
+                    case 220: {
+                        chr = isShifted ? '|' : '\\';
+                        break;
+                    }
+                    case 221: {
+                        chr = isShifted ? '}' : ']';
+                        break;
+                    }
+                    case 222: {
+                        chr = isShifted ? '"' : '\'';
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+
+
                 _KernelInputQueue.enqueue(chr);
             }
         }
