@@ -150,6 +150,15 @@ var TSOS;
                     }
                 }
                 _KernelInputQueue.enqueue(chr);
+                // Up and down arrow keys
+            }
+            else if (keyCode == 38) {
+                chr = "up_arrow";
+                _KernelInputQueue.enqueue(chr);
+            }
+            else if (keyCode == 40) {
+                chr = "down_arrow";
+                _KernelInputQueue.enqueue(chr);
             }
         }
     }

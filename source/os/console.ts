@@ -17,7 +17,9 @@ module TSOS {
                     public currentFontSize = _DefaultFontSize,
                     public currentXPosition = 0,
                     public currentYPosition = _DefaultFontSize,
-                    public buffer = "") {
+                    public buffer = "",
+                    public commandHistory = [],
+                    public commandIndex = 0) {
         }
 
         public init(): void {
@@ -44,14 +46,54 @@ module TSOS {
                     // The enter key marks the end of a console command, so ...
                     // ... tell the shell ...
                     _OsShell.handleInput(this.buffer);
-                    // ... and reset our buffer.
+                    // Add command to history if not empty
+                    if (this.buffer) this.commandHistory.push(this.buffer);
+                    // ... and reset our buffer
                     this.buffer = "";
-                }else if(chr === String.fromCharCode(8)){ // Back space
+                    // ... and reset the command index.
+                    this.commandIndex = this.commandHistory.length;
+                } else if (chr === String.fromCharCode(8)) { // Back space
                     // If there are characters in the buffer, delete the last character
-                    if(this.buffer){
-                        this.deleteText(this.buffer.charAt(this.buffer.length-1), this.buffer.length-1);
+                    if (this.buffer) {
+                        this.deleteText(this.buffer.charAt(this.buffer.length - 1), this.buffer.length - 1);
                         this.buffer = this.buffer.slice(0, -1);
                     }
+                } else if (chr === 'up_arrow') { // Go back in command history
+                    // Check if there are any past commands
+                    if(this.commandIndex != 0) {
+                        // Clear the line
+                        this.deleteLine();
+
+                        // Update the command index
+                        this.commandIndex--;
+
+                        // Output past command to console
+                        this.putText(this.commandHistory[this.commandIndex]);
+
+                        // Put command into buffer
+                        this.buffer = this.commandHistory[this.commandIndex];
+                    }
+
+                } else if (chr === 'down_arrow') { // Go forward in command history
+                    // Check if there are any next commands
+                    if(this.commandIndex < (this.commandHistory.length - 1)) {
+                        // Clear the line
+                        this.deleteLine();
+
+                        // Update the command index
+                        this.commandIndex++;
+
+                        // Output next command to console
+                        this.putText(this.commandHistory[this.commandIndex]);
+
+                        // Put command into buffer
+                        this.buffer = this.commandHistory[this.commandIndex];
+                    } else {
+                        // Exit command history
+                        this.deleteLine();
+                        this.commandIndex = this.commandHistory.length;
+                    }
+
                 } else {
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
@@ -98,6 +140,16 @@ module TSOS {
 
             // Set the x coordinate back
             this.currentXPosition -= _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+        }
+
+        public deleteLine(): void {
+            // Delete the line of text the user has typed and not submitted; clear the buffer when done
+
+            for(let i = this.buffer.length - 1; i > -1; i-- ){
+                this.deleteText(this.buffer.charAt(i), this.buffer.length);
+            }
+
+            this.buffer = "";
         }
 
         public advanceLine(): void {
