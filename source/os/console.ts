@@ -19,7 +19,10 @@ module TSOS {
                     public currentYPosition = _DefaultFontSize,
                     public buffer = "",
                     public commandHistory = [],
-                    public commandIndex = 0) {
+                    public commandIndex = 0,
+                    public tabList = [],
+                    public tabIndex = 0,
+                    public tabRegex = null) {
         }
 
         public init(): void {
@@ -50,14 +53,55 @@ module TSOS {
                     if (this.buffer) this.commandHistory.push(this.buffer);
                     // ... and reset our buffer
                     this.buffer = "";
-                    // ... and reset the command index.
+                    // ... and reset the command index
                     this.commandIndex = this.commandHistory.length;
+                    // ... and reset the tab index and list
+                    this.tabIndex = 0;
+                    this.tabList = [];
                 } else if (chr === String.fromCharCode(8)) { // Back space
                     // If there are characters in the buffer, delete the last character
                     if (this.buffer) {
                         this.deleteText(this.buffer.charAt(this.buffer.length - 1), this.buffer.length - 1);
                         this.buffer = this.buffer.slice(0, -1);
                     }
+
+                    // Reset the tab index and list
+                    this.tabIndex = 0;
+                    this.tabList = [];
+
+                } else if (chr === String.fromCharCode(9) && this.buffer) {
+                    // Not currently accessing command autocomplete
+                    if (this.tabList.length == 0) {
+                        // Create test for first letters of commands
+                        this.tabRegex = new RegExp(`^${this.buffer}`);
+
+                        // Add initial buffer to list
+                        this.tabList.push(this.buffer);
+
+                        // Find the commands that begin with current letters
+                        for (let cmd of _OsShell.commandList) {
+                            if (this.tabRegex.test(cmd.name)) this.tabList.push(cmd.name);
+                        }
+                    }
+
+                    // Go to next index if available, else reset
+                    if (this.tabList[this.tabIndex + 1] == undefined) {
+                        this.tabIndex = 0;
+
+                        // Replace original user buffer and clear list
+                        this.deleteLine();
+                        this.putText(this.tabList[this.tabIndex]);
+                        this.buffer = this.tabList[this.tabIndex];
+                        this.tabList = [];
+                    } else {
+                        this.tabIndex++;
+
+                        // Cycle through options
+                        this.deleteLine();
+                        this.putText(this.tabList[this.tabIndex]);
+                        this.buffer = this.tabList[this.tabIndex];
+                    }
+
                 } else if (chr === 'up_arrow') { // Go back in command history
                     // Check if there are any past commands
                     if(this.commandIndex != 0) {
