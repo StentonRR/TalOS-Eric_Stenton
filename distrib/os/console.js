@@ -208,13 +208,16 @@ var TSOS;
             // Check if the console needs to be scrolled upward
             if (this.currentYPosition > _Canvas.height) {
                 // Grab snapshot of text on console and clear it
-                var consoleSnapshot = _DrawingContext.getImageData(0, 0, _Canvas.width, this.currentYPosition);
+                var consoleSnapshot = _DrawingContext.getImageData(0, 0, _Canvas.width, this.currentYPosition + _FontHeightMargin);
                 this.clearScreen(this.currentYPosition);
+                // Get how much the y position must change
+                var yDifference = this.currentYPosition - _Canvas.height + _FontHeightMargin;
+                // Place snapshot higher on canvas to show next user input line
+                _DrawingContext.putImageData(consoleSnapshot, 0, -(yDifference));
+                // Reset to origin
                 this.resetXY();
-                // Place snapshot higher on canvas
-                // Keep the last few lines of text on screen to make it clear the screen was scrolled
-                _DrawingContext.putImageData(consoleSnapshot, 0, -(_Canvas.height - (advanceValue * 2))); // Show 2 lines from previous command
-                this.currentYPosition = advanceValue * 3; // Move cursor down 3 lines
+                // Move Y position to correct location
+                this.currentYPosition -= yDifference;
             }
         };
         Console.prototype.withdrawLine = function () {

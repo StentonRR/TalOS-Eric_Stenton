@@ -76,7 +76,7 @@ module TSOS {
             // death
             sc = new ShellCommand(this.shellDeath,
                 "death",
-                "Death is only a new beginning, except for this kernal. This ones done for.",
+                "Death is only a new beginning, except for this kernal. This one is done for.",
                 "death");
             this.commandList.push(sc);
 

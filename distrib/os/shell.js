@@ -80,7 +80,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellCls, "cls", "Clears the screen and resets the cursor position.", "cls");
             this.commandList.push(sc);
             // death
-            sc = new TSOS.ShellCommand(this.shellDeath, "death", "Death is only a new beginning, except for this kernal. This ones done for.", "death");
+            sc = new TSOS.ShellCommand(this.shellDeath, "death", "Death is only a new beginning, except for this kernal. This one is done for.", "death");
             this.commandList.push(sc);
             // man <topic>
             sc = new TSOS.ShellCommand(this.shellMan, "man", "Displays the MANual page for <topic>.", "man <topic>");
