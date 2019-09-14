@@ -185,6 +185,7 @@ module TSOS {
             // Go up a line if command is wrapped
             if (bufferLength > 0 && this.currentXPosition <= 0) this.withdrawLine();
 
+
             // Get x start point for blank rectangle
             let xOffset = this.currentXPosition - _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
 
@@ -233,8 +234,8 @@ module TSOS {
                 // Place snapshot higher on canvas to show next user input line
                 _DrawingContext.putImageData(consoleSnapshot, 0, -(yDifference));
 
-                // Reset to origin
-                this.resetXY();
+                // Reset X position
+                this.currentXPosition = 0;
 
                 // Move Y position to correct location
                 this.currentYPosition -= yDifference;
@@ -242,7 +243,14 @@ module TSOS {
         }
 
         public withdrawLine(): void {
-            // Opposite of advanceLine function; The cursor will return to the previous line
+            this.currentXPosition = _DrawingContext.measureText(this.currentFont, this.currentFontSize, this.buffer);
+            this.currentXPosition += _DrawingContext.measureText(this.currentFont, this.currentFontSize, _OsShell.promptStr);
+
+            let advanceValue = _DefaultFontSize +
+                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
+                _FontHeightMargin;
+
+            this.currentYPosition -= advanceValue;
         }
 
         public death(): void {

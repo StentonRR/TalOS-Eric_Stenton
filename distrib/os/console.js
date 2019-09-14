@@ -214,14 +214,19 @@ var TSOS;
                 var yDifference = this.currentYPosition - _Canvas.height + _FontHeightMargin;
                 // Place snapshot higher on canvas to show next user input line
                 _DrawingContext.putImageData(consoleSnapshot, 0, -(yDifference));
-                // Reset to origin
-                this.resetXY();
+                // Reset X position
+                this.currentXPosition = 0;
                 // Move Y position to correct location
                 this.currentYPosition -= yDifference;
             }
         };
         Console.prototype.withdrawLine = function () {
-            // Opposite of advanceLine function; The cursor will return to the previous line
+            this.currentXPosition = _DrawingContext.measureText(this.currentFont, this.currentFontSize, this.buffer);
+            this.currentXPosition += _DrawingContext.measureText(this.currentFont, this.currentFontSize, _OsShell.promptStr);
+            var advanceValue = _DefaultFontSize +
+                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
+                _FontHeightMargin;
+            this.currentYPosition -= advanceValue;
         };
         Console.prototype.death = function () {
             // Color the console blue, but also make it see through for the message

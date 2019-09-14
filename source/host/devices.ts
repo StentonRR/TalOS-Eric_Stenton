@@ -35,6 +35,10 @@ module TSOS {
             _OSclock++;
             // Call the kernel clock pulse event handler.
             _Kernel.krnOnCPUClockPulse();
+            // Display time and date
+            let date = new Date();
+            document.getElementById("date").innerHTML = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()}`;
+            document.getElementById("time").innerHTML = `${date.getHours() % 12 || 12}:${date.getMinutes()}:${date.getSeconds()} ${date.getHours() >= 12 ? 'PM' : 'AM'}`;
         }
 
         //
