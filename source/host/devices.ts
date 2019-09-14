@@ -35,6 +35,10 @@ module TSOS {
             _OSclock++;
             // Call the kernel clock pulse event handler.
             _Kernel.krnOnCPUClockPulse();
+            // Display time and date
+            let date = new Date();
+            document.getElementById("date").innerHTML = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()}`;
+            document.getElementById("time").innerHTML = `${date.getHours() % 12 || 12}:${date.getMinutes()}:${date.getSeconds()} ${date.getHours() >= 12 ? 'PM' : 'AM'}`;
         }
 
         //
@@ -57,7 +61,7 @@ module TSOS {
             if (event.target.id === "display") {
                 event.preventDefault();
                 // Note the pressed key code in the params (Mozilla-specific).
-                var params = new Array(event.which, event.shiftKey);
+                var params = new Array(event.which, event.shiftKey, event.getModifierState("CapsLock"));
                 // Enqueue this interrupt on the kernel interrupt queue so that it gets to the Interrupt handler.
                 _KernelInterruptQueue.enqueue(new Interrupt(KEYBOARD_IRQ, params));
             }

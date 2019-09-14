@@ -31,6 +31,10 @@ var TSOS;
             _OSclock++;
             // Call the kernel clock pulse event handler.
             _Kernel.krnOnCPUClockPulse();
+            // Display time and date
+            var date = new Date();
+            document.getElementById("date").innerHTML = date.getMonth() + 1 + "/" + date.getDate() + "/" + date.getFullYear();
+            document.getElementById("time").innerHTML = (date.getHours() % 12 || 12) + ":" + date.getMinutes() + ":" + date.getSeconds() + " " + (date.getHours() >= 12 ? 'PM' : 'AM');
         };
         //
         // Keyboard Interrupt, a HARDWARE Interrupt Request. (See pages 560-561 in our text book.)
@@ -50,7 +54,7 @@ var TSOS;
             if (event.target.id === "display") {
                 event.preventDefault();
                 // Note the pressed key code in the params (Mozilla-specific).
-                var params = new Array(event.which, event.shiftKey);
+                var params = new Array(event.which, event.shiftKey, event.getModifierState("CapsLock"));
                 // Enqueue this interrupt on the kernel interrupt queue so that it gets to the Interrupt handler.
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(KEYBOARD_IRQ, params));
             }
