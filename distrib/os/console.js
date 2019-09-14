@@ -156,11 +156,21 @@ var TSOS;
             // UPDATE: Even though we are now working in TypeScript, char and string remain undistinguished.
             //         Consider fixing that.
             if (text !== "") {
-                // Draw the text at the current X and Y coordinates.
-                _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
-                // Move the current X position.
-                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
-                this.currentXPosition = this.currentXPosition + offset;
+                for (var _i = 0, text_1 = text; _i < text_1.length; _i++) {
+                    var character = text_1[_i];
+                    this.putChar(character);
+                }
+            }
+        };
+        Console.prototype.putChar = function (character) {
+            // Draw the text at the current X and Y coordinates.
+            _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, character);
+            // Move the current X position.
+            var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, character);
+            this.currentXPosition = this.currentXPosition + offset;
+            // Wrap text if exceeds the width of canvas plus a small margin
+            if (this.currentXPosition > (_Canvas.width - 12)) {
+                this.advanceLine();
             }
         };
         Console.prototype.deleteText = function (text, bufferLength) {

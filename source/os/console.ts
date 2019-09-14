@@ -159,12 +159,24 @@ module TSOS {
             // UPDATE: Even though we are now working in TypeScript, char and string remain undistinguished.
             //         Consider fixing that.
             if (text !== "") {
-                // Draw the text at the current X and Y coordinates.
-                _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
-                // Move the current X position.
-                let offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
-                this.currentXPosition = this.currentXPosition + offset;
+                for(let character of text){
+                    this.putChar(character);
+                }
             }
+         }
+
+         public putChar(character): void {
+             // Draw the text at the current X and Y coordinates.
+             _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, character);
+
+             // Move the current X position.
+             let offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, character);
+             this.currentXPosition = this.currentXPosition + offset;
+
+             // Wrap text if exceeds the width of canvas plus a small margin
+             if(this.currentXPosition > (_Canvas.width - 12)){
+                 this.advanceLine();
+             }
          }
 
         public deleteText(text, bufferLength): void {
