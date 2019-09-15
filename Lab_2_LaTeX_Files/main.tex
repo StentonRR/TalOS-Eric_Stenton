@@ -1,0 +1,115 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% CMPT 424N-111
+% Fall 2019
+% Lab Two
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from: http://www.LaTeXTemplates.com
+% Original author: % Frits Wenneker (http://www.howtotex.com)
+% License: CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+% Modified by Alan G. Labouseur  - alan@labouseur.com
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[letterpaper, 10pt,DIV=13]{scrartcl} 
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm,xfrac} % Math packages
+\usepackage{sectsty} % Allows customizing section commands
+\usepackage{graphicx}
+\usepackage[lined,linesnumbered,commentsnumbered]{algorithm2e}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{lastpage}
+\usepackage{url}
+
+\allsectionsfont{\normalfont\scshape} % Make all section titles in default font and small caps.
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{page \thepage\ of \pageref{LastPage}} % Page numbering for right footer
+
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs.
+
+\binoppenalty=3000
+\relpenalty=3000
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{	
+   \normalfont \normalsize 
+   \textsc{CMPT 424N-111 - Fall 2019 - Dr. Labouseur} \\[10pt] % Header stuff.
+   \horrule{0.5pt} \\[0.25cm] 	% Top horizontal rule
+   \huge Lab Two  \\     	    % Assignment title
+   \horrule{0.5pt} \\[0.25cm] 	% Bottom horizontal rule
+}
+
+\author{Eric Stenton \\ \normalsize Eric.Stenton1@Marist.edu}
+
+\date{\normalsize\today} 	% Today's date.
+
+\begin{document}
+\maketitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%   start PROBLEM ONE
+%----------------------------------------------------------------------------------------
+\section{Problem One}
+
+\textbf{\emph{Question:}}
+How is your console like the ancient TTY subsystem in Unix as described in \url{https://www.linusakesson.net/programming/tty/}?
+
+
+\textbf{\emph{Answer:}}
+My console shares some commonalities with the ancient TTY subsystem in UNIX described in the link such as line editing in the line discipline, session management, and sending OP code signals to the CPU. While the canvastext.ts file handles the graphical component of the console, the console.ts file deals with the functions of the line discipline similar to the TTY subsystem. Here, the backspace, erasing on the graphical console, and reprinting of text is managed. The file receives input from the keyboard driver as it would from the physical device and handles it as if it is in 'cooked' mode. In the next few labs, I will be implementing session management in the form of commands to control processes with system calls and support for OP codes to carry out provided user programs. While it is more akin to simple mimicry, the console in our project performs some processes the ancient TTY subsystem did in the past that were essential in the human and machine relationship.
+
+%----------------------------------------------------------------------------------------
+%   end PROBLEM ONE
+%----------------------------------------------------------------------------------------
+
+\pagebreak
+
+%----------------------------------------------------------------------------------------
+%   start PROBLEM TWO
+%----------------------------------------------------------------------------------------
+\section{Problem Two}
+
+\textbf{\emph{Question:}} LaTeX?
+
+
+\textbf{\emph{Answer:}}
+The similarities between my console and LaTeX are fewer than the TTY subsystem. LaTeX works similar to a user program that needs to be compiled or a job that is executed rather than commands that are interpreted line by line on a console. It does, however, introduce a type of I/O process that is somewhat similar. I compile a TeX file with all the structure notation and strings of text that I wish to display pre-written, then I am given an output of a PDF file. It is akin to my status command that takes my input and displays it within a graphic task bar on the web page. It is important to note, however, that LaTeX is very unlike a shell or bash script which function more similarly to how the console interprets commands in the project due to LaTeX's nature of needing to be compiled.
+
+%----------------------------------------------------------------------------------------
+%   end PROBLEM Two
+%----------------------------------------------------------------------------------------
+
+\end{document}
