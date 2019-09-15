@@ -36,6 +36,16 @@ h3 {
   cursor: default;
 }
 
+#divBanner {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+
+  background-color: #DFDBC3;
+  border: 1px solid black;
+  font-weight: bold;
+}
+
 .normal_button {
   width: 100px;
 }
