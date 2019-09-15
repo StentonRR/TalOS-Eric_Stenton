@@ -44,20 +44,26 @@ module TSOS {
             while (_KernelInputQueue.getSize() > 0) {
                 // Get the next character from the kernel input queue.
                 let chr = _KernelInputQueue.dequeue();
+
                 // Check to see if it's "special" (enter or ctrl-c) or "normal" (anything else that the keyboard device driver gave us).
                 if (chr === String.fromCharCode(13)) { // Enter key
                     // The enter key marks the end of a console command, so ...
                     // ... tell the shell ...
                     _OsShell.handleInput(this.buffer);
+
                     // Add command to history if not empty
                     if (this.buffer) this.commandHistory.push(this.buffer);
+
                     // ... and reset our buffer
                     this.buffer = "";
+
                     // ... and reset the command index
                     this.commandIndex = this.commandHistory.length;
+
                     // ... and reset the tab index and list
                     this.tabIndex = 0;
                     this.tabList = [];
+
                 } else if (chr === String.fromCharCode(8)) { // Back space
                     // If there are characters in the buffer, delete the last character
                     if (this.buffer) {
@@ -185,7 +191,6 @@ module TSOS {
             // Go up a line if command is wrapped
             if (bufferLength > 0 && this.currentXPosition <= 0) this.withdrawLine();
 
-
             // Get x start point for blank rectangle
             let xOffset = this.currentXPosition - _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
 
@@ -254,9 +259,8 @@ module TSOS {
         }
 
         public death(): void {
-            // Color the console blue, but also make it see through for the message
-            _DrawingContext.fillStyle = "rgba(0, 0, 255, 0.5)";
-            _DrawingContext.fillRect(0, 0, _Canvas.width, _Canvas.height);
+            // Color the console blue to denote blue screen of death
+            document.getElementById("display").style.backgroundColor = "blue";
         }
     }
  }
