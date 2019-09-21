@@ -1,14 +1,9 @@
 var TSOS;
 (function (TSOS) {
     var MemoryManager = /** @class */ (function () {
-        function MemoryManager(availability, // Whether the memory segment is being used or not
-        limits) {
+        function MemoryManager(availability) {
             if (availability === void 0) { availability = [true, true, true]; }
-            if (limits === void 0) { limits = [{ start: 0, end: 255 },
-                { start: 256, end: 511 },
-                { start: 512, end: 767 }]; }
             this.availability = availability;
-            this.limits = limits;
         }
         MemoryManager.prototype.load = function (program, priority) {
             var memorySegment;
@@ -18,6 +13,9 @@ var TSOS;
                     memorySegment = i;
                     break;
                 }
+                else {
+                    throw "Memory Allocation Exception: There are no free memory segments available";
+                }
                 // todo Swapping stuff
             }
             // Load program into free memory segment
@@ -26,7 +24,6 @@ var TSOS;
             }
             // Update memory segment's availability
             this.availability[memorySegment] = false;
-            console.log(_Memory.mainMemory);
             // Create process control block for program
             var pcb = new TSOS.PCB();
             pcb.memorySegment = memorySegment;

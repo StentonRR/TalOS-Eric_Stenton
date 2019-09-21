@@ -20,7 +20,6 @@ var TSOS;
                     segment[i] = 0x00;
                 }
             }
-            console.log(this.mainMemory);
         };
         return Memory;
     }());
