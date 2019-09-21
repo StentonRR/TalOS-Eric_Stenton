@@ -100,6 +100,9 @@ module TSOS {
             // ... Create memory accessor ...
             _MemoryAccessor = new TSOS.MemoryAccessor();
 
+            // ... Create memory manager ...
+            _MemoryManager = new TSOS.MemoryManager();
+
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
             // .. and call the OS Kernel Bootstrap routine.

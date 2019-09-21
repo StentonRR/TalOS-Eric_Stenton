@@ -12,5 +12,11 @@ module TSOS {
             _Memory.mainMemory[segment][location] = value;
             // todo Add memory security to terminate process if it goes out of bounds
         }
+
+        public clear(segment): void {
+            for(let i = 0; i < _Memory.segmentSize; i++) {
+                this.write(segment, i, 0x00);
+            }
+        }
     }
 }

@@ -35,6 +35,10 @@ var _MemoryAccessor: TSOS.MemoryAccessor;
 // Software (OS)
 var _MemoryManager: any = null;
 
+// Processes
+var _pidCounter = 0;
+var _pcbList = [];
+
 
 var _OSclock: number = 0;  // Page 23.
 
