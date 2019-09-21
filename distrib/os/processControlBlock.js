@@ -6,6 +6,7 @@ var TSOS;
         acc, // Accumulator
         xReg, // X register
         yReg, // Y register
+        zFlag, // Zero flag
         pid, // Process id
         priority, // Priority of the process
         memorySegment, // The segment of memory the program resides
@@ -18,6 +19,7 @@ var TSOS;
             if (acc === void 0) { acc = 0; }
             if (xReg === void 0) { xReg = 0; }
             if (yReg === void 0) { yReg = 0; }
+            if (zFlag === void 0) { zFlag = 0; }
             if (pid === void 0) { pid = _pidCounter++; }
             if (priority === void 0) { priority = 0; }
             if (memorySegment === void 0) { memorySegment = null; }
@@ -28,6 +30,7 @@ var TSOS;
             this.acc = acc;
             this.xReg = xReg;
             this.yReg = yReg;
+            this.zFlag = zFlag;
             this.pid = pid;
             this.priority = priority;
             this.memorySegment = memorySegment;

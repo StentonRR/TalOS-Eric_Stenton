@@ -1,7 +1,7 @@
 module TSOS {
     export class MemoryManager {
         constructor(
-            public availability = [true, true, true] ) { // Whether the memory segment is being used or not
+            public availability: Boolean[] = [true, true, true] ) { // Whether the memory segment is being used or not
         }
 
         public load(program, priority): PCB | undefined {
@@ -12,11 +12,14 @@ module TSOS {
                 if (this.availability[i]){
                     memorySegment = i;
                     break;
-                } else {
-                    _StdOut.putText("Memory Allocation Exception: There are no free memory segments available");
-                    return;
                 }
                 // todo Swapping stuff
+            }
+
+            // Memory is full
+            if (memorySegment === undefined) {
+                _StdOut.putText("Memory Allocation Exception: There are no free memory segments available");
+                return;
             }
 
             // Load program into free memory segment

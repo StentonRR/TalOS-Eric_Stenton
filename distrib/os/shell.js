@@ -245,7 +245,9 @@ var TSOS;
                 // Break program input into array of 2 characters
                 var input = programInput.match(/.{2}/g);
                 var pcb = _MemoryManager.load(input, args[0]);
-                _StdOut.putText("Program with PID " + pcb.pid + " loaded into memory segment " + pcb.memorySegment + ".");
+                // Print program details if it loaded without error
+                if (pcb)
+                    _StdOut.putText("Program with PID " + pcb.pid + " loaded into memory segment " + pcb.memorySegment + ".");
             }
             else {
                 _StdOut.putText("User program is not valid hexedecimal.");

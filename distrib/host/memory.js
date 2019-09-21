@@ -5,8 +5,8 @@ var TSOS;
         segmentSize, // Size of each memory segment
         // Segments of memory
         mainMemory) {
-            if (totalSize === void 0) { totalSize = 765; }
-            if (segmentSize === void 0) { segmentSize = 255; }
+            if (totalSize === void 0) { totalSize = 768; }
+            if (segmentSize === void 0) { segmentSize = 256; }
             if (mainMemory === void 0) { mainMemory = [[], [], []]; }
             this.totalSize = totalSize;
             this.segmentSize = segmentSize;
@@ -17,7 +17,7 @@ var TSOS;
             for (var _i = 0, _a = this.mainMemory; _i < _a.length; _i++) {
                 var segment = _a[_i];
                 for (var i = 0; i < this.segmentSize; i++) {
-                    segment[i] = 0x00;
+                    segment[i] = "00";
                 }
             }
         };

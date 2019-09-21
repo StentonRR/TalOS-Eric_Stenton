@@ -9,7 +9,7 @@ module TSOS {
         }
 
         public write(segment, location, value): Boolean {
-            if (!_Memory.mainMemory[segment][location]){
+            if (_Memory.mainMemory[segment][location] === undefined){
                 _StdOut.putText(`Memory Write Exception: Location ${location} of segment ${segment} is out of bounds`);
                 return false;
             } else {
@@ -20,7 +20,7 @@ module TSOS {
 
         public clear(segment): void {
             for(let i = 0; i < _Memory.segmentSize; i++) {
-                this.write(segment, i, 0x00);
+                this.write(segment, i, "00");
             }
         }
 

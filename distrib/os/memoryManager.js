@@ -13,14 +13,21 @@ var TSOS;
                     memorySegment = i;
                     break;
                 }
-                else {
-                    throw "Memory Allocation Exception: There are no free memory segments available";
-                }
                 // todo Swapping stuff
             }
+            // Memory is full
+            if (memorySegment === undefined) {
+                _StdOut.putText("Memory Allocation Exception: There are no free memory segments available");
+                return;
+            }
             // Load program into free memory segment
+            var status;
             for (var i = 0; i < program.length; i++) {
-                _MemoryAccessor.write(memorySegment, i, program[i]);
+                status = _MemoryAccessor.write(memorySegment, i, program[i]);
+                // Terminate process if it exceeds memory bounds
+                if (!status) {
+                    return;
+                }
             }
             // Update memory segment's availability
             this.availability[memorySegment] = false;
