@@ -4,7 +4,7 @@ module TSOS {
         }
 
         // Read from memory segment and return specific portion of it
-        public read(segment, location): String {
+        public read(segment, location): string {
             return _Memory.mainMemory[segment][location];
         }
 

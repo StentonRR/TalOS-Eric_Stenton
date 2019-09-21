@@ -34,7 +34,7 @@ var TSOS;
             // Create process control block for program
             var pcb = new TSOS.PCB();
             pcb.memorySegment = memorySegment;
-            pcb.priority = priority;
+            pcb.priority = parseInt(priority);
             // Add pcb to global list
             _pcbList.push(pcb);
             return pcb;
