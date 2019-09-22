@@ -24,7 +24,8 @@ module TSOS {
                     public Xreg: number = 0,
                     public Yreg: number = 0,
                     public Zflag: number = 0,
-                    public isExecuting: boolean = false) {
+                    public isExecuting: boolean = false,
+                    public PCBIndex: number = 0) {
 
         }
 
@@ -35,6 +36,7 @@ module TSOS {
             this.Yreg = 0;
             this.Zflag = 0;
             this.isExecuting = false;
+            this.PCBIndex = 0;
         }
 
         public cycle(): void {
@@ -42,5 +44,98 @@ module TSOS {
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
         }
+
+
+        // Op codes
+
+        // Put desired value into the accumulator
+        public loadAccWithConstant(value): void {
+            this.Acc = value;
+        }
+
+        // Put the value stored in memory location into the accumulator
+        public loadAccFromMemory(location): void {
+            this.Acc = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+        }
+
+        // Store the value in the accumulator into memory location
+        public storeAccInMemory(location): void {
+            _MemoryAccessor.write(_pcbList[this.PCBIndex].memorySegment, location, this.Acc.toString(16));
+        }
+
+        // Add value stored in memory to the accumulator -- store the sum in accumulator
+        public addWithCarry(location): void {
+            this.Acc += parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+        }
+
+        // Put desired value into the X register
+        public loadXRegWithConstant(value): void {
+            this.Xreg = value;
+        }
+
+        // Put the value stored in memory location into the X register
+        public loadXRegFromMemory(location): void {
+            this.Xreg = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+        }
+
+        // Put desired value into the Y register
+        public loadYRegWithConstant(value): void {
+            this.Yreg = value;
+        }
+
+        // Put the value stored in memory location into the Y register
+        public loadYRegFromMemory(location): void {
+            this.Yreg = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+        }
+
+        // If value stored in memory location is equal to value in X register, then make Z flag equal to 1
+        public compareToXReg(location): void {
+            this.Zflag = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16) === this.Xreg ? 1 : 0;
+        }
+
+        // Change the PC if the Z flag is 0
+        public branchBytes(bytes): void {
+            if (this.Zflag === 0) {
+                let newPC = this.PC + bytes;
+
+                // Check if accessing out of bounds memory
+                if (newPC > _MemoryAccessor.getSegmentSize() - 1) {
+                    // todo Terminate process?
+                } else {
+                    this.PC = newPC;
+                }
+            }
+        }
+
+        // Increase the value stored in memory by 1
+        public incrementByteValue(location): void {
+            let value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location));
+
+            value++;
+            _MemoryAccessor.write(_pcbList[this.PCBIndex].memorySegment, location, value.toString(16));
+        }
+
+        // Print value of Y register or text stored in memory until a break code
+        public systemCall(): void {
+            if (this.Xreg === 1) {
+                _StdOut.putText(this.Yreg.toString());
+            } else if (this.Xreg === 2) {
+                let output = "";
+                let location = this.Yreg;
+                let value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+
+                while (value !== 0) {
+                    output += String.fromCharCode(value);
+                    value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, ++location), 16);
+                }
+
+                _StdOut.putText(output);
+            }
+        }
+
+
+
+
+
     }
 }

@@ -1,0 +1,135 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% CMPT 424N-111
+% Fall 2019
+% Lab Three
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from: http://www.LaTeXTemplates.com
+% Original author: % Frits Wenneker (http://www.howtotex.com)
+% License: CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+% Modified by Alan G. Labouseur  - alan@labouseur.com
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[letterpaper, 10pt,DIV=13]{scrartcl} 
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm,xfrac} % Math packages
+\usepackage{sectsty} % Allows customizing section commands
+\usepackage{graphicx}
+\usepackage[lined,linesnumbered,commentsnumbered]{algorithm2e}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{lastpage}
+
+\allsectionsfont{\normalfont\scshape} % Make all section titles in default font and small caps.
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{page \thepage\ of \pageref{LastPage}} % Page numbering for right footer
+
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs.
+
+\binoppenalty=3000
+\relpenalty=3000
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{	
+   \normalfont \normalsize 
+   \textsc{CMPT 424N-111 - Fall 2019 - Dr. Labouseur} \\[10pt] % Header stuff.
+   \horrule{0.5pt} \\[0.25cm] 	% Top horizontal rule
+   \huge Lab Three  \\     	    % Assignment title
+   \horrule{0.5pt} \\[0.25cm] 	% Bottom horizontal rule
+}
+
+\author{Eric Stenton \\ \normalsize Eric.Stenton1@Marist.edu}
+
+\date{\normalsize\today} 	% Today's date.
+
+\begin{document}
+\maketitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%   start PROBLEM ONE
+%----------------------------------------------------------------------------------------
+\section{Problem One}
+
+\textbf{\emph{Question:}}
+Explain the difference between internal and external fragmentation.
+
+\textbf{\emph{Answer:}}
+The difference between internal and external fragmentation lies with the location of the 'holes' of free memory space that result from processes being loaded into main memory using particular strategies. The first-fit and best-fit algorithms are two methods of divvying out memory space that accrue areas of external fragmentation \cite{concepts}. When available memory space is given to a process, the remaining space not used is fragmented from other areas of free space. On the other hand, if main memory is divided into blocks of predefined lengths to be given to processes, then fragmentation may still occur within a block that is being used. Internal fragmentation describes the areas of free memory space that result from processes being given blocks of memory that are too large and have an unused amount \cite{concepts}. Thus, internal and external fragmentation both describe the existence of areas of free memory that cannot be properly utilized due to the method of allocating memory space for processes. The difference is whether the free memory space exists within predefined memory blocks or between processes that are simply given slices of memory that they require. 
+
+%----------------------------------------------------------------------------------------
+%   end PROBLEM ONE
+%----------------------------------------------------------------------------------------
+
+\pagebreak
+
+%----------------------------------------------------------------------------------------
+%   start PROBLEM TWO
+%----------------------------------------------------------------------------------------
+\section{Problem Two}
+
+\textbf{\emph{Question:}}
+Given five (5) memory partitions of 100KB, 500KB, 200KB, 300KB, and 600KB (in that order), how would optimal, first-fit, best-fit, and worst-fit algorithms place processes of 212KB, 417KB, 112KB, and 426KB (in that order)?
+
+\textbf{\emph{Answer:}}
+
+First-fit:
+    The first-fit algorithm allocates memory based on the first hole that it finds suitable for a process \cite{concepts}. Thus, the algorithm will take the 212KB process, skip the 100KB memory partition since it is too small, and place the process in the 500KB partition resulting in a 288KB hole. Assuming searching starts at the beginning again, the algorithm will take the 417KB process, skip over the first 4 partitions of memory, and place it in the 600KB partition resulting in a 183KB hole. Next, the 112KB process will be placed in the second partition that has a 288KB hole resulting in a 176KB hole. The final 426KB process is unable to fit into any of the partitions assuming that all previous processes are still allocated. The current amount of free memory in each partition are as follows: 100KB, 176KB, 200KB, 300KB, 183KB.
+
+Best-fit:
+    The best-fit algorithm allocates memory based on the smallest hole that will accommodate a process \cite{concepts}. Starting with the 212KB process, it will be placed in the 4th partition with 300KB of free memory resulting in a hole of 88KB. The 417KB process will be placed in the 2nd partition with 500KB resulting in a hole of 83KB. Next, the 112KB process will be placed into the 3rd partition with 200KB creating a hole of 88KB. Lastly, the 426KB program will be placed in the 5th and last partition with 600KB creating a hole of 174KB. All processes are able to fit into memory and the amount of free memory in each partition are as follows: 100KB, 83KB, 88KB, 88KB, and 174KB.
+
+Worst-fit: 
+    The worst-fit algorithm allocates memory based on the largest hole that will accommodate a process \cite{concepts}. The first 212KB process will be placed in the last partition with 600KB creating a hole of 388KB. The second 417KB process will be placed in the 2nd partition with 500KB resulting in a hole of 83KB. The third 112KB process will find its home in the last partition of 388KB resulting in a hole of 276KB. The fourth and last 426KB process is unable to fit in any of the remaining holes in the partitions assuming none of the previous processes were terminated and gave up their allotted memory, and that no form of compaction between the partitions occurred. The partitions and amount of free memory in each are as follows: 100KB, 83KB, 200KB, 300KB, and 276KB.
+    
+Optimal: 
+    In the above situation, the best-fit algorithm allocates memory to the desired processes while conforming to the organization of the partitions in the most optimal manner. It was able to allot memory for each process, specifically the last 426KB process in which both the first-fit and worst-fit algorithms were unable to accomplish.
+
+%----------------------------------------------------------------------------------------
+%   end PROBLEM Two
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%   REFERENCES
+%----------------------------------------------------------------------------------------
+% The following two commands are all you need in the initial runs of your .tex file to
+% produce the bibliography for the citations in your paper.
+\bibliographystyle{abbrv}
+\bibliography{lab03} 
+% You must have a proper ".bib" file and remember to run:
+% latex bibtex latex latex
+% to resolve all references.
+
+\end{document}

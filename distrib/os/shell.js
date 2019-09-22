@@ -232,16 +232,26 @@ var TSOS;
                 _StdOut.putText("  " + _OsShell.commandList[i].usage + " - " + _OsShell.commandList[i].description);
             }
         };
-        Shell.prototype.shellLoad = function () {
+        Shell.prototype.shellLoad = function (args) {
             var programInput = document.getElementById("taProgramInput").value;
             // Remove whitespace from string
             programInput = programInput.replace(/\s/g, "");
             // Hexidecimal must have either digits 0 through 9 or letters A through F whether lowercase or uppercase
             var regex = /^[A-Fa-f0-9]+$/;
-            // Test if input passes hexidecimal requirements
+            // Test if input passes hexadecimal requirements
             var validity = regex.test(programInput);
-            // Output result for Project 1
-            _StdOut.putText("User program is " + (validity ? "" : "NOT ") + "valid hexidecimal");
+            // Load the program into memory if it is valid hexadecimal
+            if (validity) {
+                // Break program input into array of 2 characters
+                var input = programInput.match(/.{2}/g);
+                var pcb = _MemoryManager.load(input, args[0]);
+                // Print program details if it loaded without error
+                if (pcb)
+                    _StdOut.putText("Program with PID " + pcb.pid + " loaded into memory segment " + pcb.memorySegment + ".");
+            }
+            else {
+                _StdOut.putText("User program is not valid hexedecimal.");
+            }
         };
         Shell.prototype.shellStatus = function (args) {
             if (args.length > 0) {
