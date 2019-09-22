@@ -87,9 +87,9 @@ var TSOS;
         Cpu.prototype.branchBytes = function (bytes) {
             if (this.Zflag === 0) {
                 var newPC = this.PC + bytes;
-                // Check if accessing out of bounds memory -- make the PC loop back to its own memory segment
+                // Check if accessing out of bounds memory
                 if (newPC > _MemoryAccessor.getSegmentSize() - 1) {
-                    this.PC = newPC - _MemoryAccessor.getSegmentSize();
+                    // todo Terminate process?
                 }
                 else {
                     this.PC = newPC;
