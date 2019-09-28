@@ -271,6 +271,10 @@ var TSOS;
                     // Process is ready to be processed by cpu
                     pcb.state = "ready";
                     _ReadyQueue.push(pcb);
+                    // Set CPU to run process (will be moved to scheduler later)
+                    pcb.state = "running";
+                    _CPU.changeContext(pcb);
+                    _CPU.isExecuting = true;
                 }
             }
             else {
