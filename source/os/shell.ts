@@ -202,7 +202,7 @@ module TSOS {
 
             // 2. Separate on spaces so we can determine the command and command-line args, if any.
             let tempList = buffer.split(" ");
-            
+
             // 3. Lower-case command.
             tempList[0] = tempList[0].toLowerCase();
 
@@ -288,7 +288,7 @@ module TSOS {
                let pcb = _MemoryManager.load(input, args[0]);
 
                // Print program details if it loaded without error
-               if (pcb)  _StdOut.putText(`Program with PID ${pcb.pid} loaded into memory segment ${pcb.memorySegment}.`);
+               if (pcb) _StdOut.putText(`Program with PID ${pcb.pid} loaded into memory segment ${pcb.memorySegment.index}.`);
             } else {
                 _StdOut.putText(`User program is not valid hexedecimal.`);
             }

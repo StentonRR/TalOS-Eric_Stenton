@@ -9,7 +9,7 @@ module TSOS {
             public zFlag: number = 0, // Zero flag
             public pid: number = _pidCounter++, // Process id
             public priority: number = 0, // Priority of the process
-            public memorySegment: number = null, // The segment of memory the program resides
+            public memorySegment: any = {}, // The segment of memory the program resides
 
             // Accounting information
             public waitTime: number = 0, // Time the program spent waiting

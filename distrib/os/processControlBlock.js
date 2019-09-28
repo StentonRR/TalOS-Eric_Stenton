@@ -22,7 +22,7 @@ var TSOS;
             if (zFlag === void 0) { zFlag = 0; }
             if (pid === void 0) { pid = _pidCounter++; }
             if (priority === void 0) { priority = 0; }
-            if (memorySegment === void 0) { memorySegment = null; }
+            if (memorySegment === void 0) { memorySegment = {}; }
             if (waitTime === void 0) { waitTime = 0; }
             if (turnAroundTime === void 0) { turnAroundTime = 0; }
             this.state = state;

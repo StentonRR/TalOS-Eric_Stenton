@@ -247,7 +247,7 @@ var TSOS;
                 var pcb = _MemoryManager.load(input, args[0]);
                 // Print program details if it loaded without error
                 if (pcb)
-                    _StdOut.putText("Program with PID " + pcb.pid + " loaded into memory segment " + pcb.memorySegment + ".");
+                    _StdOut.putText("Program with PID " + pcb.pid + " loaded into memory segment " + pcb.memorySegment.index + ".");
             }
             else {
                 _StdOut.putText("User program is not valid hexedecimal.");

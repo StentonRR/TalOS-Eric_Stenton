@@ -7,18 +7,15 @@ var TSOS;
         mainMemory) {
             if (totalSize === void 0) { totalSize = 768; }
             if (segmentSize === void 0) { segmentSize = 256; }
-            if (mainMemory === void 0) { mainMemory = [[], [], []]; }
+            if (mainMemory === void 0) { mainMemory = []; }
             this.totalSize = totalSize;
             this.segmentSize = segmentSize;
             this.mainMemory = mainMemory;
         }
         Memory.prototype.init = function () {
-            // Fill each memory segment with 0's -- symbolizes empty byte of memory
-            for (var _i = 0, _a = this.mainMemory; _i < _a.length; _i++) {
-                var segment = _a[_i];
-                for (var i = 0; i < this.segmentSize; i++) {
-                    segment[i] = "00";
-                }
+            // Fill each main memory with 00's -- symbolizes empty byte of memory
+            for (var i = 0; i < this.totalSize; i++) {
+                this.mainMemory[i] = "00";
             }
         };
         return Memory;

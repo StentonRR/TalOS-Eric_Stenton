@@ -51,56 +51,48 @@ var TSOS;
         Cpu.prototype.loadAccWithConstant = function (value) {
             this.Acc = value;
         };
-        // Put the value stored in memory location into the accumulator
-        Cpu.prototype.loadAccFromMemory = function (location) {
-            this.Acc = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+        // Put the value stored in memory address into the accumulator
+        Cpu.prototype.loadAccFromMemory = function (address) {
+            this.Acc = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
         };
-        // Store the value in the accumulator into memory location
-        Cpu.prototype.storeAccInMemory = function (location) {
-            _MemoryAccessor.write(_pcbList[this.PCBIndex].memorySegment, location, this.Acc.toString(16));
+        // Store the value in the accumulator into memory address
+        Cpu.prototype.storeAccInMemory = function (address) {
+            _MemoryAccessor.write(_pcbList[this.PCBIndex].memorySegment, address, this.Acc.toString(16));
         };
         // Add value stored in memory to the accumulator -- store the sum in accumulator
-        Cpu.prototype.addWithCarry = function (location) {
-            this.Acc += parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+        Cpu.prototype.addWithCarry = function (address) {
+            this.Acc += parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
         };
         // Put desired value into the X register
         Cpu.prototype.loadXRegWithConstant = function (value) {
             this.Xreg = value;
         };
-        // Put the value stored in memory location into the X register
-        Cpu.prototype.loadXRegFromMemory = function (location) {
-            this.Xreg = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+        // Put the value stored in memory address into the X register
+        Cpu.prototype.loadXRegFromMemory = function (address) {
+            this.Xreg = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
         };
         // Put desired value into the Y register
         Cpu.prototype.loadYRegWithConstant = function (value) {
             this.Yreg = value;
         };
-        // Put the value stored in memory location into the Y register
-        Cpu.prototype.loadYRegFromMemory = function (location) {
-            this.Yreg = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+        // Put the value stored in memory address into the Y register
+        Cpu.prototype.loadYRegFromMemory = function (address) {
+            this.Yreg = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
         };
-        // If value stored in memory location is equal to value in X register, then make Z flag equal to 1
-        Cpu.prototype.compareToXReg = function (location) {
-            this.Zflag = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16) === this.Xreg ? 1 : 0;
+        // If value stored in memory address is equal to value in X register, then make Z flag equal to 1
+        Cpu.prototype.compareToXReg = function (address) {
+            this.Zflag = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16) === this.Xreg ? 1 : 0;
         };
         // Change the PC if the Z flag is 0
         Cpu.prototype.branchBytes = function (bytes) {
-            if (this.Zflag === 0) {
-                var newPC = this.PC + bytes;
-                // Check if accessing out of bounds memory
-                if (newPC > _MemoryAccessor.getSegmentSize() - 1) {
-                    // todo Terminate process?
-                }
-                else {
-                    this.PC = newPC;
-                }
-            }
+            if (this.Zflag === 0)
+                this.PC += bytes;
         };
         // Increase the value stored in memory by 1
-        Cpu.prototype.incrementByteValue = function (location) {
-            var value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location));
+        Cpu.prototype.incrementByteValue = function (address) {
+            var value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address));
             value++;
-            _MemoryAccessor.write(_pcbList[this.PCBIndex].memorySegment, location, value.toString(16));
+            _MemoryAccessor.write(_pcbList[this.PCBIndex].memorySegment, address, value.toString(16));
         };
         // Print value of Y register or text stored in memory until a break code
         Cpu.prototype.systemCall = function () {
@@ -109,11 +101,11 @@ var TSOS;
             }
             else if (this.Xreg === 2) {
                 var output = "";
-                var location_1 = this.Yreg;
-                var value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location_1), 16);
+                var address = this.Yreg;
+                var value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
                 while (value !== 0) {
                     output += String.fromCharCode(value);
-                    value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, ++location_1), 16);
+                    value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, ++address), 16);
                 }
                 _StdOut.putText(output);
             }

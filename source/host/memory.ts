@@ -5,15 +5,13 @@ module TSOS {
             public segmentSize: number = 256, // Size of each memory segment
 
             // Segments of memory
-            public mainMemory: any[] = [[], [], []] ) {
+            public mainMemory: string[] = [] ) {
         }
 
         public init(): void {
-            // Fill each memory segment with 0's -- symbolizes empty byte of memory
-            for (let segment of this.mainMemory){
-                for(let i = 0; i < this.segmentSize; i++){
-                    segment[i] = "00";
-                }
+            // Fill each main memory with 00's -- symbolizes empty byte of memory
+            for(let i = 0; i < this.totalSize; i++){
+                this.mainMemory[i] = "00";
             }
         }
     }
