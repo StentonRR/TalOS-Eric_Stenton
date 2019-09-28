@@ -1,7 +1,7 @@
 var TSOS;
 (function (TSOS) {
     var PCB = /** @class */ (function () {
-        function PCB(state, // State of the program (new, resident, ready, running, or terminated
+        function PCB(state, // State of the program (new, resident, ready, running, or terminated)
         pc, // Program counter
         acc, // Accumulator
         xReg, // X register
@@ -20,7 +20,7 @@ var TSOS;
             if (xReg === void 0) { xReg = 0; }
             if (yReg === void 0) { yReg = 0; }
             if (zFlag === void 0) { zFlag = 0; }
-            if (pid === void 0) { pid = _pidCounter++; }
+            if (pid === void 0) { pid = _PidCounter++; }
             if (priority === void 0) { priority = 0; }
             if (memorySegment === void 0) { memorySegment = {}; }
             if (waitTime === void 0) { waitTime = 0; }

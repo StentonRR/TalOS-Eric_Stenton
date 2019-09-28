@@ -36,9 +36,11 @@ var _MemoryAccessor: TSOS.MemoryAccessor;
 var _MemoryManager: any = null;
 
 // Processes
-var _pidCounter = 0;
-var _pcbList = [];
+var _PidCounter = 0;
+var _PcbList = [];
 
+// Queue with processes ready for cpu
+var _ReadyQueue = [];
 
 var _OSclock: number = 0;  // Page 23.
 

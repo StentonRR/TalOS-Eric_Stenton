@@ -42,7 +42,7 @@ var TSOS;
             pcb.priority = parseInt(priority);
             pcb.state = "resident";
             // Add pcb to global list
-            _pcbList.push(pcb);
+            _PcbList.push(pcb);
             return pcb;
         };
         return MemoryManager;

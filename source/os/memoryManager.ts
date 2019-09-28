@@ -47,7 +47,7 @@ module TSOS {
             pcb.state = "resident";
 
             // Add pcb to global list
-            _pcbList.push(pcb);
+            _PcbList.push(pcb);
 
             return pcb;
         }

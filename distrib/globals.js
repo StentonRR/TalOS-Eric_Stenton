@@ -28,8 +28,10 @@ var _MemoryAccessor;
 // Software (OS)
 var _MemoryManager = null;
 // Processes
-var _pidCounter = 0;
-var _pcbList = [];
+var _PidCounter = 0;
+var _PcbList = [];
+// Queue with processes ready for cpu
+var _ReadyQueue = [];
 var _OSclock = 0; // Page 23.
 var _Mode = 0; // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.
 var _Canvas; // Initialized in Control.hostInit().

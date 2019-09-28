@@ -53,15 +53,15 @@ var TSOS;
         };
         // Put the value stored in memory address into the accumulator
         Cpu.prototype.loadAccFromMemory = function (address) {
-            this.Acc = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
+            this.Acc = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address), 16);
         };
         // Store the value in the accumulator into memory address
         Cpu.prototype.storeAccInMemory = function (address) {
-            _MemoryAccessor.write(_pcbList[this.PCBIndex].memorySegment, address, this.Acc.toString(16));
+            _MemoryAccessor.write(_PcbList[this.PCBIndex].memorySegment, address, this.Acc.toString(16));
         };
         // Add value stored in memory to the accumulator -- store the sum in accumulator
         Cpu.prototype.addWithCarry = function (address) {
-            this.Acc += parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
+            this.Acc += parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address), 16);
         };
         // Put desired value into the X register
         Cpu.prototype.loadXRegWithConstant = function (value) {
@@ -69,7 +69,7 @@ var TSOS;
         };
         // Put the value stored in memory address into the X register
         Cpu.prototype.loadXRegFromMemory = function (address) {
-            this.Xreg = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
+            this.Xreg = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address), 16);
         };
         // Put desired value into the Y register
         Cpu.prototype.loadYRegWithConstant = function (value) {
@@ -77,11 +77,11 @@ var TSOS;
         };
         // Put the value stored in memory address into the Y register
         Cpu.prototype.loadYRegFromMemory = function (address) {
-            this.Yreg = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
+            this.Yreg = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address), 16);
         };
         // If value stored in memory address is equal to value in X register, then make Z flag equal to 1
         Cpu.prototype.compareToXReg = function (address) {
-            this.Zflag = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16) === this.Xreg ? 1 : 0;
+            this.Zflag = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address), 16) === this.Xreg ? 1 : 0;
         };
         // Change the PC if the Z flag is 0
         Cpu.prototype.branchBytes = function (bytes) {
@@ -90,9 +90,9 @@ var TSOS;
         };
         // Increase the value stored in memory by 1
         Cpu.prototype.incrementByteValue = function (address) {
-            var value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address));
+            var value = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address));
             value++;
-            _MemoryAccessor.write(_pcbList[this.PCBIndex].memorySegment, address, value.toString(16));
+            _MemoryAccessor.write(_PcbList[this.PCBIndex].memorySegment, address, value.toString(16));
         };
         // Print value of Y register or text stored in memory until a break code
         Cpu.prototype.systemCall = function () {
@@ -102,10 +102,10 @@ var TSOS;
             else if (this.Xreg === 2) {
                 var output = "";
                 var address = this.Yreg;
-                var value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
+                var value = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address), 16);
                 while (value !== 0) {
                     output += String.fromCharCode(value);
-                    value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, ++address), 16);
+                    value = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, ++address), 16);
                 }
                 _StdOut.putText(output);
             }

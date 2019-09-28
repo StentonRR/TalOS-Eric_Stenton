@@ -52,6 +52,13 @@ module TSOS {
                                   "load <priority>");
             this.commandList.push(sc);
 
+            // run <pid>
+            sc = new ShellCommand(this.shellRun,
+                                  "run",
+                                  "Runs the specified process",
+                                  "run <PID>");
+            this.commandList.push(sc);
+
             // status <string>
             sc = new ShellCommand(this.shellStatus,
                                   "status",
@@ -274,7 +281,7 @@ module TSOS {
             // Remove whitespace from string
             programInput = programInput.replace(/\s/g, "");
 
-            // Hexidecimal must have either digits 0 through 9 or letters A through F whether lowercase or uppercase
+            // Hexadecimal must have either digits 0 through 9 or letters A through F whether lowercase or uppercase
             let regex = /^[A-Fa-f0-9]+$/;
 
             // Test if input passes hexadecimal requirements
@@ -290,9 +297,34 @@ module TSOS {
                // Print program details if it loaded without error
                if (pcb) _StdOut.putText(`Program with PID ${pcb.pid} loaded into memory segment ${pcb.memorySegment.index}.`);
             } else {
-                _StdOut.putText(`User program is not valid hexedecimal.`);
+                _StdOut.putText(`User program is not valid hexadecimal.`);
             }
 
+        }
+
+        public shellRun(args) {
+            if (args.length > 0) {
+                let pid = parseInt(args[0]);
+                let pcb = _PcbList.find(element => element.pid == pid);
+
+                if (!pcb) {
+                    _StdOut.putText(`Process ${pid} does not exist`);
+
+                }else if (pcb.state === "ready") {
+                    _StdOut.putText(`Process ${pid} is already running`);
+
+                } else {
+                    _StdOut.putText(`Running process ${pid}`);
+
+                    // Process is ready to be processed by cpu
+                    pcb.state = "ready";
+                    _ReadyQueue.push(pcb);
+                }
+
+            }else{
+                _StdOut.putText("Usage: run <pid> Please supply a process id.");
+
+            }
         }
 
         public shellStatus(args) {

@@ -55,17 +55,17 @@ module TSOS {
 
         // Put the value stored in memory address into the accumulator
         public loadAccFromMemory(address): void {
-            this.Acc = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
+            this.Acc = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address), 16);
         }
 
         // Store the value in the accumulator into memory address
         public storeAccInMemory(address): void {
-            _MemoryAccessor.write(_pcbList[this.PCBIndex].memorySegment, address, this.Acc.toString(16));
+            _MemoryAccessor.write(_PcbList[this.PCBIndex].memorySegment, address, this.Acc.toString(16));
         }
 
         // Add value stored in memory to the accumulator -- store the sum in accumulator
         public addWithCarry(address): void {
-            this.Acc += parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
+            this.Acc += parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address), 16);
         }
 
         // Put desired value into the X register
@@ -75,7 +75,7 @@ module TSOS {
 
         // Put the value stored in memory address into the X register
         public loadXRegFromMemory(address): void {
-            this.Xreg = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
+            this.Xreg = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address), 16);
         }
 
         // Put desired value into the Y register
@@ -85,12 +85,12 @@ module TSOS {
 
         // Put the value stored in memory address into the Y register
         public loadYRegFromMemory(address): void {
-            this.Yreg = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
+            this.Yreg = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address), 16);
         }
 
         // If value stored in memory address is equal to value in X register, then make Z flag equal to 1
         public compareToXReg(address): void {
-            this.Zflag = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16) === this.Xreg ? 1 : 0;
+            this.Zflag = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address), 16) === this.Xreg ? 1 : 0;
         }
 
         // Change the PC if the Z flag is 0
@@ -100,10 +100,10 @@ module TSOS {
 
         // Increase the value stored in memory by 1
         public incrementByteValue(address): void {
-            let value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address));
+            let value = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address));
 
             value++;
-            _MemoryAccessor.write(_pcbList[this.PCBIndex].memorySegment, address, value.toString(16));
+            _MemoryAccessor.write(_PcbList[this.PCBIndex].memorySegment, address, value.toString(16));
         }
 
         // Print value of Y register or text stored in memory until a break code
@@ -113,11 +113,11 @@ module TSOS {
             } else if (this.Xreg === 2) {
                 let output = "";
                 let address = this.Yreg;
-                let value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, address), 16);
+                let value = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, address), 16);
 
                 while (value !== 0) {
                     output += String.fromCharCode(value);
-                    value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, ++address), 16);
+                    value = parseInt(_MemoryAccessor.read(_PcbList[this.PCBIndex].memorySegment, ++address), 16);
                 }
 
                 _StdOut.putText(output);

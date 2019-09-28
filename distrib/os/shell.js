@@ -70,6 +70,9 @@ var TSOS;
             // load <priority>
             sc = new TSOS.ShellCommand(this.shellLoad, "load", "Loads user program and validates hexadecimal code.", "load <priority>");
             this.commandList.push(sc);
+            // run <pid>
+            sc = new TSOS.ShellCommand(this.shellRun, "run", "Runs the specified process", "run <PID>");
+            this.commandList.push(sc);
             // status <string>
             sc = new TSOS.ShellCommand(this.shellStatus, "status", "Updates the user's status.", "status <string>");
             this.commandList.push(sc);
@@ -236,7 +239,7 @@ var TSOS;
             var programInput = document.getElementById("taProgramInput").value;
             // Remove whitespace from string
             programInput = programInput.replace(/\s/g, "");
-            // Hexidecimal must have either digits 0 through 9 or letters A through F whether lowercase or uppercase
+            // Hexadecimal must have either digits 0 through 9 or letters A through F whether lowercase or uppercase
             var regex = /^[A-Fa-f0-9]+$/;
             // Test if input passes hexadecimal requirements
             var validity = regex.test(programInput);
@@ -250,7 +253,28 @@ var TSOS;
                     _StdOut.putText("Program with PID " + pcb.pid + " loaded into memory segment " + pcb.memorySegment.index + ".");
             }
             else {
-                _StdOut.putText("User program is not valid hexedecimal.");
+                _StdOut.putText("User program is not valid hexadecimal.");
+            }
+        };
+        Shell.prototype.shellRun = function (args) {
+            if (args.length > 0) {
+                var pid_1 = parseInt(args[0]);
+                var pcb = _PcbList.find(function (element) { return element.pid == pid_1; });
+                if (!pcb) {
+                    _StdOut.putText("Process " + pid_1 + " does not exist");
+                }
+                else if (pcb.state === "ready") {
+                    _StdOut.putText("Process " + pid_1 + " is already running");
+                }
+                else {
+                    _StdOut.putText("Running process " + pid_1);
+                    // Process is ready to be processed by cpu
+                    pcb.state = "ready";
+                    _ReadyQueue.push(pcb);
+                }
+            }
+            else {
+                _StdOut.putText("Usage: run <pid> Please supply a process id.");
             }
         };
         Shell.prototype.shellStatus = function (args) {
