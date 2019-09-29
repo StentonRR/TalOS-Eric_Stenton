@@ -49,7 +49,6 @@ var TSOS;
             // Decode and execute instruction
             // Prime first data byte for use if necessary -- can an address or a value
             var data = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, this.PC + 1), 16);
-            console.log(this.PC, instruction.toString(16).toUpperCase(), data);
             switch (instruction) {
                 case 0xA9:
                     this.loadAccWithConstant(data);
@@ -135,7 +134,6 @@ var TSOS;
         };
         Cpu.prototype.terminateCurrentProcess = function () {
             if (this.PCB) {
-                console.log("hello");
                 this.saveState();
                 this.PCB.terminate();
             }

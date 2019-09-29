@@ -42,6 +42,11 @@ var TSOS;
             this.state = "terminated";
             // Filter out pcb from ready queue if it is in there
             _ReadyQueue = _ReadyQueue.filter(function (element) { return element.pid != _this.pid; });
+            // Notify user of termination
+            _StdOut.advanceLine();
+            _StdOut.putText("Process " + this.pid + " terminated");
+            _StdOut.advanceLine();
+            _OsShell.putPrompt();
         };
         return PCB;
     }());

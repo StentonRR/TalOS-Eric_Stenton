@@ -22,6 +22,12 @@ module TSOS {
 
             // Filter out pcb from ready queue if it is in there
             _ReadyQueue = _ReadyQueue.filter(element => element.pid != this.pid);
-        }
+
+            // Notify user of termination
+            _StdOut.advanceLine();
+            _StdOut.putText(`Process ${this.pid} terminated`);
+            _StdOut.advanceLine();
+            _OsShell.putPrompt();
+
     }
 }
