@@ -174,10 +174,14 @@ module TSOS {
         public krnTrapError(msg) {
             Control.hostLog("OS ERROR - TRAP: " + msg);
             _StdOut.putText(msg);
+            _StdOut.advanceLine();
+            _OsShell.putPrompt();
 
             // Blue Screen of Death implementation
-            _Console.death();
-            this.krnShutdown();
+            if (msg === "Kernal death") {
+                _Console.death();
+                this.krnShutdown();
+            }
         }
     }
 }

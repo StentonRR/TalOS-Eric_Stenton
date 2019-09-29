@@ -10,7 +10,8 @@ module TSOS {
 
             // Memory protection
             if (physicalAddress > segment.limitRegister || logicalAddress < 0) {
-                _StdOut.putText(`Memory Read Exception: Address is out of bounds`);
+                _Kernel.krnTrapError("Memory read exception: Cannot read memory address. Address is out of bounds");
+                _CPU.terminateCurrentProcess();
                 return;
             }else{
                 return _Memory.mainMemory[physicalAddress];
@@ -22,8 +23,9 @@ module TSOS {
             let physicalAddress = logicalAddress + segment.baseRegister;
 
             // Memory protection
-            if (physicalAddress > segment.limitRegister || logicalAddress < 0){
-                _StdOut.putText(`Memory Write Exception: Address is out of bounds`);
+            if (physicalAddress > segment.limitRegister || logicalAddress < 0) {
+                _Kernel.krnTrapError("Memory write exception: Cannot write to memory address. Address is out of bounds.");
+                _CPU.terminateCurrentProcess();
                 return false;
             } else {
                 _Memory.mainMemory[physicalAddress] = value;

@@ -76,7 +76,10 @@ var TSOS;
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             }
             else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed. {
+                console.log("cycle");
                 _CPU.cycle();
+                console.log(_CPU);
+                console.log(_Memory.mainMemory);
             }
             else { // If there are no interrupts and there is nothing being executed then just be idle. {
                 this.krnTrace("Idle");
@@ -155,9 +158,13 @@ var TSOS;
         Kernel.prototype.krnTrapError = function (msg) {
             TSOS.Control.hostLog("OS ERROR - TRAP: " + msg);
             _StdOut.putText(msg);
+            _StdOut.advanceLine();
+            _OsShell.putPrompt();
             // Blue Screen of Death implementation
-            _Console.death();
-            this.krnShutdown();
+            if (msg === "Kernal death") {
+                _Console.death();
+                this.krnShutdown();
+            }
         };
         return Kernel;
     }());

@@ -22,7 +22,7 @@ module TSOS {
 
             // Memory is full
             if (memorySegment === undefined) {
-                _StdOut.putText("Memory Allocation Exception: There are no free memory segments available");
+                _Kernel.krnTrapError("There are no free memory segments available");
                 return;
             }
 
@@ -51,11 +51,5 @@ module TSOS {
 
             return pcb;
         }
-
-
-
-
-
-
     }
 }

@@ -266,6 +266,9 @@ var TSOS;
                 else if (pcb.state === "ready") {
                     _StdOut.putText("Process " + pid_1 + " is already running");
                 }
+                else if (pcb.state === "terminated") {
+                    _StdOut.putText("Process " + pid_1 + " has already ran and terminated");
+                }
                 else {
                     _StdOut.putText("Running process " + pid_1);
                     // Process is ready to be processed by cpu

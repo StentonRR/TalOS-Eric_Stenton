@@ -22,7 +22,7 @@ var TSOS;
             }
             // Memory is full
             if (memorySegment === undefined) {
-                _StdOut.putText("Memory Allocation Exception: There are no free memory segments available");
+                _Kernel.krnTrapError("There are no free memory segments available");
                 return;
             }
             // Load program into free memory segment

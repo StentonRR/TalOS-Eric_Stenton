@@ -110,7 +110,7 @@ module TSOS {
 
                 case 0xD0:
                     this.branchBytes(data);
-                    this.PC += 3;
+                    this.PC += 2;
                     break;
                 case 0xEE:
                     this.incrementByteValue(data);
@@ -123,33 +123,41 @@ module TSOS {
                     break;
 
                 default:
-                    _StdOut.putText(`Instruction ${instruction} is not valid`);
+                    _Kernel.krnTrapError(`Process execution Exception: Instruction '${instruction.toString(16).toUpperCase()}' is not valid`);
 
                     this.saveState();
                     this.PCB.terminate();
                     this.isExecuting = false;
             }
-
-
         }
 
         public saveState(): void {
-            this.PCB.PC = this.PC;
-            this.PCB.Acc = this.Acc;
-            this.PCB.Xreg = this.Xreg;
-            this.PCB.Yreg = this.Yreg;
-            this.PCB.Zflag = this.Zflag;
+            // Initial run of a program won't have a pcb to saves, so skip this
+            if (this.PCB) {
+                this.PCB.PC = this.PC;
+                this.PCB.Acc = this.Acc;
+                this.PCB.Xreg = this.Xreg;
+                this.PCB.Yreg = this.Yreg;
+                this.PCB.Zflag = this.Zflag;
+            }
         }
 
         public changeContext(newPcb): void {
             this.saveState();
 
+            this.PCB = newPcb;
             this.PC = newPcb.PC;
             this.Acc = newPcb.Acc;
             this.Xreg = newPcb.Xreg;
             this.Yreg = newPcb.Yreg;
             this.Zflag = newPcb.Zflag;
-            this.PCB = newPcb;
+        }
+
+        public terminateCurrentProcess(): void {
+            if (this.PCB) {
+                this.saveState();
+                this.PCB.terminate();
+            }
         }
 
 
@@ -203,6 +211,10 @@ module TSOS {
         // Change the PC if the Z flag is 0
         public branchBytes(bytes): void {
             if (this.Zflag === 0) this.PC += bytes;
+
+            // Loop the process counter back around to beginning of partition if it exceeds its size
+            // plus the amount it went over
+            if (this.PC > _MemoryAccessor.getSegmentSize()) this.PC %= _MemoryAccessor.getSegmentSize();
         }
 
         // Increase the value stored in memory by 1

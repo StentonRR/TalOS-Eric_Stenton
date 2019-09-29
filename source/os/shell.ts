@@ -313,6 +313,8 @@ module TSOS {
                 }else if (pcb.state === "ready") {
                     _StdOut.putText(`Process ${pid} is already running`);
 
+                }else if (pcb.state === "terminated") {
+                    _StdOut.putText(`Process ${pid} has already ran and terminated`);
                 } else {
                     _StdOut.putText(`Running process ${pid}`);
 
