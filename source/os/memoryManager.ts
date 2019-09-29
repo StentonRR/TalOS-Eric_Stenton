@@ -1,7 +1,11 @@
 module TSOS {
     export class MemoryManager {
         constructor(
-            public availability: Boolean[] = [true, true, true] ) { // Whether the memory segment is being used or not
+            public availability: Boolean[] = [true, true, true], // Whether the memory segment is being used or not
+            public memoryRegisters: any[] = [{index: 0, baseRegister: 0, limitRegister: 256},
+                                            {index: 1, baseRegister: 256, limitRegister: 512},
+                                            {index: 2, baseRegister: 512, limitRegister: 768}]) { // Memory segment info to be placed into process control blocks
+
         }
 
         public load(program, priority): PCB | undefined {
@@ -18,16 +22,16 @@ module TSOS {
 
             // Memory is full
             if (memorySegment === undefined) {
-                _StdOut.putText("Memory Allocation Exception: There are no free memory segments available");
+                _Kernel.krnTrapError("There are no free memory segments available");
                 return;
             }
 
             // Load program into free memory segment
             let status;
             for (let i = 0; i < program.length; i++) {
-               status =  _MemoryAccessor.write(memorySegment, i, program[i]);
+               status =  _MemoryAccessor.write(this.memoryRegisters[memorySegment], i, program[i]);
 
-               // Terminate process if it exceeds memory bounds
+               // Process terminated if it exceeds memory bounds
                if (!status) {
                     return;
                }
@@ -38,19 +42,14 @@ module TSOS {
 
             // Create process control block for program
             let pcb = new PCB();
-            pcb.memorySegment = memorySegment;
+            pcb.memorySegment = this.memoryRegisters[memorySegment];
             pcb.priority = parseInt(priority);
+            pcb.state = "resident";
 
             // Add pcb to global list
-            _pcbList.push(pcb);
+            _PcbList.push(pcb);
 
             return pcb;
         }
-
-
-
-
-
-
     }
 }

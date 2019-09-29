@@ -4,21 +4,35 @@ var TSOS;
         function MemoryAccessor() {
         }
         // Read from memory segment and return specific portion of it
-        MemoryAccessor.prototype.read = function (segment, location) {
-            return _Memory.mainMemory[segment][location];
+        MemoryAccessor.prototype.read = function (segment, logicalAddress) {
+            // Change logical address to physical address
+            var physicalAddress = logicalAddress + segment.baseRegister;
+            // Memory protection
+            if (physicalAddress > segment.limitRegister || logicalAddress < 0) {
+                _Kernel.krnTrapError("Memory read exception: Cannot read memory address. Address is out of bounds");
+                _CPU.terminateCurrentProcess();
+                return;
+            }
+            else {
+                return _Memory.mainMemory[physicalAddress];
+            }
         };
-        MemoryAccessor.prototype.write = function (segment, location, value) {
-            if (_Memory.mainMemory[segment][location] === undefined) {
-                _StdOut.putText("Memory Write Exception: Location " + location + " of segment " + segment + " is out of bounds");
+        MemoryAccessor.prototype.write = function (segment, logicalAddress, value) {
+            // Change logical address to physical address
+            var physicalAddress = logicalAddress + segment.baseRegister;
+            // Memory protection
+            if (physicalAddress > segment.limitRegister || logicalAddress < 0) {
+                _Kernel.krnTrapError("Memory write exception: Cannot write to memory address. Address is out of bounds.");
+                _CPU.terminateCurrentProcess();
                 return false;
             }
             else {
-                _Memory.mainMemory[segment][location] = value;
+                _Memory.mainMemory[physicalAddress] = value;
                 return true;
             }
         };
         MemoryAccessor.prototype.clear = function (segment) {
-            for (var i = 0; i < _Memory.segmentSize; i++) {
+            for (var i = segment.baseRegister; i < segment.limitRegister; i++) {
                 this.write(segment, i, "00");
             }
         };

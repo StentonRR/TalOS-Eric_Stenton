@@ -25,7 +25,7 @@ module TSOS {
                     public Yreg: number = 0,
                     public Zflag: number = 0,
                     public isExecuting: boolean = false,
-                    public PCBIndex: number = 0) {
+                    public PCB: PCB ) {
 
         }
 
@@ -36,13 +36,128 @@ module TSOS {
             this.Yreg = 0;
             this.Zflag = 0;
             this.isExecuting = false;
-            this.PCBIndex = 0;
+            this.PCB;
         }
 
         public cycle(): void {
             _Kernel.krnTrace('CPU cycle');
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
+
+            // Fetch next instruction from memory
+            let instruction = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, this.PC), 16);
+
+            // Decode and execute instruction
+
+            // Prime first data byte for use if necessary -- can an address or a value
+            let data = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, this.PC + 1), 16);
+
+            switch (instruction) {
+                case 0xA9:
+                    this.loadAccWithConstant(data);
+                    this.PC += 2;
+                    break;
+
+                case 0xAD:
+                    this.loadAccFromMemory(data);
+                    this.PC += 3;
+                    break;
+
+                case 0x8D:
+                    this.storeAccInMemory(data);
+                    this.PC += 3;
+                    break;
+
+                case 0x6D:
+                    this.addWithCarry(data);
+                    this.PC += 3;
+                    break;
+
+                case 0xA2:
+                    this.loadXRegWithConstant(data);
+                    this.PC += 2;
+                    break;
+
+                case 0xAE:
+                    this.loadXRegFromMemory(data);
+                    this.PC += 3;
+                    break;
+
+                case 0xA0:
+                    this.loadYRegWithConstant(data);
+                    this.PC += 2;
+                    break;
+
+                case 0xAC:
+                    this.loadYRegFromMemory(data);
+                    this.PC += 3;
+                    break;
+
+                case 0xEA:
+                    this.PC++;
+                    break;
+
+                case 0x00:
+                    this.saveState();
+                    this.PCB.terminate();
+                    this.isExecuting = false;
+                    break;
+
+                case 0xEC:
+                    this.compareToXReg(data);
+                    this.PC += 3;
+                    break;
+
+                case 0xD0:
+                    this.branchBytes(data);
+                    this.PC += 2;
+                    break;
+                case 0xEE:
+                    this.incrementByteValue(data);
+                    this.PC += 3;
+                    break;
+
+                case 0xFF:
+                    this.systemCall();
+                    this.PC++;
+                    break;
+
+                default:
+                    _Kernel.krnTrapError(`Process execution Exception: Instruction '${instruction.toString(16).toUpperCase()}' is not valid`);
+
+                    this.saveState();
+                    this.PCB.terminate();
+                    this.isExecuting = false;
+            }
+        }
+
+        public saveState(): void {
+            // Initial run of a program won't have a pcb to saves, so skip this
+            if (this.PCB) {
+                this.PCB.PC = this.PC;
+                this.PCB.Acc = this.Acc;
+                this.PCB.Xreg = this.Xreg;
+                this.PCB.Yreg = this.Yreg;
+                this.PCB.Zflag = this.Zflag;
+            }
+        }
+
+        public changeContext(newPcb): void {
+            this.saveState();
+
+            this.PCB = newPcb;
+            this.PC = newPcb.PC;
+            this.Acc = newPcb.Acc;
+            this.Xreg = newPcb.Xreg;
+            this.Yreg = newPcb.Yreg;
+            this.Zflag = newPcb.Zflag;
+        }
+
+        public terminateCurrentProcess(): void {
+            if (this.PCB) {
+                this.saveState();
+                this.PCB.terminate();
+            }
         }
 
 
@@ -53,19 +168,19 @@ module TSOS {
             this.Acc = value;
         }
 
-        // Put the value stored in memory location into the accumulator
-        public loadAccFromMemory(location): void {
-            this.Acc = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+        // Put the value stored in memory address into the accumulator
+        public loadAccFromMemory(address): void {
+            this.Acc = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, address), 16);
         }
 
-        // Store the value in the accumulator into memory location
-        public storeAccInMemory(location): void {
-            _MemoryAccessor.write(_pcbList[this.PCBIndex].memorySegment, location, this.Acc.toString(16));
+        // Store the value in the accumulator into memory address
+        public storeAccInMemory(address): void {
+            _MemoryAccessor.write(this.PCB.memorySegment, address, this.Acc.toString(16));
         }
 
         // Add value stored in memory to the accumulator -- store the sum in accumulator
-        public addWithCarry(location): void {
-            this.Acc += parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+        public addWithCarry(address): void {
+            this.Acc += parseInt(_MemoryAccessor.read(this.PCB.memorySegment, address), 16);
         }
 
         // Put desired value into the X register
@@ -73,9 +188,9 @@ module TSOS {
             this.Xreg = value;
         }
 
-        // Put the value stored in memory location into the X register
-        public loadXRegFromMemory(location): void {
-            this.Xreg = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+        // Put the value stored in memory address into the X register
+        public loadXRegFromMemory(address): void {
+            this.Xreg = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, address), 16);
         }
 
         // Put desired value into the Y register
@@ -83,36 +198,31 @@ module TSOS {
             this.Yreg = value;
         }
 
-        // Put the value stored in memory location into the Y register
-        public loadYRegFromMemory(location): void {
-            this.Yreg = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+        // Put the value stored in memory address into the Y register
+        public loadYRegFromMemory(address): void {
+            this.Yreg = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, address), 16);
         }
 
-        // If value stored in memory location is equal to value in X register, then make Z flag equal to 1
-        public compareToXReg(location): void {
-            this.Zflag = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16) === this.Xreg ? 1 : 0;
+        // If value stored in memory address is equal to value in X register, then make Z flag equal to 1
+        public compareToXReg(address): void {
+            this.Zflag = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, address), 16) === this.Xreg ? 1 : 0;
         }
 
         // Change the PC if the Z flag is 0
         public branchBytes(bytes): void {
-            if (this.Zflag === 0) {
-                let newPC = this.PC + bytes;
+            if (this.Zflag === 0) this.PC += bytes;
 
-                // Check if accessing out of bounds memory
-                if (newPC > _MemoryAccessor.getSegmentSize() - 1) {
-                    // todo Terminate process?
-                } else {
-                    this.PC = newPC;
-                }
-            }
+            // Loop the process counter back around to beginning of partition if it exceeds its size
+            // plus the amount it went over
+            if (this.PC > _MemoryAccessor.getSegmentSize()) this.PC %= _MemoryAccessor.getSegmentSize();
         }
 
         // Increase the value stored in memory by 1
-        public incrementByteValue(location): void {
-            let value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location));
+        public incrementByteValue(address): void {
+            let value = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, address));
 
             value++;
-            _MemoryAccessor.write(_pcbList[this.PCBIndex].memorySegment, location, value.toString(16));
+            _MemoryAccessor.write(this.PCB.memorySegment, address, value.toString(16));
         }
 
         // Print value of Y register or text stored in memory until a break code
@@ -121,12 +231,12 @@ module TSOS {
                 _StdOut.putText(this.Yreg.toString());
             } else if (this.Xreg === 2) {
                 let output = "";
-                let location = this.Yreg;
-                let value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, location), 16);
+                let address = this.Yreg;
+                let value = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, address), 16);
 
                 while (value !== 0) {
                     output += String.fromCharCode(value);
-                    value = parseInt(_MemoryAccessor.read(_pcbList[this.PCBIndex].memorySegment, ++location), 16);
+                    value = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, ++address), 16);
                 }
 
                 _StdOut.putText(output);
