@@ -45,7 +45,7 @@ module TSOS {
             // Create process control block for program
             let pcb = new PCB();
             pcb.memorySegment = this.memoryRegisters[memorySegment];
-            pcb.priority = parseInt(priority);
+            pcb.priority = parseInt(priority) || 0;
             pcb.state = "resident";
 
             // Add pcb to global list

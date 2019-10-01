@@ -74,6 +74,95 @@ module TSOS {
             // TODO in the future: Optionally update a log database or some streaming service.
         }
 
+        //
+        // Display functions
+        //
+        public static initializeMemoryDisplay(): void {
+            let table = document.getElementById("tableMemory");
+        }
+
+        public static initializePcbDisplay(): void {
+            let table = document.getElementById("tablePcb");
+        }
+
+
+        public static updateCpuDisplay(): void {
+            // Get row for output
+            let table = document.getElementById("tableCpu") as HTMLTableElement;
+            let row = table.rows[1];
+
+            // Set cpu information
+            row.cells[0].innerHTML = _CPU.PC.toString();
+            row.cells[1].innerHTML = _CPU.IR.toString(16).toLocaleUpperCase();
+            row.cells[2].innerHTML = _CPU.Acc.toString(16).toLocaleUpperCase();
+            row.cells[3].innerHTML = _CPU.Xreg.toString(16).toLocaleUpperCase();
+            row.cells[4].innerHTML = _CPU.Yreg.toString(16).toLocaleUpperCase();
+            row.cells[5].innerHTML = _CPU.Zflag.toString();
+        }
+
+        public static updatePcbDisplay(): void {
+            let table = document.getElementById("tablePcb") as HTMLTableElement;
+            let newTbody = document.createElement('tbody');
+
+            // Add rows for each process to tbody
+            let row;
+            for (let i = 0; i < _PcbList.length; i++) {
+                row = newTbody.insertRow(-1);
+
+                // Add pcb information
+                row.insertCell(-1).innerHTML = _PcbList[i].pid;
+                row.insertCell(-1).innerHTML = _PcbList[i].priority;
+                row.insertCell(-1).innerHTML = _PcbList[i].state.toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _PcbList[i].PC;
+                row.insertCell(-1).innerHTML = _PcbList[i].Acc.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _PcbList[i].Xreg.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _PcbList[i].Yreg.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _PcbList[i].Zflag.toString(16);
+            }
+
+            // Replace old tbody with new one
+            table.replaceChild(newTbody, table.tBodies[0]);
+        }
+
+        public static updateMemoryDisplay(): void {
+            let table = document.getElementById("tableMemory") as HTMLTableElement;
+            let newTbody = document.createElement('tbody');
+
+            // Add memory information -- must work around memory accessor, so need physical to logical address calculations
+            let row;
+            let rowLabel = "0x000";
+            let rowNumber = 0;
+            let placeNumber = 0;
+
+            let physicalAddress = 0;
+            let memory = _MemoryAccessor.dump();
+
+            for (let i = 0; i <  _MemoryAccessor.getMemorySize() / 8; i++) {
+                row = newTbody.insertRow(-1);
+
+                // Get how many zeroes should be in the row label
+                rowNumber = 8 * i;
+                if (rowNumber > 255) {
+                    placeNumber = 2;
+                } else if (rowNumber > 15) {
+                    placeNumber = 3;
+                } else {
+                    placeNumber = 4;
+                }
+
+                row.insertCell(-1).innerHTML = rowLabel.slice(0, placeNumber) + rowNumber.toString(16).toLocaleUpperCase();
+
+                // Add memory information
+                for (let j = 0; j < 8; j++) {
+                    row.insertCell(-1).innerHTML = memory[physicalAddress];
+                    physicalAddress++;
+                }
+            }
+
+            // Replace old tbody with new one
+            table.replaceChild(newTbody, table.tBodies[0]);
+        }
+
 
         //
         // Host Events

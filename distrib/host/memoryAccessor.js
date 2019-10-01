@@ -39,6 +39,12 @@ var TSOS;
         MemoryAccessor.prototype.getSegmentSize = function () {
             return _Memory.segmentSize;
         };
+        MemoryAccessor.prototype.getMemorySize = function () {
+            return _Memory.totalSize;
+        };
+        MemoryAccessor.prototype.dump = function () {
+            return _Memory.mainMemory;
+        };
         return MemoryAccessor;
     }());
     TSOS.MemoryAccessor = MemoryAccessor;

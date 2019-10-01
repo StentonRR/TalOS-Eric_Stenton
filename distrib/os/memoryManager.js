@@ -25,7 +25,7 @@ var TSOS;
                 _Kernel.krnTrapError("There are no free memory segments available");
                 return;
             }
-            // Clear memory in case of remaining process
+            // Clear memory in case of remaining process code
             _MemoryAccessor.clear(memorySegment);
             // Load program into free memory segment
             var status;
@@ -41,7 +41,7 @@ var TSOS;
             // Create process control block for program
             var pcb = new TSOS.PCB();
             pcb.memorySegment = this.memoryRegisters[memorySegment];
-            pcb.priority = parseInt(priority);
+            pcb.priority = parseInt(priority) || 0;
             pcb.state = "resident";
             // Add pcb to global list
             _PcbList.push(pcb);

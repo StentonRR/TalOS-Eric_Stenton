@@ -42,5 +42,13 @@ module TSOS {
         public getSegmentSize(): number {
             return _Memory.segmentSize;
         }
+
+        public getMemorySize(): number {
+            return _Memory.totalSize;
+        }
+
+        public dump(): any {
+            return _Memory.mainMemory;
+        }
     }
 }
