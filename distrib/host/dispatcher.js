@@ -9,9 +9,10 @@ var TSOS;
             _CPU.isExecuting = true;
         };
         Dispatcher.prototype.terminateCurrentProcess = function () {
-            if (_CPU.PCB) {
+            if (_CPU.PCB && _CPU.PCB.state != "terminated") {
                 _CPU.saveState();
                 _CPU.PCB.terminate();
+                _CPU.isExecuting = false;
             }
         };
         return Dispatcher;

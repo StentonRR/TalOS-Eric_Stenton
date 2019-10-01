@@ -46,10 +46,14 @@ var TSOS;
             var keyCode = params[0];
             var isShifted = params[1];
             var capsLock = params[2];
-            _Kernel.krnTrace("Key code:" + keyCode + " Shifted:" + isShifted + " Caps Lock: " + capsLock);
+            var ctrl = params[3];
+            _Kernel.krnTrace("Key code:" + keyCode + " Shifted:" + isShifted + " Caps Lock: " + capsLock + " Control: " + ctrl);
             var chr = "";
             // Check to see if we even want to deal with the key that was pressed.
-            if ((keyCode >= 65) && (keyCode <= 90)) { // letter
+            if (ctrl && keyCode == 67) {
+                _Dispatcher.terminateCurrentProcess();
+            }
+            else if ((keyCode >= 65) && (keyCode <= 90)) { // letter
                 if ((isShifted === true && capsLock === false) || (isShifted === false && capsLock === true)) {
                     chr = String.fromCharCode(keyCode); // Uppercase A-Z
                 }

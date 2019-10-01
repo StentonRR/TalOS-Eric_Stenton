@@ -10,9 +10,10 @@ module TSOS {
         }
 
         public terminateCurrentProcess() {
-            if (_CPU.PCB) {
+            if (_CPU.PCB && _CPU.PCB.state != "terminated") {
                 _CPU.saveState();
                 _CPU.PCB.terminate();
+                _CPU.isExecuting = false;
             }
         }
     }
