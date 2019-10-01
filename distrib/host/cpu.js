@@ -16,14 +16,17 @@
 var TSOS;
 (function (TSOS) {
     var Cpu = /** @class */ (function () {
-        function Cpu(PC, Acc, Xreg, Yreg, Zflag, isExecuting, PCB) {
+        function Cpu(PC, IR, Acc, Xreg, Yreg, Zflag, isExecuting, PCB) {
             if (PC === void 0) { PC = 0; }
+            if (IR === void 0) { IR = 0x00; }
             if (Acc === void 0) { Acc = 0; }
             if (Xreg === void 0) { Xreg = 0; }
             if (Yreg === void 0) { Yreg = 0; }
             if (Zflag === void 0) { Zflag = 0; }
             if (isExecuting === void 0) { isExecuting = false; }
+            if (PCB === void 0) { PCB = null; }
             this.PC = PC;
+            this.IR = IR;
             this.Acc = Acc;
             this.Xreg = Xreg;
             this.Yreg = Yreg;
@@ -33,23 +36,24 @@ var TSOS;
         }
         Cpu.prototype.init = function () {
             this.PC = 0;
+            this.IR = 0x00;
             this.Acc = 0;
             this.Xreg = 0;
             this.Yreg = 0;
             this.Zflag = 0;
             this.isExecuting = false;
-            this.PCB;
+            this.PCB = null;
         };
         Cpu.prototype.cycle = function () {
             _Kernel.krnTrace('CPU cycle');
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
             // Fetch next instruction from memory
-            var instruction = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, this.PC), 16);
-            // Decode and execute instruction
-            // Prime first data byte for use if necessary -- can an address or a value
+            this.IR = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, this.PC), 16);
+            // Prime first data byte for use if necessary -- can be an address or data
             var data = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, this.PC + 1), 16);
-            switch (instruction) {
+            // Decode and execute instruction
+            switch (this.IR) {
                 case 0xA9:
                     this.loadAccWithConstant(data);
                     this.PC += 2;
@@ -107,8 +111,7 @@ var TSOS;
                     this.PC++;
                     break;
                 default:
-                    _Kernel.krnTrapError("Process execution Exception: Instruction '" + instruction.toString(16).toUpperCase() + "' is not valid");
-                    this.saveState();
+                    _Kernel.krnTrapError("Process execution Exception: Instruction '" + this.IR.toString(16).toUpperCase() + "' is not valid");
                     this.PCB.terminate();
                     this.isExecuting = false;
             }
@@ -131,12 +134,6 @@ var TSOS;
             this.Xreg = newPcb.Xreg;
             this.Yreg = newPcb.Yreg;
             this.Zflag = newPcb.Zflag;
-        };
-        Cpu.prototype.terminateCurrentProcess = function () {
-            if (this.PCB) {
-                this.saveState();
-                this.PCB.terminate();
-            }
         };
         // Op codes
         // Put desired value into the accumulator

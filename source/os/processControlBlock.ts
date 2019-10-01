@@ -14,7 +14,7 @@ module TSOS {
             // Accounting information
             public waitTime: number = 0, // Time the program spent waiting
             public turnAroundTime: number = 0 // Time it took for the program to execute
-            ) {
+        ) {
         }
 
         public terminate() {
@@ -23,11 +23,15 @@ module TSOS {
             // Filter out pcb from ready queue if it is in there
             _ReadyQueue = _ReadyQueue.filter(element => element.pid != this.pid);
 
+            // Release memory
+            _MemoryManager.availability[this.memorySegment.index] = true;
+
             // Notify user of termination
             _StdOut.advanceLine();
             _StdOut.putText(`Process ${this.pid} terminated`);
             _StdOut.advanceLine();
             _OsShell.putPrompt();
 
+        }
     }
 }

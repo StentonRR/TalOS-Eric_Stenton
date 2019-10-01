@@ -25,6 +25,8 @@ var TSOS;
                 _Kernel.krnTrapError("There are no free memory segments available");
                 return;
             }
+            // Clear memory in case of remaining process
+            _MemoryAccessor.clear(memorySegment);
             // Load program into free memory segment
             var status;
             for (var i = 0; i < program.length; i++) {

@@ -42,6 +42,8 @@ var TSOS;
             this.state = "terminated";
             // Filter out pcb from ready queue if it is in there
             _ReadyQueue = _ReadyQueue.filter(function (element) { return element.pid != _this.pid; });
+            // Release memory
+            _MemoryManager.availability[this.memorySegment.index] = true;
             // Notify user of termination
             _StdOut.advanceLine();
             _StdOut.putText("Process " + this.pid + " terminated");

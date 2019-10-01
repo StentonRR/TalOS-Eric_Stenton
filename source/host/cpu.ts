@@ -20,23 +20,25 @@ module TSOS {
     export class Cpu {
 
         constructor(public PC: number = 0,
+                    public IR: number = 0x00,
                     public Acc: number = 0,
                     public Xreg: number = 0,
                     public Yreg: number = 0,
                     public Zflag: number = 0,
                     public isExecuting: boolean = false,
-                    public PCB: PCB ) {
+                    public PCB: PCB = null ) {
 
         }
 
         public init(): void {
             this.PC = 0;
+            this.IR = 0x00;
             this.Acc = 0;
             this.Xreg = 0;
             this.Yreg = 0;
             this.Zflag = 0;
             this.isExecuting = false;
-            this.PCB;
+            this.PCB = null;
         }
 
         public cycle(): void {
@@ -45,14 +47,13 @@ module TSOS {
             // Do the real work here. Be sure to set this.isExecuting appropriately.
 
             // Fetch next instruction from memory
-            let instruction = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, this.PC), 16);
+            this.IR = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, this.PC), 16);
 
-            // Decode and execute instruction
-
-            // Prime first data byte for use if necessary -- can an address or a value
+            // Prime first data byte for use if necessary -- can be an address or data
             let data = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, this.PC + 1), 16);
 
-            switch (instruction) {
+            // Decode and execute instruction
+            switch (this.IR) {
                 case 0xA9:
                     this.loadAccWithConstant(data);
                     this.PC += 2;
@@ -123,9 +124,8 @@ module TSOS {
                     break;
 
                 default:
-                    _Kernel.krnTrapError(`Process execution Exception: Instruction '${instruction.toString(16).toUpperCase()}' is not valid`);
+                    _Kernel.krnTrapError(`Process execution Exception: Instruction '${this.IR.toString(16).toUpperCase()}' is not valid`);
 
-                    this.saveState();
                     this.PCB.terminate();
                     this.isExecuting = false;
             }
@@ -151,13 +151,6 @@ module TSOS {
             this.Xreg = newPcb.Xreg;
             this.Yreg = newPcb.Yreg;
             this.Zflag = newPcb.Zflag;
-        }
-
-        public terminateCurrentProcess(): void {
-            if (this.PCB) {
-                this.saveState();
-                this.PCB.terminate();
-            }
         }
 
 
@@ -242,10 +235,5 @@ module TSOS {
                 _StdOut.putText(output);
             }
         }
-
-
-
-
-
     }
 }

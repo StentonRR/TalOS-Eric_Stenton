@@ -5,7 +5,6 @@ module TSOS {
             public memoryRegisters: any[] = [{index: 0, baseRegister: 0, limitRegister: 256},
                                             {index: 1, baseRegister: 256, limitRegister: 512},
                                             {index: 2, baseRegister: 512, limitRegister: 768}]) { // Memory segment info to be placed into process control blocks
-
         }
 
         public load(program, priority): PCB | undefined {
@@ -25,6 +24,9 @@ module TSOS {
                 _Kernel.krnTrapError("There are no free memory segments available");
                 return;
             }
+
+            // Clear memory in case of remaining process code
+            _MemoryAccessor.clear(memorySegment);
 
             // Load program into free memory segment
             let status;
