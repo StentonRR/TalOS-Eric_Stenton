@@ -100,6 +100,14 @@ table thead th:first-child {
   width: 100px;
 }
 
+#btnSingleStep {
+  background-color: red;
+}
+
+#btnNextStep {
+  width: 30px;
+}
+
 .footerText {
   color: black;
   font-family: Arial, Helvetica, sans-serif;

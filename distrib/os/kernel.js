@@ -73,6 +73,7 @@ var TSOS;
             TSOS.Control.updateCpuDisplay();
             TSOS.Control.updateMemoryDisplay();
             TSOS.Control.updatePcbDisplay();
+            console.log(_SingleStep, _NextStep);
             if (_KernelInterruptQueue.getSize() > 0) {
                 // Process the first interrupt on the interrupt queue.
                 // TODO: Implement a priority queue based on the IRQ number/id to enforce interrupt priority.
@@ -80,7 +81,15 @@ var TSOS;
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             }
             else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed. {
-                _CPU.cycle();
+                if (_SingleStep) { // One cycle at a time in single-step mode
+                    if (_NextStep) {
+                        _CPU.cycle();
+                        _NextStep = false;
+                    }
+                }
+                else {
+                    _CPU.cycle();
+                }
             }
             else { // If there are no interrupts and there is nothing being executed then just be idle. {
                 this.krnTrace("Idle");

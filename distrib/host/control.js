@@ -142,9 +142,10 @@ var TSOS;
         Control.hostBtnStartOS_click = function (btn) {
             // Disable the (passed-in) start button...
             btn.disabled = true;
-            // .. enable the Halt and Reset buttons ...
+            // .. enable the Halt, Reset, and Single-Step buttons ...
             document.getElementById("btnHaltOS").disabled = false;
             document.getElementById("btnReset").disabled = false;
+            document.getElementById("btnSingleStep").disabled = false;
             // .. set focus on the OS console display ...
             document.getElementById("display").focus();
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
@@ -180,6 +181,18 @@ var TSOS;
             // That boolean parameter is the 'forceget' flag. When it is true it causes the page to always
             // be reloaded from the server. If it is false or not specified the browser may reload the
             // page from its cache, which is not what we want.
+        };
+        Control.hostBtnSingleStep_click = function (btn) {
+            _SingleStep = !_SingleStep;
+            // Make button green if in single-step mode or red if not
+            btn.style.backgroundColor = _SingleStep ? "green" : "red";
+            // Enable or disable the next-step button depending on if in single-step mode or not
+            var nextStepBtn = document.getElementById("btnNextStep").disabled = !_SingleStep;
+        };
+        Control.hostBtnNextStep_click = function (btn) {
+            // Only set _NextStep if in single-step mode
+            if (_SingleStep)
+                _NextStep = true;
         };
         return Control;
     }());

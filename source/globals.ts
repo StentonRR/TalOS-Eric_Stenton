@@ -36,7 +36,6 @@ var _Dispatcher: TSOS.Dispatcher;
 // Software (OS)
 var _MemoryManager: TSOS.MemoryManager;
 
-
 // Processes
 var _PidCounter = 0;
 var _PcbList = [];
@@ -69,6 +68,10 @@ var _StdOut;
 // UI
 var _Console: TSOS.Console;
 var _OsShell: TSOS.Shell;
+
+// Single-step mode
+var _SingleStep = false;
+var _NextStep = false;
 
 // At least this OS is not trying to kill you. (Yet.)
 var _SarcasticMode: boolean = false;
