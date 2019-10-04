@@ -73,7 +73,6 @@ var TSOS;
             TSOS.Control.updateCpuDisplay();
             TSOS.Control.updateMemoryDisplay();
             TSOS.Control.updatePcbDisplay();
-            console.log(_SingleStep, _NextStep);
             if (_KernelInterruptQueue.getSize() > 0) {
                 // Process the first interrupt on the interrupt queue.
                 // TODO: Implement a priority queue based on the IRQ number/id to enforce interrupt priority.
