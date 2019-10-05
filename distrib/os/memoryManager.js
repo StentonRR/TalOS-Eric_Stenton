@@ -26,7 +26,7 @@ var TSOS;
                 return;
             }
             // Clear memory in case of remaining process code
-            _MemoryAccessor.clear(memorySegment);
+            _MemoryAccessor.clear(this.memoryRegisters[memorySegment]);
             // Load program into free memory segment
             var status;
             for (var i = 0; i < program.length; i++) {

@@ -236,7 +236,7 @@ module TSOS {
 
             let address = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, this.PC), 16);
             this.increaseCounter();
-            let value = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, address));
+            let value = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, address), 16);
 
             value++;
             _MemoryAccessor.write(this.PCB.memorySegment, address, value.toString(16));

@@ -198,7 +198,7 @@ var TSOS;
             this.increaseCounter();
             var address = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, this.PC), 16);
             this.increaseCounter();
-            var value = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, address));
+            var value = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, address), 16);
             value++;
             _MemoryAccessor.write(this.PCB.memorySegment, address, value.toString(16));
         };
