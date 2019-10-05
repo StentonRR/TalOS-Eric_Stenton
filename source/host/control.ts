@@ -137,10 +137,12 @@ module TSOS {
             let physicalAddress = 0;
             let memory = _MemoryAccessor.dump();
 
+            let highlightedCell;
+
             for (let i = 0; i <  _MemoryAccessor.getMemorySize() / 8; i++) {
                 row = newTbody.insertRow(-1);
 
-                // Get how many zeroes should be in the row label
+                // Get how many zeros should be in the row label
                 rowNumber = 8 * i;
                 if (rowNumber > 255) {
                     placeNumber = 2;
@@ -150,17 +152,30 @@ module TSOS {
                     placeNumber = 4;
                 }
 
+                // Set row label EX: 0x2E8
                 row.insertCell(-1).innerHTML = rowLabel.slice(0, placeNumber) + rowNumber.toString(16).toLocaleUpperCase();
 
                 // Add memory information
+                let cell;
                 for (let j = 0; j < 8; j++) {
-                    row.insertCell(-1).innerHTML = memory[physicalAddress];
+                    cell = row.insertCell(-1);
+                    cell.innerHTML = memory[physicalAddress];
+
+                    // Highlight the current memory address being read in display
+                    if ( _CPU.PCB && _CPU.isExecuting && (_CPU.PCB.memorySegment.baseRegister + _CPU.PC - 1) == physicalAddress) {
+                        cell.style.backgroundColor = "#ff6961";
+                        highlightedCell = cell;
+                    }
+
                     physicalAddress++;
                 }
             }
 
             // Replace old tbody with new one
             table.replaceChild(newTbody, table.tBodies[0]);
+
+            // Scroll to highlighted cell in display
+            if (highlightedCell) highlightedCell.scrollIntoView({block: 'nearest'});
         }
 
 

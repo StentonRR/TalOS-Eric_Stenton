@@ -46,7 +46,10 @@ module TSOS {
                 let chr = _KernelInputQueue.dequeue();
 
                 // Check to see if it's "special" (enter or ctrl-c) or "normal" (anything else that the keyboard device driver gave us).
-                if (chr === String.fromCharCode(13)) { // Enter key
+                if (chr === "ctrl-c"){ // Control + C
+                    _Dispatcher.terminateCurrentProcess();
+                    this.buffer = ""; // Clear buffer since display shows an empty, new line
+                } else if (chr === String.fromCharCode(13)) { // Enter key
                     // The enter key marks the end of a console command, so ...
                     // ... tell the shell ...
                     _OsShell.handleInput(this.buffer);

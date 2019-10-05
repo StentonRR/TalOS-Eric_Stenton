@@ -77,7 +77,6 @@ var TSOS;
                     this.loadYRegFromMemory();
                     break;
                 case 0xEA:
-                    this.PC++;
                     break;
                 case 0x00:
                     this.saveState();
@@ -97,7 +96,7 @@ var TSOS;
                     this.systemCall();
                     break;
                 default:
-                    _Kernel.krnTrapError("Process execution Exception: Instruction '" + this.IR.toString(16).toUpperCase() + "' is not valid");
+                    _Kernel.krnTrapError("Process Execution Exception: Instruction '" + this.IR.toString(16).toUpperCase() + "' is not valid");
                     this.PCB.terminate();
                     this.isExecuting = false;
             }

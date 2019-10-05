@@ -42,8 +42,9 @@ module TSOS {
             let chr = "";
 
             // Check to see if we even want to deal with the key that was pressed.
-            if (ctrl && keyCode == 67) {
-                _Dispatcher.terminateCurrentProcess();
+            if (ctrl && keyCode == 67) { // Ctrl-C
+                chr = "ctrl-c";
+                _KernelInputQueue.enqueue(chr);
             } else if ((keyCode >= 65) && (keyCode <= 90)) { // letter
                 if ((isShifted === true && capsLock === false) || (isShifted === false && capsLock === true)) {
                     chr = String.fromCharCode(keyCode); // Uppercase A-Z

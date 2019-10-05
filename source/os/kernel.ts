@@ -66,6 +66,8 @@ module TSOS {
             // ... Disable the Interrupts.
             this.krnTrace("Disabling the interrupts.");
             this.krnDisableInterrupts();
+            // ... Terminate any current processes
+            _Dispatcher.terminateCurrentProcess();
             //
             // Unload the Device Drivers?
             // More?

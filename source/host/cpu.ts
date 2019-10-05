@@ -84,7 +84,6 @@ module TSOS {
                     break;
 
                 case 0xEA:
-                    this.PC++;
                     break;
 
                 case 0x00:
@@ -109,7 +108,7 @@ module TSOS {
                     break;
 
                 default:
-                    _Kernel.krnTrapError(`Process execution Exception: Instruction '${this.IR.toString(16).toUpperCase()}' is not valid`);
+                    _Kernel.krnTrapError(`Process Execution Exception: Instruction '${this.IR.toString(16).toUpperCase()}' is not valid`);
 
                     this.PCB.terminate();
                     this.isExecuting = false;
