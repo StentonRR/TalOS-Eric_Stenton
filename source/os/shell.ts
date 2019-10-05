@@ -52,6 +52,13 @@ module TSOS {
                                   "load <priority>");
             this.commandList.push(sc);
 
+            // run <pid>
+            sc = new ShellCommand(this.shellRun,
+                                  "run",
+                                  "Runs the specified process",
+                                  "run <PID>");
+            this.commandList.push(sc);
+
             // status <string>
             sc = new ShellCommand(this.shellStatus,
                                   "status",
@@ -200,11 +207,11 @@ module TSOS {
             // 1. Remove leading and trailing spaces.
             buffer = Utils.trim(buffer);
 
-            // 2. Lower-case it.
-            buffer = buffer.toLowerCase();
-
-            // 3. Separate on spaces so we can determine the command and command-line args, if any.
+            // 2. Separate on spaces so we can determine the command and command-line args, if any.
             let tempList = buffer.split(" ");
+
+            // 3. Lower-case command.
+            tempList[0] = tempList[0].toLowerCase();
 
             // 4. Take the first (zeroth) element and use that as the command.
             let cmd = tempList.shift();  // Yes, you can do that to an array in JavaScript.  See the Queue class.
@@ -268,20 +275,61 @@ module TSOS {
             }
         }
 
-        public shellLoad() {
+        public shellLoad(args) {
             let programInput = (<HTMLInputElement>document.getElementById("taProgramInput")).value;
 
             // Remove whitespace from string
             programInput = programInput.replace(/\s/g, "");
 
-            // Hexidecimal must have either digits 0 through 9 or letters A through F whether lowercase or uppercase
+            // Hexadecimal must have either digits 0 through 9 or letters A through F whether lowercase or uppercase
             let regex = /^[A-Fa-f0-9]+$/;
 
-            // Test if input passes hexidecimal requirements
+            // Test if input passes hexadecimal requirements
             let validity = regex.test(programInput);
 
-            // Output result for Project 1
-            _StdOut.putText(`User program is ${validity ? "" : "NOT "}valid hexidecimal`);
+            // Load the program into memory if it is valid hexadecimal
+            if (validity) {
+               // Break program input into array of 2 characters
+               let input = programInput.match(/.{2}/g);
+
+               let pcb = _MemoryManager.load(input, args[0]);
+
+               // Print program details if it loaded without error
+               if (pcb) _StdOut.putText(`Program with PID ${pcb.pid} loaded into memory segment ${pcb.memorySegment.index}.`);
+            } else {
+                _StdOut.putText(`User program is not valid hexadecimal.`);
+            }
+
+        }
+
+        public shellRun(args) {
+            if (args.length > 0) {
+                let pid = parseInt(args[0]);
+                let pcb = _PcbList.find(element => element.pid == pid);
+
+                if (!pcb) {
+                    _StdOut.putText(`Process ${pid} does not exist`);
+
+                }else if (pcb.state === "ready") {
+                    _StdOut.putText(`Process ${pid} is already running`);
+
+                }else if (pcb.state === "terminated") {
+                    _StdOut.putText(`Process ${pid} has already ran and terminated`);
+                } else {
+                    _StdOut.putText(`Running process ${pid}`);
+
+                    // Process is ready to be processed by cpu
+                    pcb.state = "ready";
+                    _ReadyQueue.push(pcb);
+
+                    // Run process -- will be moved to scheduler later
+                    _Dispatcher.runProcess(pcb);
+                }
+
+            }else{
+                _StdOut.putText("Usage: run <pid> Please supply a process id.");
+
+            }
         }
 
         public shellStatus(args) {

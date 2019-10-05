@@ -70,6 +70,9 @@ var TSOS;
             // load <priority>
             sc = new TSOS.ShellCommand(this.shellLoad, "load", "Loads user program and validates hexadecimal code.", "load <priority>");
             this.commandList.push(sc);
+            // run <pid>
+            sc = new TSOS.ShellCommand(this.shellRun, "run", "Runs the specified process", "run <PID>");
+            this.commandList.push(sc);
             // status <string>
             sc = new TSOS.ShellCommand(this.shellStatus, "status", "Updates the user's status.", "status <string>");
             this.commandList.push(sc);
@@ -171,10 +174,10 @@ var TSOS;
             var retVal = new TSOS.UserCommand();
             // 1. Remove leading and trailing spaces.
             buffer = TSOS.Utils.trim(buffer);
-            // 2. Lower-case it.
-            buffer = buffer.toLowerCase();
-            // 3. Separate on spaces so we can determine the command and command-line args, if any.
+            // 2. Separate on spaces so we can determine the command and command-line args, if any.
             var tempList = buffer.split(" ");
+            // 3. Lower-case command.
+            tempList[0] = tempList[0].toLowerCase();
             // 4. Take the first (zeroth) element and use that as the command.
             var cmd = tempList.shift(); // Yes, you can do that to an array in JavaScript.  See the Queue class.
             // 4.1 Remove any left-over spaces.
@@ -232,16 +235,52 @@ var TSOS;
                 _StdOut.putText("  " + _OsShell.commandList[i].usage + " - " + _OsShell.commandList[i].description);
             }
         };
-        Shell.prototype.shellLoad = function () {
+        Shell.prototype.shellLoad = function (args) {
             var programInput = document.getElementById("taProgramInput").value;
             // Remove whitespace from string
             programInput = programInput.replace(/\s/g, "");
-            // Hexidecimal must have either digits 0 through 9 or letters A through F whether lowercase or uppercase
+            // Hexadecimal must have either digits 0 through 9 or letters A through F whether lowercase or uppercase
             var regex = /^[A-Fa-f0-9]+$/;
-            // Test if input passes hexidecimal requirements
+            // Test if input passes hexadecimal requirements
             var validity = regex.test(programInput);
-            // Output result for Project 1
-            _StdOut.putText("User program is " + (validity ? "" : "NOT ") + "valid hexidecimal");
+            // Load the program into memory if it is valid hexadecimal
+            if (validity) {
+                // Break program input into array of 2 characters
+                var input = programInput.match(/.{2}/g);
+                var pcb = _MemoryManager.load(input, args[0]);
+                // Print program details if it loaded without error
+                if (pcb)
+                    _StdOut.putText("Program with PID " + pcb.pid + " loaded into memory segment " + pcb.memorySegment.index + ".");
+            }
+            else {
+                _StdOut.putText("User program is not valid hexadecimal.");
+            }
+        };
+        Shell.prototype.shellRun = function (args) {
+            if (args.length > 0) {
+                var pid_1 = parseInt(args[0]);
+                var pcb = _PcbList.find(function (element) { return element.pid == pid_1; });
+                if (!pcb) {
+                    _StdOut.putText("Process " + pid_1 + " does not exist");
+                }
+                else if (pcb.state === "ready") {
+                    _StdOut.putText("Process " + pid_1 + " is already running");
+                }
+                else if (pcb.state === "terminated") {
+                    _StdOut.putText("Process " + pid_1 + " has already ran and terminated");
+                }
+                else {
+                    _StdOut.putText("Running process " + pid_1);
+                    // Process is ready to be processed by cpu
+                    pcb.state = "ready";
+                    _ReadyQueue.push(pcb);
+                    // Run process -- will be moved to scheduler later
+                    _Dispatcher.runProcess(pcb);
+                }
+            }
+            else {
+                _StdOut.putText("Usage: run <pid> Please supply a process id.");
+            }
         };
         Shell.prototype.shellStatus = function (args) {
             if (args.length > 0) {

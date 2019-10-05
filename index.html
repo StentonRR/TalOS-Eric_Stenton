@@ -15,12 +15,17 @@
    <script type="text/javascript" src="distrib/host/control.js"></script>
    <script type="text/javascript" src="distrib/host/devices.js"></script>
    <script type="text/javascript" src="distrib/host/cpu.js"></script>
+   <script type="text/javascript" src="distrib/host/memory.js"></script>
+   <script type="text/javascript" src="distrib/host/memoryAccessor.js"></script>
+   <script type="text/javascript" src="distrib/host/dispatcher.js"></script>
 
    <!-- Virtual OS Routines: Make sure Kernel code is last, since it needs those above it. -->
    <script type="text/javascript" src="distrib/os/interrupt.js"></script>
    <script type="text/javascript" src="distrib/os/canvastext.js"></script>
    <script type="text/javascript" src="distrib/os/console.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriver.js"></script>
+   <script type="text/javascript" src="distrib/os/memoryManager.js"></script>
+   <script type="text/javascript" src="distrib/os/processControlBlock.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriverKeyboard.js"></script>
    <script type="text/javascript" src="distrib/os/queue.js"></script>
    <script type="text/javascript" src="distrib/os/shell.js"></script>
@@ -31,7 +36,7 @@
    <!-- Other Routines -->
    <script type="text/javascript" src="distrib/utils.js"></script>
    <!-- Uncomment the line below to enable GLaDOS testing. -->
-   <script type="text/javascript" src="test/glados-ip1.js"></script>
+   <script type="text/javascript" src="test/glados-ip2.js"></script>
    
 </head>
 
@@ -71,6 +76,24 @@
              value="Reset"
              tabindex="2"
              onclick="TSOS.Control.hostBtnReset_click(this);">
+
+      <input type="button"
+             id = "btnSingleStep"
+             name="brnSingleStep"
+             class="normal_button"
+             disabled="disabled"
+             value="Single-Step"
+             tabindex="3"
+             onclick="TSOS.Control.hostBtnSingleStep_click(this);">
+
+      <input type="button"
+             id = "btnNextStep"
+             name="brnNextStep"
+             class="normal_button"
+             disabled="disabled"
+             value=">"
+             tabindex="4"
+             onclick="TSOS.Control.hostBtnNextStep_click(this);">
    </div>
 
    <div id="divConsole" style="margin:4px; width:500px; height:500px; float:left;">
@@ -117,6 +140,68 @@
       </label>
    </div>
 
+   <div id="divMemory" style="margin-left:520px;">
+      <label>
+         Memory Display
+         <br>
+         <table id="tableMemory">
+            <tbody></tbody>
+         </table>
+      </label>
+   </div>
+
+   <div id="divCpu" style="margin-left:520px;">
+      <label>
+         CPU Display
+         <br>
+         <table id="tableCpu">
+            <thead>
+               <tr>
+                  <th>PC</th>
+                  <th>IR</th>
+                  <th>Acc</th>
+                  <th>Xreg</th>
+                  <th>Yreg</th>
+                  <th>Zflag</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+               </tr>
+            </tbody>
+         </table>
+      </label>
+   </div>
+
+   <div id="divPcb" style="margin-left:520px;">
+      <label>
+         PCB Display
+         <br>
+         <table id="tablePcb">
+            <thead>
+               <tr>
+                  <th>PID</th>
+                  <th>State</th>
+                  <th>Priority</th>
+                  <th>PC</th>
+                  <th>Acc</th>
+                  <th>Xreg</th>
+                  <th>Yreg</th>
+                  <th>Zflag</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr></tr>
+            </tbody>
+         </table>
+      </label>
+   </div>
 </div>
 
 <p class="footerText" style="clear:both;">

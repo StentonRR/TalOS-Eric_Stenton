@@ -36,11 +36,16 @@ module TSOS {
             let keyCode = params[0];
             let isShifted = params[1];
             let capsLock = params[2];
+            let ctrl = params[3];
 
-            _Kernel.krnTrace("Key code:" + keyCode + " Shifted:" + isShifted + " Caps Lock: " + capsLock);
+            _Kernel.krnTrace("Key code:" + keyCode + " Shifted:" + isShifted + " Caps Lock: " + capsLock + " Control: " + ctrl);
             let chr = "";
+
             // Check to see if we even want to deal with the key that was pressed.
-            if ((keyCode >= 65) && (keyCode <= 90)) { // letter
+            if (ctrl && keyCode == 67) { // Ctrl-C
+                chr = "ctrl-c";
+                _KernelInputQueue.enqueue(chr);
+            } else if ((keyCode >= 65) && (keyCode <= 90)) { // letter
                 if ((isShifted === true && capsLock === false) || (isShifted === false && capsLock === true)) {
                     chr = String.fromCharCode(keyCode); // Uppercase A-Z
                 } else {

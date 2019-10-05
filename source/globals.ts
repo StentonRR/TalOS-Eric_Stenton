@@ -26,7 +26,22 @@ const KEYBOARD_IRQ: number = 1;
 // Global Variables
 // TODO: Make a global object and use that instead of the "_" naming convention in the global namespace.
 //
+
+// Hardware (host)
 var _CPU: TSOS.Cpu;  // Utilize TypeScript's type annotation system to ensure that _CPU is an instance of the Cpu class.
+var _Memory: TSOS.Memory;
+var _MemoryAccessor: TSOS.MemoryAccessor;
+var _Dispatcher: TSOS.Dispatcher;
+
+// Software (OS)
+var _MemoryManager: TSOS.MemoryManager;
+
+// Processes
+var _PidCounter = 0;
+var _PcbList = [];
+
+// Queue with processes ready for cpu
+var _ReadyQueue = [];
 
 var _OSclock: number = 0;  // Page 23.
 
@@ -53,6 +68,10 @@ var _StdOut;
 // UI
 var _Console: TSOS.Console;
 var _OsShell: TSOS.Shell;
+
+// Single-step mode
+var _SingleStep = false;
+var _NextStep = false;
 
 // At least this OS is not trying to kill you. (Yet.)
 var _SarcasticMode: boolean = false;

@@ -21,7 +21,18 @@ var KEYBOARD_IRQ = 1;
 // Global Variables
 // TODO: Make a global object and use that instead of the "_" naming convention in the global namespace.
 //
+// Hardware (host)
 var _CPU; // Utilize TypeScript's type annotation system to ensure that _CPU is an instance of the Cpu class.
+var _Memory;
+var _MemoryAccessor;
+var _Dispatcher;
+// Software (OS)
+var _MemoryManager;
+// Processes
+var _PidCounter = 0;
+var _PcbList = [];
+// Queue with processes ready for cpu
+var _ReadyQueue = [];
 var _OSclock = 0; // Page 23.
 var _Mode = 0; // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.
 var _Canvas; // Initialized in Control.hostInit().
@@ -41,6 +52,9 @@ var _StdOut;
 // UI
 var _Console;
 var _OsShell;
+// Single-step mode
+var _SingleStep = false;
+var _NextStep = false;
 // At least this OS is not trying to kill you. (Yet.)
 var _SarcasticMode = false;
 // Global Device Driver Objects - page 12

@@ -74,6 +74,110 @@ module TSOS {
             // TODO in the future: Optionally update a log database or some streaming service.
         }
 
+        //
+        // Display functions
+        //
+        public static initializeMemoryDisplay(): void {
+            let table = document.getElementById("tableMemory");
+        }
+
+        public static initializePcbDisplay(): void {
+            let table = document.getElementById("tablePcb");
+        }
+
+
+        public static updateCpuDisplay(): void {
+            // Get row for output
+            let table = document.getElementById("tableCpu") as HTMLTableElement;
+            let row = table.rows[1];
+
+            // Set cpu information
+            row.cells[0].innerHTML = _CPU.PC.toString();
+            row.cells[1].innerHTML = _CPU.IR.toString(16).toLocaleUpperCase();
+            row.cells[2].innerHTML = _CPU.Acc.toString(16).toLocaleUpperCase();
+            row.cells[3].innerHTML = _CPU.Xreg.toString(16).toLocaleUpperCase();
+            row.cells[4].innerHTML = _CPU.Yreg.toString(16).toLocaleUpperCase();
+            row.cells[5].innerHTML = _CPU.Zflag.toString();
+        }
+
+        public static updatePcbDisplay(): void {
+            let table = document.getElementById("tablePcb") as HTMLTableElement;
+            let newTbody = document.createElement('tbody');
+
+            // Add rows for each process to tbody
+            let row;
+            for (let i = 0; i < _PcbList.length; i++) {
+                row = newTbody.insertRow(-1);
+
+                // Add pcb information
+                row.insertCell(-1).innerHTML = _PcbList[i].pid;
+                row.insertCell(-1).innerHTML = _PcbList[i].priority;
+                row.insertCell(-1).innerHTML = _PcbList[i].state.toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _PcbList[i].PC;
+                row.insertCell(-1).innerHTML = _PcbList[i].Acc.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _PcbList[i].Xreg.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _PcbList[i].Yreg.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _PcbList[i].Zflag.toString(16);
+            }
+
+            // Replace old tbody with new one
+            table.replaceChild(newTbody, table.tBodies[0]);
+        }
+
+        public static updateMemoryDisplay(): void {
+            let table = document.getElementById("tableMemory") as HTMLTableElement;
+            let newTbody = document.createElement('tbody');
+
+            // Add memory information -- must work around memory accessor, so need physical to logical address calculations
+            let row;
+            let rowLabel = "0x000";
+            let rowNumber = 0;
+            let placeNumber = 0;
+
+            let physicalAddress = 0;
+            let memory = _MemoryAccessor.dump();
+
+            let highlightedCell;
+
+            for (let i = 0; i <  _MemoryAccessor.getMemorySize() / 8; i++) {
+                row = newTbody.insertRow(-1);
+
+                // Get how many zeros should be in the row label
+                rowNumber = 8 * i;
+                if (rowNumber > 255) {
+                    placeNumber = 2;
+                } else if (rowNumber > 15) {
+                    placeNumber = 3;
+                } else {
+                    placeNumber = 4;
+                }
+
+                // Set row label EX: 0x2E8
+                row.insertCell(-1).innerHTML = rowLabel.slice(0, placeNumber) + rowNumber.toString(16).toLocaleUpperCase();
+
+                // Add memory information
+                let cell;
+                for (let j = 0; j < 8; j++) {
+                    cell = row.insertCell(-1);
+                    cell.innerHTML = memory[physicalAddress];
+
+                    // Highlight the current memory address being read in display
+                    if ( _CPU.PCB && _CPU.isExecuting && (_CPU.PCB.memorySegment.baseRegister + _CPU.PC - 1) == physicalAddress) {
+                        cell.style.backgroundColor = "#ff6961";
+                        highlightedCell = cell;
+                    }
+
+                    physicalAddress++;
+                }
+            }
+
+            // Replace old tbody with new one
+            table.replaceChild(newTbody, table.tBodies[0]);
+
+            // Scroll to highlighted cell in display
+            if (highlightedCell) highlightedCell.scrollIntoView({block: 'nearest'});
+        }
+
 
         //
         // Host Events
@@ -82,9 +186,10 @@ module TSOS {
             // Disable the (passed-in) start button...
             btn.disabled = true;
 
-            // .. enable the Halt and Reset buttons ...
+            // .. enable the Halt, Reset, and Single-Step buttons ...
             (<HTMLButtonElement>document.getElementById("btnHaltOS")).disabled = false;
             (<HTMLButtonElement>document.getElementById("btnReset")).disabled = false;
+            (<HTMLButtonElement>document.getElementById("btnSingleStep")).disabled = false;
 
             // .. set focus on the OS console display ...
             document.getElementById("display").focus();
@@ -92,6 +197,19 @@ module TSOS {
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
             _CPU = new Cpu();  // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.
             _CPU.init();       //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
+
+            // ... Create and initialize memory ...
+            _Memory = new Memory();
+            _Memory.init();
+
+            // ... Create memory accessor ...
+            _MemoryAccessor = new TSOS.MemoryAccessor();
+
+            // ... Create memory manager ...
+            _MemoryManager = new TSOS.MemoryManager();
+
+            // ... Create dispatcher ...
+            _Dispatcher = new TSOS.Dispatcher();
 
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
@@ -117,5 +235,21 @@ module TSOS {
             // be reloaded from the server. If it is false or not specified the browser may reload the
             // page from its cache, which is not what we want.
         }
+
+        public static hostBtnSingleStep_click(btn): void {
+            _SingleStep = !_SingleStep;
+
+            // Make button green if in single-step mode or red if not
+            btn.style.backgroundColor = _SingleStep ? "green" : "red";
+
+            // Enable or disable the next-step button depending on if in single-step mode or not
+            let nextStepBtn = (<HTMLButtonElement>document.getElementById("btnNextStep")).disabled = !_SingleStep;
+        }
+
+        public static hostBtnNextStep_click(btn): void {
+            // Only set _NextStep if in single-step mode
+            if (_SingleStep) _NextStep = true;
+        }
+
     }
 }

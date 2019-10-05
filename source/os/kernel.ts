@@ -66,6 +66,8 @@ module TSOS {
             // ... Disable the Interrupts.
             this.krnTrace("Disabling the interrupts.");
             this.krnDisableInterrupts();
+            // ... Terminate any current processes
+            _Dispatcher.terminateCurrentProcess();
             //
             // Unload the Device Drivers?
             // More?
@@ -81,13 +83,28 @@ module TSOS {
                that it has to look for interrupts and process them if it finds any.                           */
 
             // Check for an interrupt, are any. Page 560
+
+            // Update the visual displays
+            TSOS.Control.updateCpuDisplay();
+            TSOS.Control.updateMemoryDisplay();
+            TSOS.Control.updatePcbDisplay();
+
             if (_KernelInterruptQueue.getSize() > 0) {
                 // Process the first interrupt on the interrupt queue.
                 // TODO: Implement a priority queue based on the IRQ number/id to enforce interrupt priority.
-                var interrupt = _KernelInterruptQueue.dequeue();
+                let interrupt = _KernelInterruptQueue.dequeue();
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             } else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed. {
-                _CPU.cycle();
+
+               if (_SingleStep) { // One cycle at a time in single-step mode
+                   if (_NextStep) {
+                       _CPU.cycle();
+                       _NextStep = false;
+                   }
+               } else {
+                   _CPU.cycle();
+               }
+
             } else {                      // If there are no interrupts and there is nothing being executed then just be idle. {
                 this.krnTrace("Idle");
             }
@@ -176,8 +193,10 @@ module TSOS {
             _StdOut.putText(msg);
 
             // Blue Screen of Death implementation
-            _Console.death();
-            this.krnShutdown();
+            if (msg === "Kernal death") {
+                _Console.death();
+                this.krnShutdown();
+            }
         }
     }
 }

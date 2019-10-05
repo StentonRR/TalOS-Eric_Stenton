@@ -63,19 +63,115 @@ var TSOS;
             // TODO in the future: Optionally update a log database or some streaming service.
         };
         //
+        // Display functions
+        //
+        Control.initializeMemoryDisplay = function () {
+            var table = document.getElementById("tableMemory");
+        };
+        Control.initializePcbDisplay = function () {
+            var table = document.getElementById("tablePcb");
+        };
+        Control.updateCpuDisplay = function () {
+            // Get row for output
+            var table = document.getElementById("tableCpu");
+            var row = table.rows[1];
+            // Set cpu information
+            row.cells[0].innerHTML = _CPU.PC.toString();
+            row.cells[1].innerHTML = _CPU.IR.toString(16).toLocaleUpperCase();
+            row.cells[2].innerHTML = _CPU.Acc.toString(16).toLocaleUpperCase();
+            row.cells[3].innerHTML = _CPU.Xreg.toString(16).toLocaleUpperCase();
+            row.cells[4].innerHTML = _CPU.Yreg.toString(16).toLocaleUpperCase();
+            row.cells[5].innerHTML = _CPU.Zflag.toString();
+        };
+        Control.updatePcbDisplay = function () {
+            var table = document.getElementById("tablePcb");
+            var newTbody = document.createElement('tbody');
+            // Add rows for each process to tbody
+            var row;
+            for (var i = 0; i < _PcbList.length; i++) {
+                row = newTbody.insertRow(-1);
+                // Add pcb information
+                row.insertCell(-1).innerHTML = _PcbList[i].pid;
+                row.insertCell(-1).innerHTML = _PcbList[i].priority;
+                row.insertCell(-1).innerHTML = _PcbList[i].state.toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _PcbList[i].PC;
+                row.insertCell(-1).innerHTML = _PcbList[i].Acc.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _PcbList[i].Xreg.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _PcbList[i].Yreg.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _PcbList[i].Zflag.toString(16);
+            }
+            // Replace old tbody with new one
+            table.replaceChild(newTbody, table.tBodies[0]);
+        };
+        Control.updateMemoryDisplay = function () {
+            var table = document.getElementById("tableMemory");
+            var newTbody = document.createElement('tbody');
+            // Add memory information -- must work around memory accessor, so need physical to logical address calculations
+            var row;
+            var rowLabel = "0x000";
+            var rowNumber = 0;
+            var placeNumber = 0;
+            var physicalAddress = 0;
+            var memory = _MemoryAccessor.dump();
+            var highlightedCell;
+            for (var i = 0; i < _MemoryAccessor.getMemorySize() / 8; i++) {
+                row = newTbody.insertRow(-1);
+                // Get how many zeros should be in the row label
+                rowNumber = 8 * i;
+                if (rowNumber > 255) {
+                    placeNumber = 2;
+                }
+                else if (rowNumber > 15) {
+                    placeNumber = 3;
+                }
+                else {
+                    placeNumber = 4;
+                }
+                // Set row label EX: 0x2E8
+                row.insertCell(-1).innerHTML = rowLabel.slice(0, placeNumber) + rowNumber.toString(16).toLocaleUpperCase();
+                // Add memory information
+                var cell = void 0;
+                for (var j = 0; j < 8; j++) {
+                    cell = row.insertCell(-1);
+                    cell.innerHTML = memory[physicalAddress];
+                    // Highlight the current memory address being read in display
+                    if (_CPU.PCB && _CPU.isExecuting && (_CPU.PCB.memorySegment.baseRegister + _CPU.PC - 1) == physicalAddress) {
+                        cell.style.backgroundColor = "#ff6961";
+                        highlightedCell = cell;
+                    }
+                    physicalAddress++;
+                }
+            }
+            // Replace old tbody with new one
+            table.replaceChild(newTbody, table.tBodies[0]);
+            // Scroll to highlighted cell in display
+            if (highlightedCell)
+                highlightedCell.scrollIntoView({ block: 'nearest' });
+        };
+        //
         // Host Events
         //
         Control.hostBtnStartOS_click = function (btn) {
             // Disable the (passed-in) start button...
             btn.disabled = true;
-            // .. enable the Halt and Reset buttons ...
+            // .. enable the Halt, Reset, and Single-Step buttons ...
             document.getElementById("btnHaltOS").disabled = false;
             document.getElementById("btnReset").disabled = false;
+            document.getElementById("btnSingleStep").disabled = false;
             // .. set focus on the OS console display ...
             document.getElementById("display").focus();
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
             _CPU = new TSOS.Cpu(); // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.
             _CPU.init(); //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
+            // ... Create and initialize memory ...
+            _Memory = new TSOS.Memory();
+            _Memory.init();
+            // ... Create memory accessor ...
+            _MemoryAccessor = new TSOS.MemoryAccessor();
+            // ... Create memory manager ...
+            _MemoryManager = new TSOS.MemoryManager();
+            // ... Create dispatcher ...
+            _Dispatcher = new TSOS.Dispatcher();
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(TSOS.Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
             // .. and call the OS Kernel Bootstrap routine.
@@ -97,6 +193,18 @@ var TSOS;
             // That boolean parameter is the 'forceget' flag. When it is true it causes the page to always
             // be reloaded from the server. If it is false or not specified the browser may reload the
             // page from its cache, which is not what we want.
+        };
+        Control.hostBtnSingleStep_click = function (btn) {
+            _SingleStep = !_SingleStep;
+            // Make button green if in single-step mode or red if not
+            btn.style.backgroundColor = _SingleStep ? "green" : "red";
+            // Enable or disable the next-step button depending on if in single-step mode or not
+            var nextStepBtn = document.getElementById("btnNextStep").disabled = !_SingleStep;
+        };
+        Control.hostBtnNextStep_click = function (btn) {
+            // Only set _NextStep if in single-step mode
+            if (_SingleStep)
+                _NextStep = true;
         };
         return Control;
     }());
