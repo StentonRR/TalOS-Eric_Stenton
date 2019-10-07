@@ -323,7 +323,7 @@ module TSOS {
                     _ReadyQueue.push(pcb);
 
                     // Run process -- will be moved to scheduler later
-                    _Dispatcher.runProcess(pcb);
+                    _KernelInterruptQueue.enqueue( new Interrupt(RUN_PROCESS_IRQ, [pcb]) );
                 }
 
             }else{

@@ -126,7 +126,7 @@ module TSOS {
             // Put more here.
         }
 
-        public krnInterruptHandler(irq, params) {
+        public krnInterruptHandler(irq: number, params?: any) {
             // This is the Interrupt Handler Routine.  See pages 8 and 560.
             // Trace our entrance here so we can compute Interrupt Latency by analyzing the log file later on. Page 766.
             this.krnTrace("Handling IRQ~" + irq);
@@ -137,11 +137,33 @@ module TSOS {
             //       Maybe the hardware simulation will grow to support/require that in the future.
             switch (irq) {
                 case TIMER_IRQ:
-                    this.krnTimerISR();              // Kernel built-in routine for timers (not the clock).
+                    this.krnTimerISR();               // Kernel built-in routine for timers (not the clock).
                     break;
                 case KEYBOARD_IRQ:
                     _krnKeyboardDriver.isr(params);   // Kernel mode device driver
                     _StdIn.handleInput();
+                    break;
+                case TERMINATE_CURRENT_PROCESS_IRQ:   // Use dispatcher to terminate process currently running on CPU
+                    _Dispatcher.terminateCurrentProcess();
+                    break;
+                case RUN_PROCESS_IRQ:                 // Use dispatcher to run specified process
+                    _Dispatcher.runProcess(params[0]);
+                    break;
+                case PRINT_YREGISTER_IRQ:             // Print value in CPU's Y Register
+                    _StdOut.putText(_CPU.Yreg.toString());
+                    break;
+                case PRINT_FROM_MEMORY_IRQ:           // Print string from memory defined by CPU's Y Register
+                    let output = "";
+                    let address = _CPU.Yreg;
+                    let value = parseInt(_MemoryAccessor.read(_CPU.PCB.memorySegment, address), 16);
+
+                    while (value !== 0) {
+                        output += String.fromCharCode(value);
+                        value = parseInt(_MemoryAccessor.read(_CPU.PCB.memorySegment, ++address), 16);
+                    }
+
+                    _StdOut.putText(output);
+
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");

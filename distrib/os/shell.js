@@ -275,7 +275,7 @@ var TSOS;
                     pcb.state = "ready";
                     _ReadyQueue.push(pcb);
                     // Run process -- will be moved to scheduler later
-                    _Dispatcher.runProcess(pcb);
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(RUN_PROCESS_IRQ, [pcb]));
                 }
             }
             else {

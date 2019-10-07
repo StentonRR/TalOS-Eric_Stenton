@@ -125,6 +125,25 @@ var TSOS;
                     _krnKeyboardDriver.isr(params); // Kernel mode device driver
                     _StdIn.handleInput();
                     break;
+                case TERMINATE_CURRENT_PROCESS_IRQ: // Use dispatcher to terminate process currently running on CPU
+                    _Dispatcher.terminateCurrentProcess();
+                    break;
+                case RUN_PROCESS_IRQ: // Use dispatcher to run specified process
+                    _Dispatcher.runProcess(params[0]);
+                    break;
+                case PRINT_YREGISTER_IRQ: // Print value in CPU's Y Register
+                    _StdOut.putText(_CPU.Yreg.toString());
+                    break;
+                case PRINT_FROM_MEMORY_IRQ: // Print string from memory defined by CPU's Y Register
+                    var output = "";
+                    var address = _CPU.Yreg;
+                    var value = parseInt(_MemoryAccessor.read(_CPU.PCB.memorySegment, address), 16);
+                    while (value !== 0) {
+                        output += String.fromCharCode(value);
+                        value = parseInt(_MemoryAccessor.read(_CPU.PCB.memorySegment, ++address), 16);
+                    }
+                    _StdOut.putText(output);
+                    break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
             }

@@ -243,20 +243,13 @@ module TSOS {
         }
 
         // Print value of Y register or text stored in memory until a break code
+        // depending on X register value -- use interrupts
         public systemCall(): void {
             if (this.Xreg === 1) {
-                _StdOut.putText(this.Yreg.toString());
+                _KernelInterruptQueue.enqueue( new Interrupt(PRINT_YREGISTER_IRQ) );
             } else if (this.Xreg === 2) {
-                let output = "";
-                let address = this.Yreg;
-                let value = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, address), 16);
-
-                while (value !== 0) {
-                    output += String.fromCharCode(value);
-                    value = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, ++address), 16);
-                }
-
-                _StdOut.putText(output);
+                console.log(new Interrupt(PRINT_FROM_MEMORY_IRQ));
+                _KernelInterruptQueue.enqueue( new Interrupt(PRINT_FROM_MEMORY_IRQ) );
             }
         }
     }
