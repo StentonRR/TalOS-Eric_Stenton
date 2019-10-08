@@ -209,7 +209,6 @@ var TSOS;
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(PRINT_YREGISTER_IRQ));
             }
             else if (this.Xreg === 2) {
-                console.log(new TSOS.Interrupt(PRINT_FROM_MEMORY_IRQ));
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(PRINT_FROM_MEMORY_IRQ));
             }
         };

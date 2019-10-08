@@ -22,6 +22,9 @@ module TSOS {
             // Change logical address to physical address
             let physicalAddress = logicalAddress + segment.baseRegister;
 
+            // Pad value with extra 0 if only 1 character
+            value = Utils.padHex(value);
+
             // Memory protection
             if (physicalAddress > segment.limitRegister || logicalAddress < 0) {
                 _Kernel.krnTrapError("Memory write exception: Cannot write to memory address. Address is out of bounds.");
@@ -34,7 +37,7 @@ module TSOS {
         }
 
         public clear(segment): void {
-            for(let i = segment.baseRegister; i < segment.limitRegister; i++) {
+            for(let i = 0; i < _Memory.segmentSize; i++) {
                 this.write(segment, i, "00");
             }
         }

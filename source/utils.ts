@@ -43,5 +43,13 @@ module TSOS {
             }
             return retVal;
         }
+
+        public static padHex(str: string): string {
+            while (str.length < 2) {
+                str = "0" + str;
+            }
+
+            return str;
+        }
     }
 }

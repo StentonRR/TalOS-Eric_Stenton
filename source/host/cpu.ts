@@ -248,7 +248,6 @@ module TSOS {
             if (this.Xreg === 1) {
                 _KernelInterruptQueue.enqueue( new Interrupt(PRINT_YREGISTER_IRQ) );
             } else if (this.Xreg === 2) {
-                console.log(new Interrupt(PRINT_FROM_MEMORY_IRQ));
                 _KernelInterruptQueue.enqueue( new Interrupt(PRINT_FROM_MEMORY_IRQ) );
             }
         }

@@ -82,13 +82,12 @@ module TSOS {
                This, on the other hand, is the clock pulse from the hardware / VM / host that tells the kernel
                that it has to look for interrupts and process them if it finds any.                           */
 
-            // Check for an interrupt, are any. Page 560
 
-            // Update the visual displays
-            TSOS.Control.updateCpuDisplay();
+            // Update the memory and pcb visual displays
             TSOS.Control.updateMemoryDisplay();
             TSOS.Control.updatePcbDisplay();
 
+            // Check for an interrupt, are any. Page 560
             if (_KernelInterruptQueue.getSize() > 0) {
                 // Process the first interrupt on the interrupt queue.
                 // TODO: Implement a priority queue based on the IRQ number/id to enforce interrupt priority.
@@ -104,6 +103,8 @@ module TSOS {
                } else {
                    _CPU.cycle();
                }
+
+                TSOS.Control.updateCpuDisplay(); // Update CPU visual display
 
             } else {                      // If there are no interrupts and there is nothing being executed then just be idle. {
                 this.krnTrace("Idle");
