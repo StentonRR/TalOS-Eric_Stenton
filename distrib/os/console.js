@@ -49,8 +49,8 @@ var TSOS;
                 // Get the next character from the kernel input queue.
                 var chr = _KernelInputQueue.dequeue();
                 // Check to see if it's "special" (enter or ctrl-c) or "normal" (anything else that the keyboard device driver gave us).
-                if (chr === "ctrl-c") { // Control + C
-                    _Dispatcher.terminateCurrentProcess();
+                if (chr === "ctrl-c") { // Control + C -- Use interrupt to terminate current process
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_CURRENT_PROCESS_IRQ));
                     this.buffer = ""; // Clear buffer since display shows an empty, new line
                 }
                 else if (chr === String.fromCharCode(13)) { // Enter key

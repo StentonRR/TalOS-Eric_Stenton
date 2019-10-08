@@ -70,11 +70,10 @@ var TSOS;
                This is NOT the same as a TIMER, which causes an interrupt and is handled like other interrupts.
                This, on the other hand, is the clock pulse from the hardware / VM / host that tells the kernel
                that it has to look for interrupts and process them if it finds any.                           */
-            // Check for an interrupt, are any. Page 560
-            // Update the visual displays
-            TSOS.Control.updateCpuDisplay();
+            // Update the memory and pcb visual displays
             TSOS.Control.updateMemoryDisplay();
             TSOS.Control.updatePcbDisplay();
+            // Check for an interrupt, are any. Page 560
             if (_KernelInterruptQueue.getSize() > 0) {
                 // Process the first interrupt on the interrupt queue.
                 // TODO: Implement a priority queue based on the IRQ number/id to enforce interrupt priority.
@@ -91,6 +90,7 @@ var TSOS;
                 else {
                     _CPU.cycle();
                 }
+                TSOS.Control.updateCpuDisplay(); // Update CPU visual display
             }
             else { // If there are no interrupts and there is nothing being executed then just be idle. {
                 this.krnTrace("Idle");
@@ -124,6 +124,25 @@ var TSOS;
                 case KEYBOARD_IRQ:
                     _krnKeyboardDriver.isr(params); // Kernel mode device driver
                     _StdIn.handleInput();
+                    break;
+                case TERMINATE_CURRENT_PROCESS_IRQ: // Use dispatcher to terminate process currently running on CPU
+                    _Dispatcher.terminateCurrentProcess();
+                    break;
+                case RUN_PROCESS_IRQ: // Use dispatcher to run specified process
+                    _Dispatcher.runProcess(params[0]);
+                    break;
+                case PRINT_YREGISTER_IRQ: // Print value in CPU's Y Register
+                    _StdOut.putText(_CPU.Yreg.toString());
+                    break;
+                case PRINT_FROM_MEMORY_IRQ: // Print string from memory defined by CPU's Y Register
+                    var output = "";
+                    var address = _CPU.Yreg;
+                    var value = parseInt(_MemoryAccessor.read(_CPU.PCB.memorySegment, address), 16);
+                    while (value !== 0) {
+                        output += String.fromCharCode(value);
+                        value = parseInt(_MemoryAccessor.read(_CPU.PCB.memorySegment, ++address), 16);
+                    }
+                    _StdOut.putText(output);
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");

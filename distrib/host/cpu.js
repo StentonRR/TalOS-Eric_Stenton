@@ -203,19 +203,13 @@ var TSOS;
             _MemoryAccessor.write(this.PCB.memorySegment, address, value.toString(16));
         };
         // Print value of Y register or text stored in memory until a break code
+        // depending on X register value -- use interrupts
         Cpu.prototype.systemCall = function () {
             if (this.Xreg === 1) {
-                _StdOut.putText(this.Yreg.toString());
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(PRINT_YREGISTER_IRQ));
             }
             else if (this.Xreg === 2) {
-                var output = "";
-                var address = this.Yreg;
-                var value = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, address), 16);
-                while (value !== 0) {
-                    output += String.fromCharCode(value);
-                    value = parseInt(_MemoryAccessor.read(this.PCB.memorySegment, ++address), 16);
-                }
-                _StdOut.putText(output);
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(PRINT_FROM_MEMORY_IRQ));
             }
         };
         return Cpu;

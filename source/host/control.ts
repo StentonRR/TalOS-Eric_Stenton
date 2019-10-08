@@ -77,23 +77,35 @@ module TSOS {
         //
         // Display functions
         //
-        public static initializeMemoryDisplay(): void {
-            let table = document.getElementById("tableMemory");
-        }
-
-        public static initializePcbDisplay(): void {
-            let table = document.getElementById("tablePcb");
-        }
-
-
         public static updateCpuDisplay(): void {
+            // Op code information
+            let opCodeInfo = {"A9": {"operandNumber": 1},
+                "AD": {"operandNumber": 2},
+                "8D": {"operandNumber": 2},
+                "6D": {"operandNumber": 2},
+                "A2": {"operandNumber": 1},
+                "AE": {"operandNumber": 2},
+                "A0": {"operandNumber": 1},
+                "AC": {"operandNumber": 2},
+                "EA": {"operandNumber": 0},
+                "00": {"operandNumber": 0},
+                "EC": {"operandNumber": 2},
+                "D0": {"operandNumber": 1},
+                "EE": {"operandNumber": 2},
+                "FF": {"operandNumber": 0}
+            };
+
             // Get row for output
             let table = document.getElementById("tableCpu") as HTMLTableElement;
             let row = table.rows[1];
 
+            let currentInstruction = Utils.padHex( _CPU.IR.toString(16).toLocaleUpperCase() );
+
             // Set cpu information
-            row.cells[0].innerHTML = _CPU.PC.toString();
-            row.cells[1].innerHTML = _CPU.IR.toString(16).toLocaleUpperCase();
+            row.cells[0].innerHTML = (_CPU.PC - opCodeInfo[currentInstruction].operandNumber - 1).toString(); // Subtract 1 due to the program counter
+                                                                                                              // increasing at the end of a cycle.
+                                                                                                              // Remember PC starts from 0.
+            row.cells[1].innerHTML = currentInstruction;
             row.cells[2].innerHTML = _CPU.Acc.toString(16).toLocaleUpperCase();
             row.cells[3].innerHTML = _CPU.Xreg.toString(16).toLocaleUpperCase();
             row.cells[4].innerHTML = _CPU.Yreg.toString(16).toLocaleUpperCase();
@@ -125,6 +137,23 @@ module TSOS {
         }
 
         public static updateMemoryDisplay(): void {
+            // Op code information
+            let opCodeInfo = {"A9": {"operandNumber": 1},
+                "AD": {"operandNumber": 2},
+                "8D": {"operandNumber": 2},
+                "6D": {"operandNumber": 2},
+                "A2": {"operandNumber": 1},
+                "AE": {"operandNumber": 2},
+                "A0": {"operandNumber": 1},
+                "AC": {"operandNumber": 2},
+                "EA": {"operandNumber": 0},
+                "00": {"operandNumber": 0},
+                "EC": {"operandNumber": 2},
+                "D0": {"operandNumber": 1},
+                "EE": {"operandNumber": 2},
+                "FF": {"operandNumber": 0}
+            };
+
             let table = document.getElementById("tableMemory") as HTMLTableElement;
             let newTbody = document.createElement('tbody');
 
@@ -157,14 +186,42 @@ module TSOS {
 
                 // Add memory information
                 let cell;
+                let currentInstruction;
+                let operandHighlights = [];
                 for (let j = 0; j < 8; j++) {
                     cell = row.insertCell(-1);
                     cell.innerHTML = memory[physicalAddress];
 
+                    currentInstruction = Utils.padHex( _CPU.IR.toString(16).toLocaleUpperCase() );
+
                     // Highlight the current memory address being read in display
-                    if ( _CPU.PCB && _CPU.isExecuting && (_CPU.PCB.memorySegment.baseRegister + _CPU.PC - 1) == physicalAddress) {
-                        cell.style.backgroundColor = "#ff6961";
-                        highlightedCell = cell;
+                    if ( _CPU.PCB && _CPU.isExecuting) {
+                        // Subtract 1 from below due to the program counter being incremented at the end of a cycle
+                        if ( (_CPU.PCB.memorySegment.baseRegister + _CPU.PC - opCodeInfo[currentInstruction].operandNumber - 1) == physicalAddress ) {
+                            cell.style.backgroundColor = "#ff6961";
+                            highlightedCell = cell;
+
+                            operandHighlights[0] = opCodeInfo[currentInstruction].operandNumber;
+                            operandHighlights[1] = false;
+
+                            // Since D0 branches, do not highlight operands
+                            if (currentInstruction == "D0") {
+                                operandHighlights[0] = 0;
+                            }
+                        }
+
+                        // Highlight operands
+                        if (operandHighlights[0] > 0 && operandHighlights[1]) {
+                            cell.style.backgroundColor = "#77dd77 ";
+                            highlightedCell = cell;
+
+                            operandHighlights[0]--;
+                        }
+
+                        // Skip highlight operands once so that the current instruction isn't highlighted
+                        if(operandHighlights[0] > 0 && !operandHighlights[1]) {
+                            operandHighlights[1] = true;
+                        }
                     }
 
                     physicalAddress++;
