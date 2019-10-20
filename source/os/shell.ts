@@ -315,15 +315,11 @@ module TSOS {
 
                 }else if (pcb.state === "terminated") {
                     _StdOut.putText(`Process ${pid} has already ran and terminated`);
+
                 } else {
                     _StdOut.putText(`Running process ${pid}`);
+                    _Scheduler.runProcess(pcb);
 
-                    // Process is ready to be processed by cpu
-                    pcb.state = "ready";
-                    _ReadyQueue.push(pcb);
-
-                    // Run process -- will be moved to scheduler later
-                    _KernelInterruptQueue.enqueue( new Interrupt(RUN_PROCESS_IRQ, [pcb]) );
                 }
 
             }else{

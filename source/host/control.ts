@@ -262,9 +262,6 @@ module TSOS {
             // ... Create memory accessor ...
             _MemoryAccessor = new TSOS.MemoryAccessor();
 
-            // ... Create memory manager ...
-            _MemoryManager = new TSOS.MemoryManager();
-
             // ... Create dispatcher ...
             _Dispatcher = new TSOS.Dispatcher();
 

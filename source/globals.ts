@@ -44,6 +44,7 @@ var _Dispatcher: TSOS.Dispatcher;
 
 // Software (OS)
 var _MemoryManager: TSOS.MemoryManager;
+var _Scheduler: TSOS.Scheduler;
 
 // Processes
 var _PidCounter = 0;
