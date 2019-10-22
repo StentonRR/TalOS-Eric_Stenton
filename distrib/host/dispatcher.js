@@ -5,6 +5,9 @@ var TSOS;
         }
         Dispatcher.prototype.runProcess = function (pcb) {
             pcb.state = "running";
+            // Process that was running returns to ready state
+            if (_CPU.PCB && _CPU.PCB.state !== "terminated")
+                _CPU.PCB.state = "ready";
             _CPU.changeContext(pcb);
             _CPU.isExecuting = true;
         };

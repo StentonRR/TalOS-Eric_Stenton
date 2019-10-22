@@ -271,7 +271,7 @@ var TSOS;
                 }
                 else {
                     _StdOut.putText("Running process " + pid_1);
-                    _Scheduler.runProcess(pcb);
+                    _Scheduler.addToReadyQueue(pcb);
                 }
             }
             else {

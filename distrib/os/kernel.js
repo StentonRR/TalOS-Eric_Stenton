@@ -83,6 +83,8 @@ var TSOS;
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             }
             else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed. {
+                // Update the turnaround time and wait time for processes
+                _Scheduler.updateStatistics();
                 if (_SingleStep) { // One cycle at a time in single-step mode
                     if (_NextStep) {
                         _CPU.cycle();
@@ -96,6 +98,12 @@ var TSOS;
             }
             else { // If there are no interrupts and there is nothing being executed then just be idle. {
                 this.krnTrace("Idle");
+            }
+            // Manage process execution if any are ready -- there is no overhead for the project,
+            // so no need to put it into the above if-else statement to take up a clock tick
+            if (_ReadyQueue.length > 0) {
+                this.krnTrace("Scheduler active");
+                _Scheduler.scheduleProcesses();
             }
         };
         //

@@ -35,7 +35,7 @@ var _MemoryManager;
 var _Scheduler;
 // Processes
 var _PidCounter = 0;
-var _PcbList = [];
+var _PcbList = []; // List of all PCB's....acts as resident list...holds terminated processes as well
 // Queue with processes ready for cpu
 var _ReadyQueue = [];
 var _OSclock = 0; // Page 23.

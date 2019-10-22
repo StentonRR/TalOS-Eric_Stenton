@@ -30,6 +30,10 @@ module TSOS {
             _StdOut.advanceLine();
             _StdOut.putText(`Process ${this.pid} terminated`);
             _StdOut.advanceLine();
+            _StdOut.putText(`Turnaround Time: ${this.turnAroundTime} Cycles`);
+            _StdOut.advanceLine();
+            _StdOut.putText(`Wait Time: ${this.waitTime} Cycles`);
+            _StdOut.advanceLine();
             _OsShell.putPrompt();
 
         }

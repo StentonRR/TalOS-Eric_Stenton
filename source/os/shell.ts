@@ -318,7 +318,7 @@ module TSOS {
 
                 } else {
                     _StdOut.putText(`Running process ${pid}`);
-                    _Scheduler.runProcess(pcb);
+                    _Scheduler.addToReadyQueue(pcb);
 
                 }
 
