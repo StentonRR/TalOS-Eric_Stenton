@@ -271,11 +271,7 @@ var TSOS;
                 }
                 else {
                     _StdOut.putText("Running process " + pid_1);
-                    // Process is ready to be processed by cpu
-                    pcb.state = "ready";
-                    _ReadyQueue.push(pcb);
-                    // Run process -- will be moved to scheduler later
-                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(RUN_PROCESS_IRQ, [pcb]));
+                    _Scheduler.runProcess(pcb);
                 }
             }
             else {

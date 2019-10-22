@@ -1,7 +1,7 @@
 module TSOS {
     export class Scheduler {
         constructor(
-            public quantum: number = 1, // Default quantum for processes
+            public quantum: number = 6, // Default quantum for processes
             public activeAlgorithm: string = "rr", // Current scheduling algorithm in use
         ) {
         }
@@ -17,7 +17,7 @@ module TSOS {
                 case "sjf": // Shortest Job First
                     break;
                 case "p": // Priority
-                    _ReadyQueue.sort( (a,b) => (b.priority < a.priority) ? 1 : -1);
+
                     break;
             }
 
@@ -34,6 +34,22 @@ module TSOS {
             // Process is ready to be processed by cpu
             pcb.state = "ready";
             _ReadyQueue.push(pcb);
+        }
+
+        public roundRobinScheduler(quantum) {
+
+        }
+
+        public firstComeFirstServeScheduler() {
+
+        }
+
+        public shortestJobFirstScheduler() {
+
+        }
+
+        public priorityScheduler() {
+            _ReadyQueue.sort( (a,b) => (b.priority < a.priority) ? 1 : -1);
         }
     }
 }

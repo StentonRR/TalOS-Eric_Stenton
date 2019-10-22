@@ -43,6 +43,7 @@ module TSOS {
 
             // Initialize memory manager
             _MemoryManager = new TSOS.MemoryManager();
+            _MemoryManager.init();
 
             // Initialize scheduler
             _Scheduler = new TSOS.Scheduler();

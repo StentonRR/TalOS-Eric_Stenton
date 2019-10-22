@@ -32,6 +32,7 @@ var _MemoryAccessor;
 var _Dispatcher;
 // Software (OS)
 var _MemoryManager;
+var _Scheduler;
 // Processes
 var _PidCounter = 0;
 var _PcbList = [];
