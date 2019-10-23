@@ -136,10 +136,48 @@ module TSOS {
                 "quote");
             this.commandList.push(sc);
 
-            // ps  - list the running processes and their IDs
-            // kill <id> - kills the specified process id.
+            // ps
+            sc = new ShellCommand(this.shellPs,
+                "ps",
+                "List the running processes and their IDs",
+                "ps");
+            this.commandList.push(sc);
 
-            //
+            // kill <PID>
+            sc = new ShellCommand(this.shellKill,
+                "kill",
+                "Kills the process with specified process ID",
+                "kill <ID>");
+            this.commandList.push(sc);
+
+            // clearmem
+            sc = new ShellCommand(this.shellClearMem,
+                "clearmem",
+                "Clears all memory partitions",
+                "clearmem");
+            this.commandList.push(sc);
+
+            // runall
+            sc = new ShellCommand(this.shellRunAll,
+                "runall",
+                "Run all processes with a 'resident' state",
+                "runall");
+            this.commandList.push(sc);
+
+            // killall
+            sc = new ShellCommand(this.shellKillAll,
+                "killall",
+                "Kill all processes",
+                "killall");
+            this.commandList.push(sc);
+
+            // quantum <int>
+            sc = new ShellCommand(this.shellQuantum,
+                "quantum",
+                "Sets the Round Robin quantum",
+                "killall");
+            this.commandList.push(sc);
+
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -193,6 +231,7 @@ module TSOS {
             _StdOut.advanceLine();
             // ... call the command function passing in the args with some über-cool functional programming ...
             fn(args);
+
             // Check to see if we need to advance the line again
             if (_StdOut.currentXPosition > 0) {
                 _StdOut.advanceLine();
@@ -325,6 +364,50 @@ module TSOS {
             }else{
                 _StdOut.putText("Usage: run <pid> Please supply a process id.");
 
+            }
+        }
+
+        public shellClearMem() {
+
+        }
+
+        public shellRunAll(args) {
+            // Get list of resident processes
+            let residentList = _PcbList.filter(element => element.state == 'resident');
+
+            // Get a list of the pids of all the resident processes
+            let pids = residentList.map( element => element.pid);
+
+            // Use the run command for each pid -- put pid in list to mimic args
+            for(let pid of pids) {
+                this.shellRun([pid])
+            }
+        }
+
+        public shellPs() {
+            for(let process of _PcbList) {
+                _StdOut.putText(`${process.pid}: ${process.state}`);
+                _StdOut.advanceLine();
+            }
+        }
+
+        public shellKill(args) {
+            if (args.length > 0) {
+
+            } else {
+                _StdOut.putText("Usage: kill <PID> Please supply a PID.");
+            }
+        }
+
+        public shellKillAll() {
+
+        }
+
+        public shellQuantum(args) {
+            if (args.length > 0) {
+                _Scheduler.quantum = parseInt(args[0]);
+            } else {
+                _StdOut.putText("Usage: quantum <int> Please supply an integer.");
             }
         }
 

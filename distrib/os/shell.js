@@ -106,9 +106,24 @@ var TSOS;
             // quote
             sc = new TSOS.ShellCommand(this.shellQuote, "quote", "Displays a random programmer quote in labeled text area", "quote");
             this.commandList.push(sc);
-            // ps  - list the running processes and their IDs
-            // kill <id> - kills the specified process id.
-            //
+            // ps
+            sc = new TSOS.ShellCommand(this.shellPs, "ps", "List the running processes and their IDs", "ps");
+            this.commandList.push(sc);
+            // kill <PID>
+            sc = new TSOS.ShellCommand(this.shellKill, "kill", "Kills the process with specified process ID", "kill <ID>");
+            this.commandList.push(sc);
+            // clearmem
+            sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "Clears all memory partitions", "clearmem");
+            this.commandList.push(sc);
+            // runall
+            sc = new TSOS.ShellCommand(this.shellRunAll, "runall", "Run all processes with a 'resident' state", "runall");
+            this.commandList.push(sc);
+            // killall
+            sc = new TSOS.ShellCommand(this.shellKillAll, "killall", "Kill all processes", "killall");
+            this.commandList.push(sc);
+            // quantum <int>
+            sc = new TSOS.ShellCommand(this.shellQuantum, "quantum", "Sets the Round Robin quantum", "killall");
+            this.commandList.push(sc);
             // Display the initial prompt.
             this.putPrompt();
         };
@@ -154,6 +169,7 @@ var TSOS;
                 }
                 else { // It's just a bad command. {
                     this.execute(this.shellInvalidCommand);
+                    console.log(this);
                 }
             }
         };
@@ -276,6 +292,43 @@ var TSOS;
             }
             else {
                 _StdOut.putText("Usage: run <pid> Please supply a process id.");
+            }
+        };
+        Shell.prototype.shellClearMem = function () {
+        };
+        Shell.prototype.shellRunAll = function (args) {
+            // Get list of resident processes
+            var residentList = _PcbList.filter(function (element) { return element.state == 'resident'; });
+            // Get a list of the pids of all the resident processes
+            var pids = residentList.map(function (element) { return element.pid; });
+            // Use the run command for each pid -- put pid in list to mimic args
+            for (var _i = 0, pids_1 = pids; _i < pids_1.length; _i++) {
+                var pid = pids_1[_i];
+                this.shellRun([pid]);
+            }
+        };
+        Shell.prototype.shellPs = function () {
+            for (var _i = 0, _PcbList_1 = _PcbList; _i < _PcbList_1.length; _i++) {
+                var process = _PcbList_1[_i];
+                _StdOut.putText(process.pid + ": " + process.state);
+                _StdOut.advanceLine();
+            }
+        };
+        Shell.prototype.shellKill = function (args) {
+            if (args.length > 0) {
+            }
+            else {
+                _StdOut.putText("Usage: kill <PID> Please supply a PID.");
+            }
+        };
+        Shell.prototype.shellKillAll = function () {
+        };
+        Shell.prototype.shellQuantum = function (args) {
+            if (args.length > 0) {
+                _Scheduler.quantum = parseInt(args[0]);
+            }
+            else {
+                _StdOut.putText("Usage: quantum <int> Please supply an integer.");
             }
         };
         Shell.prototype.shellStatus = function (args) {
