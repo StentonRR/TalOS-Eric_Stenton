@@ -153,7 +153,7 @@ module TSOS {
             // clearmem
             sc = new ShellCommand(this.shellClearMem,
                 "clearmem",
-                "Clears all memory partitions",
+                "Clears all memory partitions; this will terminate all processes in memory",
                 "clearmem");
             this.commandList.push(sc);
 
@@ -368,7 +368,14 @@ module TSOS {
         }
 
         public shellClearMem() {
+            // Kill all processes in memory first -- ignore already terminated ones
+            for(let pcb of _PcbList) {
+               if(pcb.state != 'terminated' && pcb.storageLocation == 'memory') _KernelInterruptQueue.enqueue(
+                                                                    new Interrupt(TERMINATE_PROCESS_IRQ,
+                                                                   [pcb]));
+            }
 
+            _MemoryManager.clearAllMem();
         }
 
         public shellRunAll(args) {
@@ -378,9 +385,12 @@ module TSOS {
             // Get a list of the pids of all the resident processes
             let pids = residentList.map( element => element.pid);
 
-            // Use the run command for each pid -- put pid in list to mimic args
+            // Run each resident process
             for(let pid of pids) {
-                this.shellRun([pid])
+                let pcb = _PcbList.find(element => element.pid == pid);
+                _StdOut.putText(`Running process ${pid}`);
+                _StdOut.advanceLine();
+                _Scheduler.addToReadyQueue(pcb);
             }
         }
 
@@ -391,16 +401,25 @@ module TSOS {
             }
         }
 
-        public shellKill(args) {
+        public shellKill(args) { // Only terminate processes that are ready or running
             if (args.length > 0) {
+                let pcb = _ReadyQueue.find(element => element.pid == args[0]);
 
+                if (pcb) {
+                    _KernelInterruptQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+                } else {
+                    _StdOut.putText("Process either doesn't exist or is terminated/resident.");
+                }
             } else {
                 _StdOut.putText("Usage: kill <PID> Please supply a PID.");
             }
         }
 
         public shellKillAll() {
-
+            // Terminate each process in ready queue
+            for(let pcb of _ReadyQueue) {
+                _KernelInterruptQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+            }
         }
 
         public shellQuantum(args) {

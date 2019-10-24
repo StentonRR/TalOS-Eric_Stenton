@@ -65,5 +65,10 @@ module TSOS {
 
             return pcb;
         }
+
+        public clearAllMem(): void {
+            for (let segment of this.memoryRegisters)
+            _MemoryAccessor.clear(segment.index);
+        }
     }
 }

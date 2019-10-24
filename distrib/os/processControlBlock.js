@@ -10,6 +10,7 @@ var TSOS;
         pid, // Process id
         priority, // Priority of the process
         memorySegment, // The segment of memory the program resides
+        storageLocation, 
         // Accounting information
         waitTime, // Time the program spent waiting
         turnAroundTime // Time it took for the program to execute
@@ -23,6 +24,7 @@ var TSOS;
             if (pid === void 0) { pid = _PidCounter++; }
             if (priority === void 0) { priority = 0; }
             if (memorySegment === void 0) { memorySegment = {}; }
+            if (storageLocation === void 0) { storageLocation = "memory"; }
             if (waitTime === void 0) { waitTime = 0; }
             if (turnAroundTime === void 0) { turnAroundTime = 0; }
             this.state = state;
@@ -34,6 +36,7 @@ var TSOS;
             this.pid = pid;
             this.priority = priority;
             this.memorySegment = memorySegment;
+            this.storageLocation = storageLocation;
             this.waitTime = waitTime;
             this.turnAroundTime = turnAroundTime;
         }

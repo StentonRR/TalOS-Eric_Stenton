@@ -177,6 +177,10 @@ module TSOS {
                     _StdOut.putText(output);
 
                     break;
+                case TERMINATE_PROCESS_IRQ: // Terminate specified process -- use dispatcher if process is running
+                    let pcb = params[0];
+                    pcb.state == 'running' ? _Dispatcher.terminateCurrentProcess() : pcb.terminate();
+                    break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
             }

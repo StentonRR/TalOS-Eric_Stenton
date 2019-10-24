@@ -21,6 +21,7 @@ var TERMINATE_CURRENT_PROCESS_IRQ = 2;
 var RUN_PROCESS_IRQ = 3;
 var PRINT_YREGISTER_IRQ = 4;
 var PRINT_FROM_MEMORY_IRQ = 5;
+var TERMINATE_PROCESS_IRQ = 6;
 //
 // Global Variables
 // TODO: Make a global object and use that instead of the "_" naming convention in the global namespace.

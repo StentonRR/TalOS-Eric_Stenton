@@ -29,6 +29,8 @@ const PRINT_YREGISTER_IRQ: number = 4;
 
 const PRINT_FROM_MEMORY_IRQ: number = 5;
 
+const TERMINATE_PROCESS_IRQ: number = 6;
+
 
 
 //

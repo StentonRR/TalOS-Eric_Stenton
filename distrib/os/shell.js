@@ -113,7 +113,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellKill, "kill", "Kills the process with specified process ID", "kill <ID>");
             this.commandList.push(sc);
             // clearmem
-            sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "Clears all memory partitions", "clearmem");
+            sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "Clears all memory partitions; this will terminate all processes in memory", "clearmem");
             this.commandList.push(sc);
             // runall
             sc = new TSOS.ShellCommand(this.shellRunAll, "runall", "Run all processes with a 'resident' state", "runall");
@@ -169,7 +169,6 @@ var TSOS;
                 }
                 else { // It's just a bad command. {
                     this.execute(this.shellInvalidCommand);
-                    console.log(this);
                 }
             }
         };
@@ -295,33 +294,58 @@ var TSOS;
             }
         };
         Shell.prototype.shellClearMem = function () {
+            // Kill all processes in memory first -- ignore already terminated ones
+            for (var _i = 0, _PcbList_1 = _PcbList; _i < _PcbList_1.length; _i++) {
+                var pcb = _PcbList_1[_i];
+                if (pcb.state != 'terminated' && pcb.storageLocation == 'memory')
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+            }
+            _MemoryManager.clearAllMem();
         };
         Shell.prototype.shellRunAll = function (args) {
             // Get list of resident processes
             var residentList = _PcbList.filter(function (element) { return element.state == 'resident'; });
             // Get a list of the pids of all the resident processes
             var pids = residentList.map(function (element) { return element.pid; });
-            // Use the run command for each pid -- put pid in list to mimic args
+            var _loop_1 = function (pid) {
+                var pcb = _PcbList.find(function (element) { return element.pid == pid; });
+                _StdOut.putText("Running process " + pid);
+                _StdOut.advanceLine();
+                _Scheduler.addToReadyQueue(pcb);
+            };
+            // Run each resident process
             for (var _i = 0, pids_1 = pids; _i < pids_1.length; _i++) {
                 var pid = pids_1[_i];
-                this.shellRun([pid]);
+                _loop_1(pid);
             }
         };
         Shell.prototype.shellPs = function () {
-            for (var _i = 0, _PcbList_1 = _PcbList; _i < _PcbList_1.length; _i++) {
-                var process = _PcbList_1[_i];
+            for (var _i = 0, _PcbList_2 = _PcbList; _i < _PcbList_2.length; _i++) {
+                var process = _PcbList_2[_i];
                 _StdOut.putText(process.pid + ": " + process.state);
                 _StdOut.advanceLine();
             }
         };
         Shell.prototype.shellKill = function (args) {
             if (args.length > 0) {
+                var pcb = _ReadyQueue.find(function (element) { return element.pid == args[0]; });
+                if (pcb) {
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+                }
+                else {
+                    _StdOut.putText("Process either doesn't exist or is terminated/resident.");
+                }
             }
             else {
                 _StdOut.putText("Usage: kill <PID> Please supply a PID.");
             }
         };
         Shell.prototype.shellKillAll = function () {
+            // Terminate each process in ready queue
+            for (var _i = 0, _ReadyQueue_1 = _ReadyQueue; _i < _ReadyQueue_1.length; _i++) {
+                var pcb = _ReadyQueue_1[_i];
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+            }
         };
         Shell.prototype.shellQuantum = function (args) {
             if (args.length > 0) {

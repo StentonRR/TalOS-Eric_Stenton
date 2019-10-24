@@ -57,6 +57,12 @@ var TSOS;
             _PcbList.push(pcb);
             return pcb;
         };
+        MemoryManager.prototype.clearAllMem = function () {
+            for (var _i = 0, _a = this.memoryRegisters; _i < _a.length; _i++) {
+                var segment = _a[_i];
+                _MemoryAccessor.clear(segment.index);
+            }
+        };
         return MemoryManager;
     }());
     TSOS.MemoryManager = MemoryManager;
