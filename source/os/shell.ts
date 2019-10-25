@@ -136,10 +136,48 @@ module TSOS {
                 "quote");
             this.commandList.push(sc);
 
-            // ps  - list the running processes and their IDs
-            // kill <id> - kills the specified process id.
+            // ps
+            sc = new ShellCommand(this.shellPs,
+                "ps",
+                "List the running processes and their IDs",
+                "ps");
+            this.commandList.push(sc);
 
-            //
+            // kill <PID>
+            sc = new ShellCommand(this.shellKill,
+                "kill",
+                "Kills the process with specified process ID",
+                "kill <PID>");
+            this.commandList.push(sc);
+
+            // clearmem
+            sc = new ShellCommand(this.shellClearMem,
+                "clearmem",
+                "Clears all memory partitions; this will terminate all processes in memory",
+                "clearmem");
+            this.commandList.push(sc);
+
+            // runall
+            sc = new ShellCommand(this.shellRunAll,
+                "runall",
+                "Run all processes with a 'resident' state",
+                "runall");
+            this.commandList.push(sc);
+
+            // killall
+            sc = new ShellCommand(this.shellKillAll,
+                "killall",
+                "Kill all processes",
+                "killall");
+            this.commandList.push(sc);
+
+            // quantum <int>
+            sc = new ShellCommand(this.shellQuantum,
+                "quantum",
+                "Sets the Round Robin quantum",
+                "quantum <int>");
+            this.commandList.push(sc);
+
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -193,6 +231,7 @@ module TSOS {
             _StdOut.advanceLine();
             // ... call the command function passing in the args with some über-cool functional programming ...
             fn(args);
+
             // Check to see if we need to advance the line again
             if (_StdOut.currentXPosition > 0) {
                 _StdOut.advanceLine();
@@ -305,7 +344,7 @@ module TSOS {
         public shellRun(args) {
             if (args.length > 0) {
                 let pid = parseInt(args[0]);
-                let pcb = _PcbList.find(element => element.pid == pid);
+                let pcb = _ResidentList.find(element => element.pid == pid);
 
                 if (!pcb) {
                     _StdOut.putText(`Process ${pid} does not exist`);
@@ -315,20 +354,79 @@ module TSOS {
 
                 }else if (pcb.state === "terminated") {
                     _StdOut.putText(`Process ${pid} has already ran and terminated`);
+
                 } else {
                     _StdOut.putText(`Running process ${pid}`);
+                    _Scheduler.addToReadyQueue(pcb);
 
-                    // Process is ready to be processed by cpu
-                    pcb.state = "ready";
-                    _ReadyQueue.push(pcb);
-
-                    // Run process -- will be moved to scheduler later
-                    _KernelInterruptQueue.enqueue( new Interrupt(RUN_PROCESS_IRQ, [pcb]) );
                 }
 
             }else{
                 _StdOut.putText("Usage: run <pid> Please supply a process id.");
 
+            }
+        }
+
+        public shellClearMem() {
+            // Kill all processes in memory first -- ignore already terminated ones
+            for(let pcb of _ResidentList) {
+               if(pcb.state != 'terminated' && pcb.storageLocation == 'memory') {
+                   _KernelInterruptQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ,[pcb]));
+               }
+            }
+
+            _MemoryManager.clearAllMem();
+        }
+
+        public shellRunAll(args) {
+            // Get list of resident processes
+            let residentList = _ResidentList.filter(element => element.state == 'resident');
+
+            // Get a list of the pids of all the resident processes
+            let pids = residentList.map( element => element.pid);
+
+            // Run each resident process
+            for(let pid of pids) {
+                let pcb = _ResidentList.find(element => element.pid == pid);
+                _StdOut.putText(`Running process ${pid}`);
+                _StdOut.advanceLine();
+                _Scheduler.addToReadyQueue(pcb);
+            }
+        }
+
+        public shellPs() {
+            for(let process of _ResidentList) {
+                _StdOut.putText(`${process.pid}: ${process.state}`);
+                _StdOut.advanceLine();
+            }
+        }
+
+        public shellKill(args) { // Only terminate processes that are ready or running
+            if (args.length > 0) {
+                let pcb = _ReadyQueue.find(element => element.pid == args[0]);
+
+                if (pcb) {
+                    _KernelInterruptQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+                } else {
+                    _StdOut.putText("Process either doesn't exist or is terminated/resident.");
+                }
+            } else {
+                _StdOut.putText("Usage: kill <PID> Please supply a PID.");
+            }
+        }
+
+        public shellKillAll() {
+            // Terminate each process in ready queue
+            for(let pcb of _ReadyQueue) {
+                _KernelInterruptQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+            }
+        }
+
+        public shellQuantum(args) {
+            if (args.length > 0) {
+                _Scheduler.quantum = parseInt(args[0]);
+            } else {
+                _StdOut.putText("Usage: quantum <int> Please supply an integer.");
             }
         }
 

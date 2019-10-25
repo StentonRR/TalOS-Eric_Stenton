@@ -29,6 +29,8 @@ const PRINT_YREGISTER_IRQ: number = 4;
 
 const PRINT_FROM_MEMORY_IRQ: number = 5;
 
+const TERMINATE_PROCESS_IRQ: number = 6;
+
 
 
 //
@@ -44,10 +46,11 @@ var _Dispatcher: TSOS.Dispatcher;
 
 // Software (OS)
 var _MemoryManager: TSOS.MemoryManager;
+var _Scheduler: TSOS.Scheduler;
 
 // Processes
 var _PidCounter = 0;
-var _PcbList = [];
+var _ResidentList = []; // List of all PCB's
 
 // Queue with processes ready for cpu
 var _ReadyQueue = [];

@@ -21,6 +21,7 @@ var TERMINATE_CURRENT_PROCESS_IRQ = 2;
 var RUN_PROCESS_IRQ = 3;
 var PRINT_YREGISTER_IRQ = 4;
 var PRINT_FROM_MEMORY_IRQ = 5;
+var TERMINATE_PROCESS_IRQ = 6;
 //
 // Global Variables
 // TODO: Make a global object and use that instead of the "_" naming convention in the global namespace.
@@ -32,9 +33,10 @@ var _MemoryAccessor;
 var _Dispatcher;
 // Software (OS)
 var _MemoryManager;
+var _Scheduler;
 // Processes
 var _PidCounter = 0;
-var _PcbList = [];
+var _ResidentList = []; // List of all PCB's
 // Queue with processes ready for cpu
 var _ReadyQueue = [];
 var _OSclock = 0; // Page 23.

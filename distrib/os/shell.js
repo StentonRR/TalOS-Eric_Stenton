@@ -106,9 +106,24 @@ var TSOS;
             // quote
             sc = new TSOS.ShellCommand(this.shellQuote, "quote", "Displays a random programmer quote in labeled text area", "quote");
             this.commandList.push(sc);
-            // ps  - list the running processes and their IDs
-            // kill <id> - kills the specified process id.
-            //
+            // ps
+            sc = new TSOS.ShellCommand(this.shellPs, "ps", "List the running processes and their IDs", "ps");
+            this.commandList.push(sc);
+            // kill <PID>
+            sc = new TSOS.ShellCommand(this.shellKill, "kill", "Kills the process with specified process ID", "kill <PID>");
+            this.commandList.push(sc);
+            // clearmem
+            sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "Clears all memory partitions; this will terminate all processes in memory", "clearmem");
+            this.commandList.push(sc);
+            // runall
+            sc = new TSOS.ShellCommand(this.shellRunAll, "runall", "Run all processes with a 'resident' state", "runall");
+            this.commandList.push(sc);
+            // killall
+            sc = new TSOS.ShellCommand(this.shellKillAll, "killall", "Kill all processes", "killall");
+            this.commandList.push(sc);
+            // quantum <int>
+            sc = new TSOS.ShellCommand(this.shellQuantum, "quantum", "Sets the Round Robin quantum", "quantum <int>");
+            this.commandList.push(sc);
             // Display the initial prompt.
             this.putPrompt();
         };
@@ -259,7 +274,7 @@ var TSOS;
         Shell.prototype.shellRun = function (args) {
             if (args.length > 0) {
                 var pid_1 = parseInt(args[0]);
-                var pcb = _PcbList.find(function (element) { return element.pid == pid_1; });
+                var pcb = _ResidentList.find(function (element) { return element.pid == pid_1; });
                 if (!pcb) {
                     _StdOut.putText("Process " + pid_1 + " does not exist");
                 }
@@ -271,15 +286,74 @@ var TSOS;
                 }
                 else {
                     _StdOut.putText("Running process " + pid_1);
-                    // Process is ready to be processed by cpu
-                    pcb.state = "ready";
-                    _ReadyQueue.push(pcb);
-                    // Run process -- will be moved to scheduler later
-                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(RUN_PROCESS_IRQ, [pcb]));
+                    _Scheduler.addToReadyQueue(pcb);
                 }
             }
             else {
                 _StdOut.putText("Usage: run <pid> Please supply a process id.");
+            }
+        };
+        Shell.prototype.shellClearMem = function () {
+            // Kill all processes in memory first -- ignore already terminated ones
+            for (var _i = 0, _ResidentList_1 = _ResidentList; _i < _ResidentList_1.length; _i++) {
+                var pcb = _ResidentList_1[_i];
+                if (pcb.state != 'terminated' && pcb.storageLocation == 'memory') {
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+                }
+            }
+            _MemoryManager.clearAllMem();
+        };
+        Shell.prototype.shellRunAll = function (args) {
+            // Get list of resident processes
+            var residentList = _ResidentList.filter(function (element) { return element.state == 'resident'; });
+            // Get a list of the pids of all the resident processes
+            var pids = residentList.map(function (element) { return element.pid; });
+            var _loop_1 = function (pid) {
+                var pcb = _ResidentList.find(function (element) { return element.pid == pid; });
+                _StdOut.putText("Running process " + pid);
+                _StdOut.advanceLine();
+                _Scheduler.addToReadyQueue(pcb);
+            };
+            // Run each resident process
+            for (var _i = 0, pids_1 = pids; _i < pids_1.length; _i++) {
+                var pid = pids_1[_i];
+                _loop_1(pid);
+            }
+        };
+        Shell.prototype.shellPs = function () {
+            for (var _i = 0, _ResidentList_2 = _ResidentList; _i < _ResidentList_2.length; _i++) {
+                var process = _ResidentList_2[_i];
+                _StdOut.putText(process.pid + ": " + process.state);
+                _StdOut.advanceLine();
+            }
+        };
+        Shell.prototype.shellKill = function (args) {
+            if (args.length > 0) {
+                var pcb = _ReadyQueue.find(function (element) { return element.pid == args[0]; });
+                if (pcb) {
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+                }
+                else {
+                    _StdOut.putText("Process either doesn't exist or is terminated/resident.");
+                }
+            }
+            else {
+                _StdOut.putText("Usage: kill <PID> Please supply a PID.");
+            }
+        };
+        Shell.prototype.shellKillAll = function () {
+            // Terminate each process in ready queue
+            for (var _i = 0, _ReadyQueue_1 = _ReadyQueue; _i < _ReadyQueue_1.length; _i++) {
+                var pcb = _ReadyQueue_1[_i];
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+            }
+        };
+        Shell.prototype.shellQuantum = function (args) {
+            if (args.length > 0) {
+                _Scheduler.quantum = parseInt(args[0]);
+            }
+            else {
+                _StdOut.putText("Usage: quantum <int> Please supply an integer.");
             }
         };
         Shell.prototype.shellStatus = function (args) {

@@ -3,13 +3,23 @@ var TSOS;
     var MemoryManager = /** @class */ (function () {
         function MemoryManager(availability, // Whether the memory segment is being used or not
         memoryRegisters) {
-            if (availability === void 0) { availability = [true, true, true]; }
-            if (memoryRegisters === void 0) { memoryRegisters = [{ index: 0, baseRegister: 0, limitRegister: 256 },
-                { index: 1, baseRegister: 256, limitRegister: 512 },
-                { index: 2, baseRegister: 512, limitRegister: 768 }]; }
+            if (availability === void 0) { availability = []; }
+            if (memoryRegisters === void 0) { memoryRegisters = []; }
             this.availability = availability;
             this.memoryRegisters = memoryRegisters;
         }
+        MemoryManager.prototype.init = function () {
+            // Create memory information
+            var memorySegmentSize = _MemoryAccessor.getSegmentSize();
+            var memorySize = _MemoryAccessor.getMemorySize();
+            var numberOfSegments = memorySize / memorySegmentSize;
+            for (var i = 0; i < numberOfSegments; i++) {
+                this.availability[i] = true;
+                this.memoryRegisters[i] = { index: i,
+                    baseRegister: memorySegmentSize * i,
+                    limitRegister: memorySegmentSize * (i + 1) };
+            }
+        };
         MemoryManager.prototype.load = function (program, priority) {
             var memorySegment;
             // Find next available memory segment
@@ -44,8 +54,14 @@ var TSOS;
             pcb.priority = parseInt(priority) || 0;
             pcb.state = "resident";
             // Add pcb to global list
-            _PcbList.push(pcb);
+            _ResidentList.push(pcb);
             return pcb;
+        };
+        MemoryManager.prototype.clearAllMem = function () {
+            for (var _i = 0, _a = this.memoryRegisters; _i < _a.length; _i++) {
+                var segment = _a[_i];
+                _MemoryAccessor.clear(segment.index);
+            }
         };
         return MemoryManager;
     }());
