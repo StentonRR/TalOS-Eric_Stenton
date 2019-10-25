@@ -54,7 +54,7 @@ var TSOS;
             pcb.priority = parseInt(priority) || 0;
             pcb.state = "resident";
             // Add pcb to global list
-            _PcbList.push(pcb);
+            _ResidentList.push(pcb);
             return pcb;
         };
         MemoryManager.prototype.clearAllMem = function () {

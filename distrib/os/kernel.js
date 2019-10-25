@@ -83,15 +83,16 @@ var TSOS;
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             }
             else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed. {
-                // Update the turnaround time and wait time for processes
-                _Scheduler.updateStatistics();
                 if (_SingleStep) { // One cycle at a time in single-step mode
                     if (_NextStep) {
+                        // Update the turnaround time and wait time for processes
+                        _Scheduler.updateStatistics();
                         _CPU.cycle();
-                        _NextStep = false;
                     }
                 }
                 else {
+                    // Update the turnaround time and wait time for processes
+                    _Scheduler.updateStatistics();
                     _CPU.cycle();
                 }
                 TSOS.Control.updateCpuDisplay(); // Update CPU visual display
@@ -100,11 +101,16 @@ var TSOS;
                 this.krnTrace("Idle");
             }
             // Manage process execution if any are ready -- there is no overhead for the project,
-            // so no need to put it into the above if-else statement to take up a clock tick
-            if (_ReadyQueue.length > 0) {
+            // so no need to put it into the above if-else statement to take up a clock tick.
+            // Don't schedule if there are interrupts to avoid any discrepancies.
+            // Don't schedule if in single-step mode and it is not the next step
+            if ((_ReadyQueue.length > 0 && _KernelInterruptQueue.getSize() == 0) && (!_SingleStep || _NextStep)) {
                 this.krnTrace("Scheduler active");
                 _Scheduler.scheduleProcesses();
             }
+            // Change this here to allow scheduler to work with single-step mode
+            if (_NextStep)
+                _NextStep = false;
         };
         //
         // Interrupt Handling

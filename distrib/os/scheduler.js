@@ -9,7 +9,7 @@ var TSOS;
             if (quantum === void 0) { quantum = 6; }
             if (turns === void 0) { turns = 0; }
             if (currentProcess === void 0) { currentProcess = null; }
-            if (activeAlgorithm === void 0) { activeAlgorithm = "rr"; }
+            if (activeAlgorithm === void 0) { activeAlgorithm = "p"; }
             this.quantum = quantum;
             this.turns = turns;
             this.currentProcess = currentProcess;
@@ -17,6 +17,8 @@ var TSOS;
         }
         // Sort ready queue in order designated by scheduling algorithm -- running process should always be in index 0
         Scheduler.prototype.scheduleProcesses = function () {
+            // Set currently running process if there is one
+            this.currentProcess = _ReadyQueue.find(function (element) { return element.state == 'running'; });
             switch (this.activeAlgorithm) {
                 case "rr": // Round Robin
                     this.roundRobinScheduler(this.quantum);
@@ -27,14 +29,14 @@ var TSOS;
                 case "sjf": // Shortest Job First
                     break;
                 case "p": // Priority
+                    this.priorityScheduler();
                     break;
             }
         };
         // Run the next process in the ready queue
         Scheduler.prototype.runProcess = function () {
             // Make sure process isn't already running
-            var runningProcess = _PcbList.find(function (element) { return element.state == 'running'; });
-            if (!runningProcess || runningProcess.pid !== _ReadyQueue[0].pid) {
+            if (!this.currentProcess || this.currentProcess.pid !== _ReadyQueue[0].pid) {
                 // Run process through interrupt and dispatcher
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(RUN_PROCESS_IRQ, [_ReadyQueue[0]]));
             }
@@ -52,13 +54,11 @@ var TSOS;
                 if (this.turns <= 0) { // Reorder ready queue and run next process because turns ran out
                     var process = _ReadyQueue.splice(0, 1);
                     _ReadyQueue.push(process[0]);
-                    this.currentProcess = _ReadyQueue[0];
                     this.turns = quantum;
                 }
             }
-            else { // Run next process because previous one terminated or this is the first one to run
+            else { // Run next process because previous one terminated or this is the first one to run -- quantum reset
                 this.turns = quantum;
-                this.currentProcess = _ReadyQueue[0];
             }
             this.runProcess();
             this.turns--;
@@ -66,11 +66,12 @@ var TSOS;
         Scheduler.prototype.shortestJobFirstScheduler = function () {
         };
         Scheduler.prototype.priorityScheduler = function () {
-            _ReadyQueue.sort(function (a, b) { return (b.priority < a.priority) ? 1 : -1; });
+            _ReadyQueue.sort(function (a, b) { return (b.priority <= a.priority) ? 1 : -1; });
+            this.runProcess();
         };
         Scheduler.prototype.updateStatistics = function () {
-            for (var _i = 0, _PcbList_1 = _PcbList; _i < _PcbList_1.length; _i++) {
-                var pcb = _PcbList_1[_i];
+            for (var _i = 0, _ResidentList_1 = _ResidentList; _i < _ResidentList_1.length; _i++) {
+                var pcb = _ResidentList_1[_i];
                 pcb.turnAroundTime++;
                 // Turnaround and wait time increases for ready processes
                 if (pcb.state === 'ready')

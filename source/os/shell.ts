@@ -147,7 +147,7 @@ module TSOS {
             sc = new ShellCommand(this.shellKill,
                 "kill",
                 "Kills the process with specified process ID",
-                "kill <ID>");
+                "kill <PID>");
             this.commandList.push(sc);
 
             // clearmem
@@ -175,7 +175,7 @@ module TSOS {
             sc = new ShellCommand(this.shellQuantum,
                 "quantum",
                 "Sets the Round Robin quantum",
-                "killall");
+                "quantum <int>");
             this.commandList.push(sc);
 
             // Display the initial prompt.
@@ -344,7 +344,7 @@ module TSOS {
         public shellRun(args) {
             if (args.length > 0) {
                 let pid = parseInt(args[0]);
-                let pcb = _PcbList.find(element => element.pid == pid);
+                let pcb = _ResidentList.find(element => element.pid == pid);
 
                 if (!pcb) {
                     _StdOut.putText(`Process ${pid} does not exist`);
@@ -369,10 +369,10 @@ module TSOS {
 
         public shellClearMem() {
             // Kill all processes in memory first -- ignore already terminated ones
-            for(let pcb of _PcbList) {
-               if(pcb.state != 'terminated' && pcb.storageLocation == 'memory') _KernelInterruptQueue.enqueue(
-                                                                    new Interrupt(TERMINATE_PROCESS_IRQ,
-                                                                   [pcb]));
+            for(let pcb of _ResidentList) {
+               if(pcb.state != 'terminated' && pcb.storageLocation == 'memory') {
+                   _KernelInterruptQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ,[pcb]));
+               }
             }
 
             _MemoryManager.clearAllMem();
@@ -380,14 +380,14 @@ module TSOS {
 
         public shellRunAll(args) {
             // Get list of resident processes
-            let residentList = _PcbList.filter(element => element.state == 'resident');
+            let residentList = _ResidentList.filter(element => element.state == 'resident');
 
             // Get a list of the pids of all the resident processes
             let pids = residentList.map( element => element.pid);
 
             // Run each resident process
             for(let pid of pids) {
-                let pcb = _PcbList.find(element => element.pid == pid);
+                let pcb = _ResidentList.find(element => element.pid == pid);
                 _StdOut.putText(`Running process ${pid}`);
                 _StdOut.advanceLine();
                 _Scheduler.addToReadyQueue(pcb);
@@ -395,7 +395,7 @@ module TSOS {
         }
 
         public shellPs() {
-            for(let process of _PcbList) {
+            for(let process of _ResidentList) {
                 _StdOut.putText(`${process.pid}: ${process.state}`);
                 _StdOut.advanceLine();
             }

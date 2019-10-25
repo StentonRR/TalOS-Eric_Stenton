@@ -10,6 +10,9 @@ module TSOS {
 
         // Sort ready queue in order designated by scheduling algorithm -- running process should always be in index 0
         public scheduleProcesses() {
+            // Set currently running process if there is one
+            this.currentProcess = _ReadyQueue.find(element => element.state == 'running');
+
             switch (this.activeAlgorithm) {
                 case "rr": // Round Robin
                     this.roundRobinScheduler(this.quantum);
@@ -20,6 +23,7 @@ module TSOS {
                 case "sjf": // Shortest Job First
                     break;
                 case "p": // Priority
+                    this.priorityScheduler();
                     break;
             }
         }
@@ -27,9 +31,7 @@ module TSOS {
         // Run the next process in the ready queue
         public runProcess() {
             // Make sure process isn't already running
-            let runningProcess = _PcbList.find(element => element.state == 'running');
-
-            if (!runningProcess || runningProcess.pid !== _ReadyQueue[0].pid) {
+            if (!this.currentProcess ||  this.currentProcess.pid !== _ReadyQueue[0].pid) {
                 // Run process through interrupt and dispatcher
                 _KernelInterruptQueue.enqueue(new Interrupt(RUN_PROCESS_IRQ, [_ReadyQueue[0]]));
             }
@@ -50,12 +52,10 @@ module TSOS {
                     let process = _ReadyQueue.splice(0, 1);
                     _ReadyQueue.push(process[0]);
 
-                    this.currentProcess = _ReadyQueue[0];
                     this.turns = quantum;
                 }
-            } else { // Run next process because previous one terminated or this is the first one to run
+            } else { // Run next process because previous one terminated or this is the first one to run -- quantum reset
                 this.turns = quantum;
-                this.currentProcess = _ReadyQueue[0];
             }
 
             this.runProcess();
@@ -67,11 +67,12 @@ module TSOS {
         }
 
         public priorityScheduler() {
-            _ReadyQueue.sort((a, b) => (b.priority < a.priority) ? 1 : -1);
+            _ReadyQueue.sort((a, b) => (b.priority <= a.priority) ? 1 : -1);
+            this.runProcess();
         }
 
         public updateStatistics() {
-            for (let pcb of _PcbList) {
+            for (let pcb of _ResidentList) {
                 pcb.turnAroundTime++;
 
                 // Turnaround and wait time increases for ready processes

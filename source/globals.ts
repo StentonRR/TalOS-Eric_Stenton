@@ -50,7 +50,7 @@ var _Scheduler: TSOS.Scheduler;
 
 // Processes
 var _PidCounter = 0;
-var _PcbList = []; // List of all PCB's....acts as resident list...holds terminated processes as well
+var _ResidentList = []; // List of all PCB's
 
 // Queue with processes ready for cpu
 var _ReadyQueue = [];
