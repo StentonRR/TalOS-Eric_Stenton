@@ -86,6 +86,9 @@ var TSOS;
             var table = document.getElementById("tableCpu");
             var row = table.rows[1];
             var currentInstruction = TSOS.Utils.padHex(_CPU.IR.toString(16).toLocaleUpperCase());
+            // If invalid op code, return
+            if (!opCodeInfo[currentInstruction])
+                return;
             // Set cpu information
             row.cells[0].innerHTML = (_CPU.PC - opCodeInfo[currentInstruction].operandNumber - 1).toString(); // Subtract 1 due to the program counter
             // increasing at the end of a cycle.
@@ -101,17 +104,17 @@ var TSOS;
             var newTbody = document.createElement('tbody');
             // Add rows for each process to tbody
             var row;
-            for (var i = 0; i < _PcbList.length; i++) {
+            for (var i = 0; i < _ResidentList.length; i++) {
                 row = newTbody.insertRow(-1);
                 // Add pcb information
-                row.insertCell(-1).innerHTML = _PcbList[i].pid;
-                row.insertCell(-1).innerHTML = _PcbList[i].priority;
-                row.insertCell(-1).innerHTML = _PcbList[i].state.toLocaleUpperCase();
-                row.insertCell(-1).innerHTML = _PcbList[i].PC;
-                row.insertCell(-1).innerHTML = _PcbList[i].Acc.toString(16).toLocaleUpperCase();
-                row.insertCell(-1).innerHTML = _PcbList[i].Xreg.toString(16).toLocaleUpperCase();
-                row.insertCell(-1).innerHTML = _PcbList[i].Yreg.toString(16).toLocaleUpperCase();
-                row.insertCell(-1).innerHTML = _PcbList[i].Zflag.toString(16);
+                row.insertCell(-1).innerHTML = _ResidentList[i].pid;
+                row.insertCell(-1).innerHTML = _ResidentList[i].state.toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _ResidentList[i].priority;
+                row.insertCell(-1).innerHTML = _ResidentList[i].PC;
+                row.insertCell(-1).innerHTML = _ResidentList[i].Acc.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _ResidentList[i].Xreg.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _ResidentList[i].Yreg.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _ResidentList[i].Zflag.toString(16);
             }
             // Replace old tbody with new one
             table.replaceChild(newTbody, table.tBodies[0]);
@@ -167,7 +170,7 @@ var TSOS;
                     cell.innerHTML = memory[physicalAddress];
                     currentInstruction = TSOS.Utils.padHex(_CPU.IR.toString(16).toLocaleUpperCase());
                     // Highlight the current memory address being read in display
-                    if (_CPU.PCB && _CPU.isExecuting) {
+                    if (_CPU.PCB && _CPU.isExecuting && opCodeInfo[currentInstruction]) {
                         // Subtract 1 from below due to the program counter being incremented at the end of a cycle
                         if ((_CPU.PCB.memorySegment.baseRegister + _CPU.PC - opCodeInfo[currentInstruction].operandNumber - 1) == physicalAddress) {
                             cell.style.backgroundColor = "#ff6961";
@@ -219,8 +222,6 @@ var TSOS;
             _Memory.init();
             // ... Create memory accessor ...
             _MemoryAccessor = new TSOS.MemoryAccessor();
-            // ... Create memory manager ...
-            _MemoryManager = new TSOS.MemoryManager();
             // ... Create dispatcher ...
             _Dispatcher = new TSOS.Dispatcher();
             // ... then set the host clock pulse ...

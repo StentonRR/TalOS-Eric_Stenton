@@ -36,9 +36,11 @@ var TSOS;
             _krnKeyboardDriver = new TSOS.DeviceDriverKeyboard(); // Construct it.
             _krnKeyboardDriver.driverEntry(); // Call the driverEntry() initialization routine.
             this.krnTrace(_krnKeyboardDriver.status);
-            //
-            // ... more?
-            //
+            // Initialize memory manager
+            _MemoryManager = new TSOS.MemoryManager();
+            _MemoryManager.init();
+            // Initialize scheduler
+            _Scheduler = new TSOS.Scheduler();
             // Enable the OS Interrupts.  (Not the CPU clock interrupt, as that is done in the hardware sim.)
             this.krnTrace("Enabling the interrupts.");
             this.krnEnableInterrupts();
@@ -83,11 +85,14 @@ var TSOS;
             else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed. {
                 if (_SingleStep) { // One cycle at a time in single-step mode
                     if (_NextStep) {
+                        // Update the turnaround time and wait time for processes
+                        _Scheduler.updateStatistics();
                         _CPU.cycle();
-                        _NextStep = false;
                     }
                 }
                 else {
+                    // Update the turnaround time and wait time for processes
+                    _Scheduler.updateStatistics();
                     _CPU.cycle();
                 }
                 TSOS.Control.updateCpuDisplay(); // Update CPU visual display
@@ -95,6 +100,17 @@ var TSOS;
             else { // If there are no interrupts and there is nothing being executed then just be idle. {
                 this.krnTrace("Idle");
             }
+            // Manage process execution if any are ready -- there is no overhead for the project,
+            // so no need to put it into the above if-else statement to take up a clock tick.
+            // Don't schedule if there are interrupts to avoid any discrepancies.
+            // Don't schedule if in single-step mode and it is not the next step
+            if ((_ReadyQueue.length > 0 && _KernelInterruptQueue.getSize() == 0) && (!_SingleStep || _NextStep)) {
+                this.krnTrace("Scheduler active");
+                _Scheduler.scheduleProcesses();
+            }
+            // Change this here to allow scheduler to work with single-step mode
+            if (_NextStep)
+                _NextStep = false;
         };
         //
         // Interrupt Handling
@@ -143,6 +159,10 @@ var TSOS;
                         value = parseInt(_MemoryAccessor.read(_CPU.PCB.memorySegment, ++address), 16);
                     }
                     _StdOut.putText(output);
+                    break;
+                case TERMINATE_PROCESS_IRQ: // Terminate specified process -- use dispatcher if process is running
+                    var pcb = params[0];
+                    pcb.state == 'running' ? _Dispatcher.terminateCurrentProcess() : pcb.terminate();
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");

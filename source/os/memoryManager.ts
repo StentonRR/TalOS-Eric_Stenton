@@ -1,10 +1,22 @@
 module TSOS {
     export class MemoryManager {
         constructor(
-            public availability: Boolean[] = [true, true, true], // Whether the memory segment is being used or not
-            public memoryRegisters: any[] = [{index: 0, baseRegister: 0, limitRegister: 256},
-                                            {index: 1, baseRegister: 256, limitRegister: 512},
-                                            {index: 2, baseRegister: 512, limitRegister: 768}]) { // Memory segment info to be placed into process control blocks
+            public availability: Boolean[] = [], // Whether the memory segment is being used or not
+            public memoryRegisters: any[] = []) { // Memory segment info to be placed into process control blocks
+        }
+
+        public init(): void {
+            // Create memory information
+            let memorySegmentSize = _MemoryAccessor.getSegmentSize();
+            let memorySize = _MemoryAccessor.getMemorySize();
+            let numberOfSegments = memorySize / memorySegmentSize;
+
+            for (let i = 0; i < numberOfSegments; i++) {
+                this.availability[i] = true;
+                this.memoryRegisters[i] = {index: i,
+                                           baseRegister: memorySegmentSize*i,
+                                           limitRegister: memorySegmentSize*(i+1)}
+            }
         }
 
         public load(program, priority): PCB | undefined {
@@ -49,9 +61,15 @@ module TSOS {
             pcb.state = "resident";
 
             // Add pcb to global list
-            _PcbList.push(pcb);
+            _ResidentList.push(pcb);
 
             return pcb;
+        }
+
+        public clearAllMem(): void {
+            for (let segment of this.memoryRegisters) {
+                _MemoryAccessor.clear(segment.index);
+            }
         }
     }
 }

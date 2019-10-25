@@ -10,6 +10,7 @@ module TSOS {
             public pid: number = _PidCounter++, // Process id
             public priority: number = 0, // Priority of the process
             public memorySegment: any = {}, // The segment of memory the program resides
+            public storageLocation: string = "memory",
 
             // Accounting information
             public waitTime: number = 0, // Time the program spent waiting
@@ -29,6 +30,10 @@ module TSOS {
             // Notify user of termination
             _StdOut.advanceLine();
             _StdOut.putText(`Process ${this.pid} terminated`);
+            _StdOut.advanceLine();
+            _StdOut.putText(`Turnaround Time: ${this.turnAroundTime} Cycles`);
+            _StdOut.advanceLine();
+            _StdOut.putText(`Wait Time: ${this.waitTime} Cycles`);
             _StdOut.advanceLine();
             _OsShell.putPrompt();
 
