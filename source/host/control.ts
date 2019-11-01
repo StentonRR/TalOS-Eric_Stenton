@@ -193,7 +193,7 @@ module TSOS {
                 let operandHighlights = [];
                 for (let j = 0; j < 8; j++) {
                     cell = row.insertCell(-1);
-                    cell.innerHTML = memory[physicalAddress];
+                    cell.innerHTML = memory[physicalAddress].toLocaleUpperCase();
 
                     currentInstruction = Utils.padHex( _CPU.IR.toString(16).toLocaleUpperCase() );
 
