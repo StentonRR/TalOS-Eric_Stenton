@@ -153,7 +153,7 @@ module TSOS {
             // clearmem
             sc = new ShellCommand(this.shellClearMem,
                 "clearmem",
-                "Clears all memory partitions; this will terminate all processes in memory",
+                "Clears memory partitions; this will terminate ready processes but ignore running process",
                 "clearmem");
             this.commandList.push(sc);
 
@@ -368,14 +368,18 @@ module TSOS {
         }
 
         public shellClearMem() {
-            // Kill all processes in memory first -- ignore already terminated ones
+            // Kill processes in memory first -- ignore already terminated ones and currently running process
+
+            let ignoreList = []; // list of memory segments to ignore when clearing
             for(let pcb of _ResidentList) {
-               if(pcb.state != 'terminated' && pcb.storageLocation == 'memory') {
+                if(pcb.state != 'terminated' && pcb.state != 'running' && pcb.storageLocation == 'memory') {
                    _KernelInterruptQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ,[pcb]));
-               }
+               } else if(pcb.state == 'running') {
+                    ignoreList.push(pcb.memorySegment.index);
+                }
             }
 
-            _MemoryManager.clearAllMem();
+            _MemoryManager.clearAllMem(ignoreList);
         }
 
         public shellRunAll(args) {
@@ -425,6 +429,7 @@ module TSOS {
         public shellQuantum(args) {
             if (args.length > 0) {
                 _Scheduler.quantum = parseInt(args[0]);
+                _StdOut.putText(`Quantum is now ${args[0]}`);
             } else {
                 _StdOut.putText("Usage: quantum <int> Please supply an integer.");
             }

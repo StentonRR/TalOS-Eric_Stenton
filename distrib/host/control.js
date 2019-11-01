@@ -167,7 +167,7 @@ var TSOS;
                 var operandHighlights = [];
                 for (var j = 0; j < 8; j++) {
                     cell = row.insertCell(-1);
-                    cell.innerHTML = memory[physicalAddress];
+                    cell.innerHTML = memory[physicalAddress].toLocaleUpperCase();
                     currentInstruction = TSOS.Utils.padHex(_CPU.IR.toString(16).toLocaleUpperCase());
                     // Highlight the current memory address being read in display
                     if (_CPU.PCB && _CPU.isExecuting && opCodeInfo[currentInstruction]) {

@@ -10,7 +10,7 @@ var TSOS;
         pid, // Process id
         priority, // Priority of the process
         memorySegment, // The segment of memory the program resides
-        storageLocation, 
+        storageLocation, // Where the program is currently stored
         // Accounting information
         waitTime, // Time the program spent waiting
         turnAroundTime // Time it took for the program to execute
