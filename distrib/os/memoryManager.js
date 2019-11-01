@@ -57,10 +57,11 @@ var TSOS;
             _ResidentList.push(pcb);
             return pcb;
         };
-        MemoryManager.prototype.clearAllMem = function () {
+        MemoryManager.prototype.clearAllMem = function (ignoreList) {
             for (var _i = 0, _a = this.memoryRegisters; _i < _a.length; _i++) {
                 var segment = _a[_i];
-                _MemoryAccessor.clear(segment.index);
+                if (!ignoreList.includes(segment.index))
+                    _MemoryAccessor.clear(segment);
             }
         };
         return MemoryManager;
