@@ -66,9 +66,9 @@ module TSOS {
             return pcb;
         }
 
-        public clearAllMem(): void {
+        public clearAllMem(ignoreList): void {
             for (let segment of this.memoryRegisters) {
-                _MemoryAccessor.clear(segment.index);
+                if ( !ignoreList.includes(segment.index) ) _MemoryAccessor.clear(segment);
             }
         }
     }

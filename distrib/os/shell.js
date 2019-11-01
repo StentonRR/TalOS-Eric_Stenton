@@ -113,7 +113,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellKill, "kill", "Kills the process with specified process ID", "kill <PID>");
             this.commandList.push(sc);
             // clearmem
-            sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "Clears all memory partitions; this will terminate all processes in memory", "clearmem");
+            sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "Clears memory partitions; this will terminate ready processes but ignore running process", "clearmem");
             this.commandList.push(sc);
             // runall
             sc = new TSOS.ShellCommand(this.shellRunAll, "runall", "Run all processes with a 'resident' state", "runall");
@@ -294,14 +294,18 @@ var TSOS;
             }
         };
         Shell.prototype.shellClearMem = function () {
-            // Kill all processes in memory first -- ignore already terminated ones
+            // Kill processes in memory first -- ignore already terminated ones and currently running process
+            var ignoreList = []; // list of memory segments to ignore when clearing
             for (var _i = 0, _ResidentList_1 = _ResidentList; _i < _ResidentList_1.length; _i++) {
                 var pcb = _ResidentList_1[_i];
-                if (pcb.state != 'terminated' && pcb.storageLocation == 'memory') {
+                if (pcb.state != 'terminated' && pcb.state != 'running' && pcb.storageLocation == 'memory') {
                     _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
                 }
+                else if (pcb.state == 'running') {
+                    ignoreList.push(pcb.memorySegment.index);
+                }
             }
-            _MemoryManager.clearAllMem();
+            _MemoryManager.clearAllMem(ignoreList);
         };
         Shell.prototype.shellRunAll = function (args) {
             // Get list of resident processes
@@ -351,6 +355,7 @@ var TSOS;
         Shell.prototype.shellQuantum = function (args) {
             if (args.length > 0) {
                 _Scheduler.quantum = parseInt(args[0]);
+                _StdOut.putText("Quantum is now " + args[0]);
             }
             else {
                 _StdOut.putText("Usage: quantum <int> Please supply an integer.");

@@ -10,7 +10,7 @@ module TSOS {
             public pid: number = _PidCounter++, // Process id
             public priority: number = 0, // Priority of the process
             public memorySegment: any = {}, // The segment of memory the program resides
-            public storageLocation: string = "memory",
+            public storageLocation: string = "memory", // Where the program is currently stored
 
             // Accounting information
             public waitTime: number = 0, // Time the program spent waiting

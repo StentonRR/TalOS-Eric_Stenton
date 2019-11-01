@@ -10,19 +10,23 @@ module TSOS {
 
         // Sort ready queue in order designated by scheduling algorithm -- running process should always be in index 0
         public scheduleProcesses() {
+            // Set mode bit = user mode
+            _Mode = 1;
+
             // Set currently running process if there is one
             this.currentProcess = _ReadyQueue.find(element => element.state == 'running');
 
             switch (this.activeAlgorithm) {
                 case "rr": // Round Robin
+                    _Kernel.krnTrace(`Scheduling with round robin: quantum = ${this.quantum}`);
                     this.roundRobinScheduler(this.quantum);
                     break;
                 case "fcfs": // First Come, First Serve
+                    _Kernel.krnTrace("Scheduling with first come, first serve");
                     this.roundRobinScheduler(Infinity); // Doesn't need function of its own, just a high quantum
                     break;
-                case "sjf": // Shortest Job First
-                    break;
                 case "p": // Priority
+                    _Kernel.krnTrace("Scheduling with priority");
                     this.priorityScheduler();
                     break;
             }
@@ -33,8 +37,12 @@ module TSOS {
             // Make sure process isn't already running
             if (!this.currentProcess ||  this.currentProcess.pid !== _ReadyQueue[0].pid) {
                 // Run process through interrupt and dispatcher
+                _Kernel.krnTrace("Issuing context switch");
                 _KernelInterruptQueue.enqueue(new Interrupt(RUN_PROCESS_IRQ, [_ReadyQueue[0]]));
             }
+
+            // Set mode bit = kernel mode
+            _Mode = 0;
         }
 
         // Adds a process to ready queue and changes its state
@@ -62,20 +70,17 @@ module TSOS {
             this.turns--;
         }
 
-        public shortestJobFirstScheduler() {
-
-        }
-
         public priorityScheduler() {
             _ReadyQueue.sort((a, b) => (b.priority <= a.priority) ? 1 : -1);
             this.runProcess();
         }
 
         public updateStatistics() {
+            _Kernel.krnTrace("Updating turnaround time and wait time for PCBs");
             for (let pcb of _ResidentList) {
                 pcb.turnAroundTime++;
 
-                // Turnaround and wait time increases for ready processes
+                // Turnaround AND wait time increases for ready processes
                 if (pcb.state === 'ready') pcb.waitTime++;
             }
 
