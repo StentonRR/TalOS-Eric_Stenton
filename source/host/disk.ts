@@ -16,7 +16,7 @@ module TSOS {
                     for (let b = 0; b < this.blockNumber; b++) {
 
                         let availability = 0; // If the block is free to be used
-                        let pointer = '-1:-1:-1'; // The next associated block address
+                        let pointer = '-1:-1:-1'; // The next associated block address -- -1 values when not set
                         let data = Array(this.dataSize).fill("00"); // Hex values of files or programs
 
                         sessionStorage.setItem(`${t}:${s}:${b}`, JSON.stringify({availability,
@@ -26,5 +26,12 @@ module TSOS {
                 }
             }
         }
+
+        public getDataSize(): number {
+            return this.dataSize;
+        }
+
+
+
     }
 }
