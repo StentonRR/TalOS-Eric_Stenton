@@ -41,6 +41,7 @@ const TERMINATE_PROCESS_IRQ: number = 6;
 // Hardware (host)
 var _CPU: TSOS.Cpu;  // Utilize TypeScript's type annotation system to ensure that _CPU is an instance of the Cpu class.
 var _Memory: TSOS.Memory;
+var _Disk: TSOS.Disk;
 var _MemoryAccessor: TSOS.MemoryAccessor;
 var _Dispatcher: TSOS.Dispatcher;
 

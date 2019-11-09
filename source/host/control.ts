@@ -262,6 +262,10 @@ module TSOS {
             _Memory = new Memory();
             _Memory.init();
 
+            // ... Create and initialize disk ...
+            _Disk = new Disk();
+            _Disk.init();
+
             // ... Create memory accessor ...
             _MemoryAccessor = new TSOS.MemoryAccessor();
 
