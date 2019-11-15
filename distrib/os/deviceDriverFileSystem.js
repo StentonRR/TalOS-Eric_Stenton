@@ -41,6 +41,16 @@ var TSOS;
             this.status = "loaded";
             // More?
         };
+        DeviceDriverFileSystem.prototype.clearBlock = function (key) {
+            // Get block and parse it to json object
+            var block = JSON.parse(sessionStorage.getItem(key));
+            // Clear data and mark availability + pointer to
+            block.data = Array(_Disk.dataSize).fill("00");
+            block.availability = 0;
+            block.pointer = '-1:-1:-1';
+            // Set session object to new block object
+            sessionStorage.setItem(key, JSON.stringify(block));
+        };
         return DeviceDriverFileSystem;
     }(TSOS.DeviceDriver));
     TSOS.DeviceDriverFileSystem = DeviceDriverFileSystem;

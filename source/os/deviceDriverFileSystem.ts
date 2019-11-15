@@ -14,35 +14,87 @@ module TSOS {
     // Extends DeviceDriver
     export class DeviceDriverFileSystem extends DeviceDriver {
 
-        constructor() {
+        constructor(
+            public formatted = false,
+            public forbiddenPrefixes = ['@'], // File names cannot start with these
+            public specialPrefixes = ['@', '.'] // Files with names that start with these need the -a flag to list
+        ) {
             // Override the base method pointers.
 
             // The code below cannot run because "this" can only be
             // accessed after calling super.
             //super(this.krnKbdDriverEntry, this.krnKbdDispatchKeyPress);
             super();
-            this.driverEntry = this.krnKbdDriverEntry;
-            //this.isr = this.krnKbdDispatchKeyPress;
+            this.driverEntry = this.krnFsDriverEntry;
+            this.isr = this.krnFsDispatchOperation;
         }
 
-        public krnKbdDriverEntry() {
+        public krnFsDriverEntry() {
             // Initialization routine for this, the kernel-mode File System Device Driver.
             this.status = "loaded";
             // More?
         }
 
+        public krnFsDispatchOperation(params) {
+            let action = params[0]; // Operation to be completed
+            let flags = params[1]; // Flags that modify action
+            let target = params[2]; // Target of operation -- file or directory name
+            let data = params[3]; // Any data associated with operation
+
+            if (action == 'format') {
+                _Disk.init();
+
+            } else {
+
+                if (this.formatted) {
+                    switch (action) {
+
+                        case 'readDir': {
+
+                            break;
+                        }
+
+                        default: {
+                            break;
+                        }
+
+                    }
+
+                } else {
+                    _StdOut.putText("The disk must be formatted first!");
+                }
+            }
+
+
+
+        }
+
+        public readFile(key) {
+            let commandFlags = [];
+        }
+
+        public writeFile(key, data) {
+            let commandFlags = [];
+
+        }
+
+        public readDir(key) {
+            let commandFlags = [];
+
+        }
+
+        public writeDir(key, data) {
+            let commandFlags = [];
+
+        }
+
+        public format() {
+            let commandFlags = ['quick', 'full'];
+
+        }
+
         public clearBlock(key) {
-
-            // Get block and parse it to json object
-            let block = JSON.parse( sessionStorage.getItem(key) );
-
-            // Clear data and mark availability + pointer to
-            block.data = Array(_Disk.dataSize).fill("00");
-            block.availability = 0;
-            block.pointer = '-1:-1:-1';
-
-            // Set session object to new block object
-            sessionStorage.setItem(key, JSON.stringify(block));
+            _Disk.initBlock(key);
         }
 
 

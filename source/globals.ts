@@ -31,6 +31,8 @@ const PRINT_FROM_MEMORY_IRQ: number = 5;
 
 const TERMINATE_PROCESS_IRQ: number = 6;
 
+const FILE_SYSTEM_IRQ: number = 7;
+
 
 
 //
