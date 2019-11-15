@@ -62,12 +62,14 @@ var TSOS;
                     _ReadyQueue.push(process[0]);
                     this.turns = quantum;
                 }
+                else {
+                    this.turns--;
+                }
             }
             else { // Run next process because previous one terminated or this is the first one to run -- quantum reset
                 this.turns = quantum;
             }
             this.runProcess();
-            this.turns--;
         };
         Scheduler.prototype.priorityScheduler = function () {
             _ReadyQueue.sort(function (a, b) { return (b.priority <= a.priority) ? 1 : -1; });

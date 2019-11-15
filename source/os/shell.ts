@@ -428,6 +428,12 @@ module TSOS {
 
         public shellQuantum(args) {
             if (args.length > 0) {
+
+                // Quantum cannot be 0 or negative
+                if ( parseInt(args[0]) <= 0 || isNaN(args[0]) ) {
+                    return _StdOut.putText(`Invalid quantum given!`);
+                }
+
                 _Scheduler.quantum = parseInt(args[0]);
                 _StdOut.putText(`Quantum is now ${args[0]}`);
             } else {

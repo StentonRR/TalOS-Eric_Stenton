@@ -118,7 +118,7 @@ module TSOS {
         }
 
         public saveState(): void {
-            // Initial run of a program won't have a pcb to saves, so skip this
+            // Initial run of a program won't have a pcb to save, so skip this
             if (this.PCB) {
                 this.PCB.PC = this.PC;
                 this.PCB.Acc = this.Acc;

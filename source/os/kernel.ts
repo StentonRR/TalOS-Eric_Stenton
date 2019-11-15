@@ -85,6 +85,8 @@ module TSOS {
                This, on the other hand, is the clock pulse from the hardware / VM / host that tells the kernel
                that it has to look for interrupts and process them if it finds any.                           */
 
+            // Have CPU save PCB state to keep visual displays up to date in real time
+            _CPU.saveState();
 
             // Update the memory and pcb visual displays
             TSOS.Control.updateMemoryDisplay();
@@ -126,8 +128,6 @@ module TSOS {
                 _Scheduler.scheduleProcesses();
             }
 
-            // Change this here to allow scheduler to work with single-step mode
-            if(_NextStep) _NextStep = false;
         }
 
 

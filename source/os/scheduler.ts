@@ -56,18 +56,21 @@ module TSOS {
             // Processes should be 'pushed' to ready queue, so they are already in order of arrival,
             // so no need to reorder them
             if (this.currentProcess && _ReadyQueue[0].pid === this.currentProcess.pid) {
+
                 if (this.turns <= 0) { // Reorder ready queue and run next process because turns ran out
                     let process = _ReadyQueue.splice(0, 1);
                     _ReadyQueue.push(process[0]);
 
                     this.turns = quantum;
+                } else {
+                    this.turns--;
                 }
+
             } else { // Run next process because previous one terminated or this is the first one to run -- quantum reset
                 this.turns = quantum;
             }
 
             this.runProcess();
-            this.turns--;
         }
 
         public priorityScheduler() {
