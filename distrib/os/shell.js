@@ -124,6 +124,31 @@ var TSOS;
             // quantum <int>
             sc = new TSOS.ShellCommand(this.shellQuantum, "quantum", "Sets the Round Robin quantum", "quantum <int>");
             this.commandList.push(sc);
+            // create <file name>
+            sc = new TSOS.ShellCommand(this.shellCreate, "create", "Creates a new file with the given name", "create <file name>");
+            this.commandList.push(sc);
+            // read <file name>
+            sc = new TSOS.ShellCommand(this.shellRead, "read", "Prints contents of a file", "read <file name>");
+            this.commandList.push(sc);
+            // write <file name>
+            sc = new TSOS.ShellCommand(this.shellWrite, "write", "Writes provided data to file. Make sure to put data in quotes.", 'write "<file name>"');
+            this.commandList.push(sc);
+            // delete <file name>
+            sc = new TSOS.ShellCommand(this.shellDelete, "delete", "Deletes the file with given name", "delete <file name>");
+            this.commandList.push(sc);
+            // format
+            sc = new TSOS.ShellCommand(this.shellFormat, "format", "Initializes data blocks. Quick format only initializes first four bytes while full format " +
+                "initializes the entire block, both header and data portion", "format <-quick, -full>");
+            this.commandList.push(sc);
+            // ls
+            sc = new TSOS.ShellCommand(this.shellLs, "ls", "Lists the files in the directory. The -l flag includes special files in output", "ls <-l (optional)>");
+            this.commandList.push(sc);
+            // setschedule <schedule type>
+            sc = new TSOS.ShellCommand(this.shellSetSchedule, "setschedule", "Changes the current scheduler. Options are round robin, first come first serve, and priority", "setschedule <scheduler type (rr, fcfs, or priority)>");
+            this.commandList.push(sc);
+            // getschedule
+            sc = new TSOS.ShellCommand(this.shellGetSchedule, "getschedule", "Returns the current scheduling algorithm", "getschedule");
+            this.commandList.push(sc);
             // Display the initial prompt.
             this.putPrompt();
         };
@@ -480,6 +505,52 @@ var TSOS;
                     }
                 });
             });
+        };
+        Shell.prototype.shellCreate = function (args) {
+            if (args.length > 0) {
+            }
+            else {
+                _StdOut.putText("Usage: create <file name> Please supply a file name.");
+            }
+        };
+        Shell.prototype.shellRead = function (args) {
+            if (args.length > 0) {
+            }
+            else {
+                _StdOut.putText("Usage: read <file name> Please supply a file name.");
+            }
+        };
+        Shell.prototype.shellWrite = function (args) {
+            if (args.length > 0) {
+            }
+            else {
+                _StdOut.putText('Usage: write "<text>" Please supply a text.');
+            }
+        };
+        Shell.prototype.shellDelete = function (args) {
+            if (args.length > 0) {
+            }
+            else {
+                _StdOut.putText("Usage: delete <file name> Please supply a file name.");
+            }
+        };
+        Shell.prototype.shellFormat = function (args) {
+            if (args.length > 0) {
+            }
+            else {
+                _StdOut.putText("Usage: format <-quick, -full> Please supply a flag.");
+            }
+        };
+        Shell.prototype.shellLs = function (args) {
+        };
+        Shell.prototype.shellSetSchedule = function (args) {
+            if (args.length > 0) {
+            }
+            else {
+                _StdOut.putText("Usage: setschedule <scheduler type (rr, fcfs, or priority)> Please supply a scheduler type.");
+            }
+        };
+        Shell.prototype.shellGetSchedule = function () {
         };
         return Shell;
     }());

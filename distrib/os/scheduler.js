@@ -30,7 +30,7 @@ var TSOS;
                     _Kernel.krnTrace("Scheduling with first come, first serve");
                     this.roundRobinScheduler(Infinity); // Doesn't need function of its own, just a high quantum
                     break;
-                case "p": // Priority
+                case "priority": // Priority
                     _Kernel.krnTrace("Scheduling with priority");
                     this.priorityScheduler();
                     break;

@@ -168,6 +168,9 @@ var TSOS;
                     var pcb = params[0];
                     pcb.state == 'running' ? _Dispatcher.terminateCurrentProcess() : pcb.terminate();
                     break;
+                case FILE_SYSTEM_IRQ: // Run file operation
+                    _krnKeyboardDriver.isr(params); // Kernel mode device driver
+                    break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
             }

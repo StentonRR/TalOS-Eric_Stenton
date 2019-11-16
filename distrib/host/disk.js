@@ -18,16 +18,21 @@ var TSOS;
             for (var t = 0; t < this.trackNumber; t++) {
                 for (var s = 0; s < this.sectorNumber; s++) {
                     for (var b = 0; b < this.blockNumber; b++) {
-                        // Build disk data
-                        var availability = '0'; // If the block is free to be used
-                        var pointer = ['-1', '-1', '-1']; // The next associated block address -- -1 values when not set
-                        var data = Array(this.dataSize).fill("00"); // Hex values of files or programs
-                        data = pointer.concat(data);
-                        data.unshift(availability);
-                        sessionStorage.setItem(t + ":" + s + ":" + b, JSON.stringify(data));
+                        this.initBlock(t + ":" + s + ":" + b);
                     }
                 }
             }
+        };
+        Disk.prototype.initBlock = function (key) {
+            // Build disk data
+            var availability = '0'; // If the block is free to be used
+            var pointer = ['-1', '-1', '-1']; // The next associated block address -- -1 values when not set
+            var data = Array(this.dataSize).fill("00"); // Hex values of files or programs
+            // Combine values
+            data = pointer.concat(data);
+            data.unshift(availability);
+            // Save to session storage
+            sessionStorage.setItem(key, JSON.stringify(data));
         };
         Disk.prototype.getDataSize = function () {
             return this.dataSize;
