@@ -196,7 +196,7 @@ module TSOS {
             sc = new ShellCommand(this.shellWrite,
                 "write",
                 "Writes provided data to file. Make sure to put data in quotes.",
-                'write "<file name>"');
+                'write "<text>"');
             this.commandList.push(sc);
 
             // delete <file name>
@@ -616,7 +616,11 @@ module TSOS {
 
         public shellCreate(args) {
             if (args.length > 0) {
+                // Add operation to object
+                args.unshift('create');
 
+                // Create interrupt for file operation
+                _KernelInterruptQueue.enqueue( new Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 3)) );
             } else {
                 _StdOut.putText("Usage: create <file name> Please supply a file name.");
             }

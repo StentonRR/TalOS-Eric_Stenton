@@ -131,7 +131,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellRead, "read", "Prints contents of a file", "read <file name>");
             this.commandList.push(sc);
             // write <file name>
-            sc = new TSOS.ShellCommand(this.shellWrite, "write", "Writes provided data to file. Make sure to put data in quotes.", 'write "<file name>"');
+            sc = new TSOS.ShellCommand(this.shellWrite, "write", "Writes provided data to file. Make sure to put data in quotes.", 'write "<text>"');
             this.commandList.push(sc);
             // delete <file name>
             sc = new TSOS.ShellCommand(this.shellDelete, "delete", "Deletes the file with given name", "delete <file name>");
@@ -508,6 +508,10 @@ var TSOS;
         };
         Shell.prototype.shellCreate = function (args) {
             if (args.length > 0) {
+                // Add operation to object
+                args.unshift('create');
+                // Create interrupt for file operation
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 3)));
             }
             else {
                 _StdOut.putText("Usage: create <file name> Please supply a file name.");

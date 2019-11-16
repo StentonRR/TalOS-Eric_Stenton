@@ -32,7 +32,7 @@ var TSOS;
             data = pointer.concat(data);
             data.unshift(availability);
             // Save to session storage
-            sessionStorage.setItem(key, JSON.stringify(data));
+            sessionStorage.setItem(key, data.join(''));
         };
         Disk.prototype.getDataSize = function () {
             return this.dataSize;

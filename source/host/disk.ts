@@ -34,7 +34,7 @@ module TSOS {
             data.unshift(availability);
 
             // Save to session storage
-            sessionStorage.setItem( key, JSON.stringify(data) );
+            sessionStorage.setItem( key, data.join('') );
         }
 
         public getDataSize(): number {
