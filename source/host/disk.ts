@@ -25,7 +25,7 @@ module TSOS {
         public initBlock(key) {
             // Build disk data
             let availability = '0'; // If the block is free to be used
-            let pointer = ['-1', '-1', '-1']; // The next associated block address -- -1 values when not set
+            let pointer = ['F', 'F', 'F']; // The next associated block address -- F values when not set
 
             let data = Array(this.dataSize).fill("00"); // Hex values of files or programs
 
@@ -41,6 +41,9 @@ module TSOS {
             return this.dataSize;
         }
 
+        public getHeadSize(): number {
+            return this.headSize;
+        }
 
 
     }

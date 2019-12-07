@@ -35,7 +35,6 @@ module TSOS {
         public krnFsDriverEntry() {
             // Initialization routine for this, the kernel-mode File System Device Driver.
             this.status = "loaded";
-            // More?
         }
 
         public krnFsDispatchOperation(params) {
@@ -43,7 +42,7 @@ module TSOS {
             let target = params[1]; // Target of operation -- file or directory name
             let data = params[2]; // Any data associated with operation
             let flags = params[3]; // Flags that modify action
-
+            console.table({action, target, data, flags});
 
             if (action == 'format') {
                 _Disk.init();
@@ -69,7 +68,7 @@ module TSOS {
                             let dataPieces = data.map( () => data.splice(0, _Disk.dataSize).filter(data => data) );
 
 
-                            this.write(target, data, this.fileDataInfo);
+                            this.write(target, data);
                             break;
                         }
 
@@ -95,8 +94,19 @@ module TSOS {
         }
 
         public create(fileName) {
+
+            // Check if file name is too long
+            if ( fileName.length > _Disk.getDataSize() ) {
+                return _Kernel.krnTrapError(("File allocation error: File name is too big");
+            }
+
             // Find a free directory space
             let key = this.findFreeSpace(1, this.directoryDataInfo)[0];
+
+            // No space is available
+            if (!key) {
+                return _Kernel.krnTrapError(("File allocation error: Insufficient space to create file");
+            }
 
             // Get free data space
             let block = this.read(key);
@@ -106,33 +116,54 @@ module TSOS {
             block.data = fileName;
 
             // Create the directory in session storage
-            this.write(key, block, this.directoryDataInfo);
+            this.write(key, block);
+
+            _StdOut.putText("File successfully created");
+            _StdOut.advanceLine();
+            _OsShell.putPrompt()
         }
 
         public read(key) {
+            // If key object given, translate to string key
+            if (typeof key == 'object') key = this.keyObjectToString(key);
+
+            // Get data block and translate it to an object
             let block = sessionStorage.getItem(key);
             let blockObj = {'availability': parseInt(block[0]),
                             'pointer': this.keyStringToObject( block.substring(1, 4) ),
-                            'data': block.substring(4).match(/.{1,2}/g)};
+                            'data': block.substring(_Disk.getHeadSize()).match(/.{1,2}/g)};
 
             return blockObj;
         }
 
-        public write(key, block, dataInfo) {
-            console.log(block);
+        public write(key, block) {
+            // If key object given, translate to string key
+            if (typeof key == 'object') key = this.keyObjectToString(key);
+
+            // Translate data
+            block.data = this.translateToHex(block.data);
+
+            // Fill unused bytes in data section with 00's
+            if (block.data.length < _Disk.getDataSize()) {
+                let originalDataSize = block.data.length;
+                for (let i = 0; i < _Disk.getDataSize() - originalDataSize; i++) {
+                    block.data.push('00');
+                }
+            }
+
             // Combine data object values into single string
-            let data = block.pointer.values.concat(block.data);
+            let data = Object.values(block.pointer).concat(block.data);
             data.unshift( block.availability.toString() );
 
             // Save to session storage
-            sessionStorage.setItem( key, JSON.stringify(data) );
+            sessionStorage.setItem( key, data.join('') );
         }
 
         public list(flags) {
             let commandFlags = ['l'];
         }
 
-        public format() {
+        public format(flags) {
             let commandFlags = ['quick', 'full'];
 
         }
@@ -145,11 +176,11 @@ module TSOS {
             // Loop until free space found -- label loops to break from them easier
             trackLoop:
                 for (let t = key.t; t <= keyLimit.t; t++) {
-                    sectorLoop:
+                        sectorLoop:
                         for (let s = key.s; s <= keyLimit.s; s++) {
                             blockLoop: // Ternary to skip master book record
                                 for (let b = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
-                                    let data = this.read( this.keyObjectToString({t, s, b}) );
+                                    let data = this.read({t, s, b});
 
                                     // Add key to list if it is available
                                     if (!data.availability) {
@@ -167,14 +198,31 @@ module TSOS {
         }
 
         public keyStringToObject(key) {
-            // Make key into an object of integers to loop through easier
-            key = key.split(':');
-            return { 't': parseInt(key[0]), 's': parseInt(key[1]), 'b': parseInt(key[2]) };
+            // Check if key is initialized or not
+            if (key == 'FFF') {
+                return { 't': 'F', 's': 'F', 'b': 'F' };
+            } else {
+                // Make key into an object of integers to loop through easier
+                key = key.split(':');
+                return {'t': parseInt(key[0]), 's': parseInt(key[1]), 'b': parseInt(key[2])};
+            }
         }
 
         public keyObjectToString(key) {
             // Make key back into a string for session storage indexing
             return `${key.t}:${key.s}:${key.b}`;
+        }
+
+        public translateToHex(data) {
+            // Break string into list
+            data = data.split('');
+
+            // Translate characters to ascii digits then to hex
+            for (let i in data) {
+                data[i] = data[i].charCodeAt().toString(16);
+            }
+
+            return data;
         }
 
         public clearBlock(key) {

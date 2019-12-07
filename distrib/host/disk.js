@@ -26,7 +26,7 @@ var TSOS;
         Disk.prototype.initBlock = function (key) {
             // Build disk data
             var availability = '0'; // If the block is free to be used
-            var pointer = ['-1', '-1', '-1']; // The next associated block address -- -1 values when not set
+            var pointer = ['F', 'F', 'F']; // The next associated block address -- F values when not set
             var data = Array(this.dataSize).fill("00"); // Hex values of files or programs
             // Combine values
             data = pointer.concat(data);
@@ -36,6 +36,9 @@ var TSOS;
         };
         Disk.prototype.getDataSize = function () {
             return this.dataSize;
+        };
+        Disk.prototype.getHeadSize = function () {
+            return this.headSize;
         };
         return Disk;
     }());
