@@ -97,7 +97,7 @@ module TSOS {
 
             // Check if file name is too long
             if ( fileName.length > _Disk.getDataSize() ) {
-                return _Kernel.krnTrapError(("File allocation error: File name is too big");
+                return _Kernel.krnTrapError("File allocation error: File name is too big");
             }
 
             // Find a free directory space
@@ -105,7 +105,7 @@ module TSOS {
 
             // No space is available
             if (!key) {
-                return _Kernel.krnTrapError(("File allocation error: Insufficient space to create file");
+                return _Kernel.krnTrapError("File allocation error: Insufficient space to create file");
             }
 
             // Get free data space
@@ -160,7 +160,20 @@ module TSOS {
         }
 
         public list(flags) {
-            let commandFlags = ['l'];
+            let keys;
+
+            // Check to see if special files should be included
+            if ( flags.includes('l') ) {
+                keys = this.searchFiles(new RegExp('.'), this.directoryDataInfo);
+            } else {
+                keys = this.searchFiles(new RegExp(`^(?!^[${this.specialPrefixes.join('')}])`), this.directoryDataInfo);
+            }
+
+            let files = keys.map( key => this.translateFromHex(this.read(key).data) );
+
+            _StdOut.putText( files.join(' ') );
+            _StdOut.advanceLine();
+            _OsShell.putPrompt()
         }
 
         public format(flags) {
@@ -180,10 +193,10 @@ module TSOS {
                         for (let s = key.s; s <= keyLimit.s; s++) {
                             blockLoop: // Ternary to skip master book record
                                 for (let b = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
-                                    let data = this.read({t, s, b});
+                                    let block = this.read({t, s, b});
 
                                     // Add key to list if it is available
-                                    if (!data.availability) {
+                                    if (!block.availability) {
                                         freeKeys.push( this.keyObjectToString({t, s, b}) );
                                         amount--;
                                     }
@@ -223,6 +236,49 @@ module TSOS {
             }
 
             return data;
+        }
+
+        public translateFromHex(data) {
+            let output = '';
+
+            // Translate hex to characters
+            for (let i in data) {
+
+                if (data[i] == "00") break; // Break when hits empty bytes
+
+                output += String.fromCharCode(parseInt(data[i], 16));
+            }
+
+            return output;
+        }
+
+        public searchFiles(re, dataInfo) { console.log(re)
+            let key = this.keyStringToObject(dataInfo.start);
+            let keyLimit = this.keyStringToObject(dataInfo.end);
+            let outputKeys = [];
+
+            // Loop and find files that match search criteria -- label loops to break from them easier
+            trackLoop:
+                for (let t = key.t; t <= keyLimit.t; t++) {
+                    sectorLoop:
+                        for (let s = key.s; s <= keyLimit.s; s++) {
+                            blockLoop: // Ternary to skip master book record
+                                for (let b = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
+                                    let block = this.read({t, s, b});
+                                    if (!block.availability) continue; // Only look at blocks in use
+
+                                    block.data = this.translateFromHex(block.data);
+                                    console.log(block);
+                                    // Check if matches search criteria
+                                    if ( re.test(block.data) ) {
+                                        outputKeys.push( this.keyObjectToString({t, s, b}) );
+                                    }
+
+                                }
+                        }
+                }
+
+            return outputKeys;
         }
 
         public clearBlock(key) {

@@ -659,7 +659,11 @@ module TSOS {
         }
 
         public shellLs(args) {
+            // Get all flags if any and remove dashes
+            args = args.filter( el => el[0] == '-').map(flag => flag.substring(1));
 
+            // Create interrupt for file operation
+            _KernelInterruptQueue.enqueue( new Interrupt(FILE_SYSTEM_IRQ, ['list', null, null, args]) );
 
         }
 

@@ -546,6 +546,10 @@ var TSOS;
             }
         };
         Shell.prototype.shellLs = function (args) {
+            // Get all flags if any and remove dashes
+            args = args.filter(function (el) { return el[0] == '-'; }).map(function (flag) { return flag.substring(1); });
+            // Create interrupt for file operation
+            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, ['list', null, null, args]));
         };
         Shell.prototype.shellSetSchedule = function (args) {
             if (args.length > 0) {

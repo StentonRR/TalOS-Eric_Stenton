@@ -100,13 +100,13 @@ var TSOS;
         DeviceDriverFileSystem.prototype.create = function (fileName) {
             // Check if file name is too long
             if (fileName.length > _Disk.getDataSize()) {
-                return _Kernel.krnTrapError(("File allocation error: File name is too big"));
+                return _Kernel.krnTrapError("File allocation error: File name is too big");
             }
             // Find a free directory space
             var key = this.findFreeSpace(1, this.directoryDataInfo)[0];
             // No space is available
             if (!key) {
-                return _Kernel.krnTrapError(("File allocation error: Insufficient space to create file"));
+                return _Kernel.krnTrapError("File allocation error: Insufficient space to create file");
             }
             // Get free data space
             var block = this.read(key);
@@ -150,7 +150,19 @@ var TSOS;
             sessionStorage.setItem(key, data.join(''));
         };
         DeviceDriverFileSystem.prototype.list = function (flags) {
-            var commandFlags = ['l'];
+            var _this = this;
+            var keys;
+            // Check to see if special files should be included
+            if (flags.includes('l')) {
+                keys = this.searchFiles(new RegExp('.'), this.directoryDataInfo);
+            }
+            else {
+                keys = this.searchFiles(new RegExp("^(?!^[" + this.specialPrefixes.join('') + "])"), this.directoryDataInfo);
+            }
+            var files = keys.map(function (key) { return _this.translateFromHex(_this.read(key).data); });
+            _StdOut.putText(files.join(' '));
+            _StdOut.advanceLine();
+            _OsShell.putPrompt();
         };
         DeviceDriverFileSystem.prototype.format = function (flags) {
             var commandFlags = ['quick', 'full'];
@@ -164,9 +176,9 @@ var TSOS;
                 sectorLoop: for (var s = key.s; s <= keyLimit.s; s++) {
                     blockLoop: // Ternary to skip master book record
                      for (var b = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
-                        var data = this.read({ t: t, s: s, b: b });
+                        var block = this.read({ t: t, s: s, b: b });
                         // Add key to list if it is available
-                        if (!data.availability) {
+                        if (!block.availability) {
                             freeKeys.push(this.keyObjectToString({ t: t, s: s, b: b }));
                             amount--;
                         }
@@ -201,6 +213,40 @@ var TSOS;
                 data[i] = data[i].charCodeAt().toString(16);
             }
             return data;
+        };
+        DeviceDriverFileSystem.prototype.translateFromHex = function (data) {
+            var output = '';
+            // Translate hex to characters
+            for (var i in data) {
+                if (data[i] == "00")
+                    break; // Break when hits empty bytes
+                output += String.fromCharCode(parseInt(data[i], 16));
+            }
+            return output;
+        };
+        DeviceDriverFileSystem.prototype.searchFiles = function (re, dataInfo) {
+            console.log(re);
+            var key = this.keyStringToObject(dataInfo.start);
+            var keyLimit = this.keyStringToObject(dataInfo.end);
+            var outputKeys = [];
+            // Loop and find files that match search criteria -- label loops to break from them easier
+            trackLoop: for (var t = key.t; t <= keyLimit.t; t++) {
+                sectorLoop: for (var s = key.s; s <= keyLimit.s; s++) {
+                    blockLoop: // Ternary to skip master book record
+                     for (var b = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
+                        var block = this.read({ t: t, s: s, b: b });
+                        if (!block.availability)
+                            continue; // Only look at blocks in use
+                        block.data = this.translateFromHex(block.data);
+                        console.log(block);
+                        // Check if matches search criteria
+                        if (re.test(block.data)) {
+                            outputKeys.push(this.keyObjectToString({ t: t, s: s, b: b }));
+                        }
+                    }
+                }
+            }
+            return outputKeys;
         };
         DeviceDriverFileSystem.prototype.clearBlock = function (key) {
             _Disk.initBlock(key);
