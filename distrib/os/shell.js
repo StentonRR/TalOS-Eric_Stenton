@@ -519,6 +519,10 @@ var TSOS;
         };
         Shell.prototype.shellRead = function (args) {
             if (args.length > 0) {
+                // Add operation to object
+                args.unshift('read');
+                // Create interrupt for file operation
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 2)));
             }
             else {
                 _StdOut.putText("Usage: read <file name> Please supply a file name.");

@@ -63,7 +63,29 @@ module TSOS {
                         }
 
                         case 'read': {
-                            this.read(target);
+                            // Find file with given name
+                            let result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
+                            if (result.length == 0) return _Kernel.krnTrapError("File read error: File does not exist");
+
+                            let dirKey = result[0];
+                            let dirBlock = this.read(dirKey);
+
+
+                            // Get file blocks associated with directory block and concat their data
+                            let output = '';
+                            let currentBlock;
+                            let currentPointer = this.keyObjectToString(dirBlock.pointer);
+                            while (currentPointer != "F:F:F") {
+                                currentBlock = this.read(currentPointer);
+
+                                output += this.translateFromHex(currentBlock.data);
+                                currentPointer = this.keyObjectToString(currentBlock.pointer);
+                            }
+
+                            _StdOut.putText(output);
+                            _StdOut.advanceLine();
+                            _OsShell.putPrompt();
+
                             break;
                         }
 
@@ -74,9 +96,22 @@ module TSOS {
                             let dataPieces = data.map( () => data.splice(0, _Disk.dataSize).filter(data => data) );
 
                             // Get directory block
-                            let dirKey = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo)[0];
+                            let result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
+                            if (result.length == 0) return _Kernel.krnTrapError("File write error: File does not exist");
+
+                            let dirKey = result[0];
                             let dirBlock = this.read(dirKey);
-                            if (!dirBlock) return _Kernel.krnTrapError("File write error: File does not exist");
+
+                            // If file already written to, reclaim space then allocate new blocks
+                            let currentBlock;
+                            let currentPointer = this.keyObjectToString(dirBlock.pointer);
+                            while (currentPointer != "F:F:F") {
+                                currentBlock = this.read(currentPointer);
+
+                                this.delete(currentPointer);
+
+                                currentPointer = this.keyObjectToString(currentBlock.pointer);
+                            }
 
                             // Get blocks of free memory to store data
                             let keys = this.findFreeSpace(Object.keys(dataPieces).length, this.fileDataInfo);
@@ -202,6 +237,10 @@ module TSOS {
             sessionStorage.setItem( key, data.join('') );
         }
 
+        public delete(key) {
+            _Disk.initBlock(key);
+        }
+
         public list(flags) {
             let keys;
 
@@ -257,9 +296,13 @@ module TSOS {
             // Check if key is initialized or not
             if (key == 'FFF') {
                 return { 't': 'F', 's': 'F', 'b': 'F' };
-            } else {
+            } else if ( key.includes(':') ) {
                 // Make key into an object of integers to loop through easier
                 key = key.split(':');
+                return {'t': parseInt(key[0]), 's': parseInt(key[1]), 'b': parseInt(key[2])};
+            } else { // Pointer key
+                // Make key into an object of integers to loop through easier
+                key = key.split('');
                 return {'t': parseInt(key[0]), 's': parseInt(key[1]), 'b': parseInt(key[2])};
             }
         }

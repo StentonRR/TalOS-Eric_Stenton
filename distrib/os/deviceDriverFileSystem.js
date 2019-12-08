@@ -71,11 +71,32 @@ var TSOS;
                 if (this.formatted) {
                     switch (action) {
                         case 'create': {
+                            // Check if file name begins with forbidden character
+                            if (this.forbiddenPrefixes.includes(target[0])) {
+                                return _Kernel.krnTrapError("File allocation error: File name cannot begin with '" + target[0] + "'");
+                            }
                             this.create(target);
                             break;
                         }
                         case 'read': {
-                            this.read(target);
+                            // Find file with given name
+                            var result = this.searchFiles(new RegExp("^" + target + "$"), this.directoryDataInfo);
+                            if (result.length == 0)
+                                return _Kernel.krnTrapError("File read error: File does not exist");
+                            var dirKey = result[0];
+                            var dirBlock = this.read(dirKey);
+                            // Get file blocks associated with directory block and concat their data
+                            var output = '';
+                            var currentBlock = void 0;
+                            var currentPointer = this.keyObjectToString(dirBlock.pointer);
+                            while (currentPointer != "F:F:F") {
+                                currentBlock = this.read(currentPointer);
+                                output += this.translateFromHex(currentBlock.data);
+                                currentPointer = this.keyObjectToString(currentBlock.pointer);
+                            }
+                            _StdOut.putText(output);
+                            _StdOut.advanceLine();
+                            _OsShell.putPrompt();
                             break;
                         }
                         case 'write': {
@@ -83,10 +104,19 @@ var TSOS;
                             data = data.split("");
                             var dataPieces = data.map(function () { return data.splice(0, _Disk.dataSize).filter(function (data) { return data; }); });
                             // Get directory block
-                            var dirKey = this.searchFiles(new RegExp("^" + target + "$"), this.directoryDataInfo)[0];
-                            var dirBlock = this.read(dirKey);
-                            if (!dirBlock)
+                            var result = this.searchFiles(new RegExp("^" + target + "$"), this.directoryDataInfo);
+                            if (result.length == 0)
                                 return _Kernel.krnTrapError("File write error: File does not exist");
+                            var dirKey = result[0];
+                            var dirBlock = this.read(dirKey);
+                            // If file already written to, reclaim space then allocate new blocks
+                            var currentBlock = void 0;
+                            var currentPointer = this.keyObjectToString(dirBlock.pointer);
+                            while (currentPointer != "F:F:F") {
+                                currentBlock = this.read(currentPointer);
+                                this["delete"](currentPointer);
+                                currentPointer = this.keyObjectToString(currentBlock.pointer);
+                            }
                             // Get blocks of free memory to store data
                             var keys = this.findFreeSpace(Object.keys(dataPieces).length, this.fileDataInfo);
                             var freeBlocks = keys.map(function (key) { return _this.read(key); });
@@ -127,10 +157,6 @@ var TSOS;
             }
         };
         DeviceDriverFileSystem.prototype.create = function (fileName) {
-            // Check if file name begins with forbidden character
-            if (this.forbiddenPrefixes.includes(fileName[0])) {
-                return _Kernel.krnTrapError("File allocation error: File name cannot begin with " + fileName[0]);
-            }
             // Check if file name is too long
             if (fileName.length > _Disk.getDataSize()) {
                 return _Kernel.krnTrapError("File allocation error: File name is too big");
@@ -187,6 +213,9 @@ var TSOS;
             // Save to session storage
             sessionStorage.setItem(key, data.join(''));
         };
+        DeviceDriverFileSystem.prototype["delete"] = function (key) {
+            _Disk.initBlock(key);
+        };
         DeviceDriverFileSystem.prototype.list = function (flags) {
             var _this = this;
             var keys;
@@ -233,9 +262,14 @@ var TSOS;
             if (key == 'FFF') {
                 return { 't': 'F', 's': 'F', 'b': 'F' };
             }
-            else {
+            else if (key.includes(':')) {
                 // Make key into an object of integers to loop through easier
                 key = key.split(':');
+                return { 't': parseInt(key[0]), 's': parseInt(key[1]), 'b': parseInt(key[2]) };
+            }
+            else { // Pointer key
+                // Make key into an object of integers to loop through easier
+                key = key.split('');
                 return { 't': parseInt(key[0]), 's': parseInt(key[1]), 'b': parseInt(key[2]) };
             }
         };
