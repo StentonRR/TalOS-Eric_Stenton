@@ -65,7 +65,7 @@ var TSOS;
             var flags = params[3]; // Flags that modify action
             console.table({ action: action, target: target, data: data, flags: flags });
             if (action == 'format') {
-                _Disk.init();
+                this.format(flags);
             }
             else {
                 if (this.formatted) {
@@ -140,6 +140,21 @@ var TSOS;
                             break;
                         }
                         case 'delete': {
+                            // Delete directory block
+                            var result = this.searchFiles(new RegExp("^" + target + "$"), this.directoryDataInfo);
+                            if (result.length == 0)
+                                return _Kernel.krnTrapError("File delete error: File does not exist");
+                            var dirKey = result[0];
+                            var dirBlock = this.read(dirKey);
+                            this["delete"](dirKey);
+                            // Delete associated file blocks
+                            var currentBlock = void 0;
+                            var currentPointer = this.keyObjectToString(dirBlock.pointer);
+                            while (currentPointer != "F:F:F") {
+                                currentBlock = this.read(currentPointer);
+                                this["delete"](currentPointer);
+                                currentPointer = this.keyObjectToString(currentBlock.pointer);
+                            }
                             break;
                         }
                         case 'list': {
@@ -232,7 +247,32 @@ var TSOS;
             _OsShell.putPrompt();
         };
         DeviceDriverFileSystem.prototype.format = function (flags) {
-            var commandFlags = ['quick', 'full'];
+            // Check flags
+            if (flags.includes('quick')) {
+                var key = this.keyStringToObject(this.directoryDataInfo.start);
+                var keyLimit = this.keyStringToObject(this.fileDataInfo.end);
+                // Initialize first 4 bytes of all blocks -- label loops to break from them easier
+                trackLoop: for (var t = key.t; t <= keyLimit.t; t++) {
+                    sectorLoop: for (var s = key.s; s <= keyLimit.s; s++) {
+                        blockLoop: // Ternary to skip master book record
+                         for (var b = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
+                            var block = this.read({ t: t, s: s, b: b });
+                            // Skip blocks already initialized
+                            if (block.availability) {
+                                block.availability = 0;
+                                block.pointer = { 't': 'F', 's': 'F', 'b': 'F' };
+                                this.write({ t: t, s: s, b: b }, block);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (flags.includes('full') || flags.length == 0) { // No flags, assume full format
+                _Disk.init();
+            }
+            else {
+                return _Kernel.krnTrapError("File format error: Supplied flag(s) not valid");
+            }
         };
         DeviceDriverFileSystem.prototype.findFreeSpace = function (amount, dataInfo) {
             var key = this.keyStringToObject(dataInfo.start);

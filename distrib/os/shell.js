@@ -551,17 +551,20 @@ var TSOS;
         };
         Shell.prototype.shellDelete = function (args) {
             if (args.length > 0) {
+                // Add operation to object
+                args.unshift('delete');
+                // Create interrupt for file operation
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 2)));
             }
             else {
                 _StdOut.putText("Usage: delete <file name> Please supply a file name.");
             }
         };
         Shell.prototype.shellFormat = function (args) {
-            if (args.length > 0) {
-            }
-            else {
-                _StdOut.putText("Usage: format <-quick, -full> Please supply a flag.");
-            }
+            // Get all flags if any and remove dashes
+            args = args.filter(function (el) { return el[0] == '-'; }).map(function (flag) { return flag.substring(1); });
+            // Create interrupt for file operation
+            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, ['format', null, null, args]));
         };
         Shell.prototype.shellLs = function (args) {
             // Get all flags if any and remove dashes

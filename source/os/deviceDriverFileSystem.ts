@@ -45,7 +45,7 @@ module TSOS {
             console.table({action, target, data, flags});
 
             if (action == 'format') {
-                _Disk.init();
+                this.format(flags);
 
             } else {
 
@@ -142,6 +142,27 @@ module TSOS {
                         }
 
                         case 'delete': {
+                            // Delete directory block
+                            let result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
+                            if (result.length == 0) return _Kernel.krnTrapError("File delete error: File does not exist");
+
+                            let dirKey = result[0];
+                            let dirBlock = this.read(dirKey);
+
+                            this.delete(dirKey);
+
+
+                            // Delete associated file blocks
+                            let currentBlock;
+                            let currentPointer = this.keyObjectToString(dirBlock.pointer);
+                            while (currentPointer != "F:F:F") {
+                                currentBlock = this.read(currentPointer);
+
+                                this.delete(currentPointer);
+
+                                currentPointer = this.keyObjectToString(currentBlock.pointer);
+                            }
+
                             break;
                         }
 
@@ -259,8 +280,36 @@ module TSOS {
         }
 
         public format(flags) {
-            let commandFlags = ['quick', 'full'];
 
+            // Check flags
+            if ( flags.includes('quick') ) {
+                let key = this.keyStringToObject(this.directoryDataInfo.start);
+                let keyLimit = this.keyStringToObject(this.fileDataInfo.end);
+
+                // Initialize first 4 bytes of all blocks -- label loops to break from them easier
+                trackLoop:
+                    for (let t:any = key.t; t <= keyLimit.t; t++) {
+                        sectorLoop:
+                            for (let s:any = key.s; s <= keyLimit.s; s++) {
+                                blockLoop: // Ternary to skip master book record
+                                    for (let b:any = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
+                                        let block = this.read({t, s, b});
+
+                                        // Skip blocks already initialized
+                                        if (block.availability) {
+                                            block.availability = 0;
+                                            block.pointer = {'t': 'F', 's': 'F', 'b': 'F'}
+                                            this.write({t, s, b}, block);
+                                        }
+                                    }
+                            }
+                    }
+
+            } else if ( flags.includes('full') || flags.length == 0 ) { // No flags, assume full format
+                _Disk.init();
+            } else {
+                return _Kernel.krnTrapError("File format error: Supplied flag(s) not valid");
+            }
         }
 
         public findFreeSpace(amount, dataInfo) {
