@@ -73,7 +73,7 @@ var TSOS;
                         case 'create': {
                             // Check if file name begins with forbidden character
                             if (this.forbiddenPrefixes.includes(target[0])) {
-                                return _Kernel.krnTrapError("File allocation error: File name cannot begin with '" + target[0] + "'");
+                                return _StdOut.printInfo("File name cannot begin with '" + target[0] + "'");
                             }
                             this.create(target);
                             break;
@@ -82,7 +82,7 @@ var TSOS;
                             // Find file with given name
                             var result = this.searchFiles(new RegExp("^" + target + "$"), this.directoryDataInfo);
                             if (result.length == 0)
-                                return _Kernel.krnTrapError("File read error: File does not exist");
+                                return _StdOut.printInfo("File does not exist");
                             var dirKey = result[0];
                             var dirBlock = this.read(dirKey);
                             // Get file blocks associated with directory block and concat their data
@@ -94,9 +94,7 @@ var TSOS;
                                 output += this.translateFromHex(currentBlock.data);
                                 currentPointer = this.keyObjectToString(currentBlock.pointer);
                             }
-                            _StdOut.putText(output);
-                            _StdOut.advanceLine();
-                            _OsShell.putPrompt();
+                            _StdOut.printInfo(output);
                             break;
                         }
                         case 'write': {
@@ -106,7 +104,7 @@ var TSOS;
                             // Get directory block
                             var result = this.searchFiles(new RegExp("^" + target + "$"), this.directoryDataInfo);
                             if (result.length == 0)
-                                return _Kernel.krnTrapError("File write error: File does not exist");
+                                return _StdOut.printInfo("File does not exist");
                             var dirKey = result[0];
                             var dirBlock = this.read(dirKey);
                             // If file already written to, reclaim space then allocate new blocks
@@ -121,7 +119,7 @@ var TSOS;
                             var keys = this.findFreeSpace(Object.keys(dataPieces).length, this.fileDataInfo);
                             var freeBlocks = keys.map(function (key) { return _this.read(key); });
                             if (freeBlocks.length != Object.keys(dataPieces).length)
-                                return _Kernel.krnTrapError("File write error: Insufficient space");
+                                return _StdOut.printInfo("Insufficient space");
                             // Set pointer of directory block to key of first file block
                             dirBlock.pointer = this.keyStringToObject(keys[0]);
                             // Update directory block on hard drive
@@ -134,16 +132,14 @@ var TSOS;
                                     freeBlocks[i].pointer = this.keyStringToObject(keys[i + 1]);
                                 this.write(keys[i], freeBlocks[i]);
                             }
-                            _StdOut.putText("Data successfully written to file");
-                            _StdOut.advanceLine();
-                            _OsShell.putPrompt();
+                            _StdOut.printInfo("Data successfully written to file");
                             break;
                         }
                         case 'delete': {
                             // Delete directory block
                             var result = this.searchFiles(new RegExp("^" + target + "$"), this.directoryDataInfo);
                             if (result.length == 0)
-                                return _Kernel.krnTrapError("File delete error: File does not exist");
+                                return _StdOut.printInfo("File does not exist");
                             var dirKey = result[0];
                             var dirBlock = this.read(dirKey);
                             this["delete"](dirKey);
@@ -167,24 +163,24 @@ var TSOS;
                     }
                 }
                 else {
-                    _StdOut.putText("The disk must be formatted first!");
+                    _StdOut.printInfo("The disk must be formatted first!");
                 }
             }
         };
         DeviceDriverFileSystem.prototype.create = function (fileName) {
             // Check if file name is too long
             if (fileName.length > _Disk.getDataSize()) {
-                return _Kernel.krnTrapError("File allocation error: File name is too big");
+                return _StdOut.printInfo("File name is too big");
             }
             // Check if file already exists
             if (this.searchFiles(new RegExp("^" + fileName + "$"), this.directoryDataInfo)[0]) {
-                return _Kernel.krnTrapError("File allocation error: File with given name already exists");
+                return _StdOut.printInfo("File with given name already exists");
             }
             // Find a free directory space
             var key = this.findFreeSpace(1, this.directoryDataInfo)[0];
             // No space is available
             if (!key) {
-                return _Kernel.krnTrapError("File allocation error: Insufficient space to create file");
+                return _StdOut.printInfo("Insufficient space to create file");
             }
             // Get free data space
             var block = this.read(key);
@@ -193,9 +189,7 @@ var TSOS;
             block.data = fileName;
             // Create the directory in session storage
             this.write(key, block);
-            _StdOut.putText("File successfully created");
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+            _StdOut.printInfo("File successfully created");
         };
         DeviceDriverFileSystem.prototype.read = function (key) {
             // If key object given, translate to string key
@@ -242,9 +236,7 @@ var TSOS;
                 keys = this.searchFiles(new RegExp("^(?!^[" + this.specialPrefixes.join('') + "])"), this.directoryDataInfo);
             }
             var files = keys.map(function (key) { return _this.translateFromHex(_this.read(key).data); });
-            _StdOut.putText(files.join(' '));
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+            _StdOut.printInfo(files.join(' '));
         };
         DeviceDriverFileSystem.prototype.format = function (flags) {
             // Check flags
@@ -266,12 +258,14 @@ var TSOS;
                         }
                     }
                 }
+                _StdOut.printInfo("Hard drive quickly formatted");
             }
             else if (flags.includes('full') || flags.length == 0) { // No flags, assume full format
                 _Disk.init();
+                _StdOut.printInfo("Hard drive fully formatted");
             }
             else {
-                return _Kernel.krnTrapError("File format error: Supplied flag(s) not valid");
+                return _StdOut.printInfo("Supplied flag(s) not valid");
             }
         };
         DeviceDriverFileSystem.prototype.findFreeSpace = function (amount, dataInfo) {

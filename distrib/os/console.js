@@ -177,6 +177,12 @@ var TSOS;
                 this.advanceLine();
             }
         };
+        Console.prototype.printInfo = function (text) {
+            this.deletePrompt();
+            this.putText(text);
+            this.advanceLine();
+            _OsShell.putPrompt();
+        };
         Console.prototype.deleteText = function (text, bufferLength) {
             // Remove the text or characters from console; called when back space is pressed
             // Go up a line if command is wrapped
@@ -190,6 +196,10 @@ var TSOS;
             _DrawingContext.eraseText(_DrawingContext, xOffset, yOffset, this.currentXPosition, this.currentYPosition + _DrawingContext.fontDescent(this.currentFont, this.currentFontSize));
             // Set the x coordinate back
             this.currentXPosition -= _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+        };
+        Console.prototype.deletePrompt = function () {
+            // Deletes the prompt from the screen for information or an error to be printed
+            this.deleteText(_OsShell.promptStr, _OsShell.promptStr.length);
         };
         Console.prototype.deleteLine = function () {
             // Delete the line of text the user has typed and not submitted; clear the buffer when done

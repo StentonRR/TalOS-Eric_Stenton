@@ -55,17 +55,20 @@ module TSOS {
                         case 'create': {
                             // Check if file name begins with forbidden character
                             if ( this.forbiddenPrefixes.includes(target[0]) ) {
-                                return _Kernel.krnTrapError(`File allocation error: File name cannot begin with '${target[0]}'`);
+                                return _StdOut.printInfo(`File name cannot begin with '${target[0]}'`);
                             }
 
                             this.create(target);
+
+                            _StdOut.printInfo("File successfully created");
+
                             break;
                         }
 
                         case 'read': {
                             // Find file with given name
                             let result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
-                            if (result.length == 0) return _Kernel.krnTrapError("File read error: File does not exist");
+                            if (result.length == 0) return _StdOut.printInfo("File does not exist");
 
                             let dirKey = result[0];
                             let dirBlock = this.read(dirKey);
@@ -82,9 +85,7 @@ module TSOS {
                                 currentPointer = this.keyObjectToString(currentBlock.pointer);
                             }
 
-                            _StdOut.putText(output);
-                            _StdOut.advanceLine();
-                            _OsShell.putPrompt();
+                            _StdOut.printInfo(output);
 
                             break;
                         }
@@ -97,7 +98,7 @@ module TSOS {
 
                             // Get directory block
                             let result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
-                            if (result.length == 0) return _Kernel.krnTrapError("File write error: File does not exist");
+                            if (result.length == 0) return _StdOut.printInfo("File does not exist");
 
                             let dirKey = result[0];
                             let dirBlock = this.read(dirKey);
@@ -116,7 +117,7 @@ module TSOS {
                             // Get blocks of free memory to store data
                             let keys = this.findFreeSpace(Object.keys(dataPieces).length, this.fileDataInfo);
                             let freeBlocks = keys.map( key => this.read(key) );
-                            if (freeBlocks.length != Object.keys(dataPieces).length) return _Kernel.krnTrapError("File write error: Insufficient space");
+                            if (freeBlocks.length != Object.keys(dataPieces).length) return _StdOut.printInfo("Insufficient space");
 
                             // Set pointer of directory block to key of first file block
                             dirBlock.pointer = this.keyStringToObject(keys[0]);
@@ -134,9 +135,7 @@ module TSOS {
                                 this.write(keys[i], freeBlocks[i]);
                             }
 
-                            _StdOut.putText("Data successfully written to file");
-                            _StdOut.advanceLine();
-                            _OsShell.putPrompt();
+                            _StdOut.printInfo("Data successfully written to file");
 
                             break;
                         }
@@ -144,7 +143,7 @@ module TSOS {
                         case 'delete': {
                             // Delete directory block
                             let result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
-                            if (result.length == 0) return _Kernel.krnTrapError("File delete error: File does not exist");
+                            if (result.length == 0) return _StdOut.printInfo("File does not exist");
 
                             let dirKey = result[0];
                             let dirBlock = this.read(dirKey);
@@ -163,6 +162,8 @@ module TSOS {
                                 currentPointer = this.keyObjectToString(currentBlock.pointer);
                             }
 
+                            _StdOut.printInfo("File successfully deleted");
+
                             break;
                         }
 
@@ -178,7 +179,7 @@ module TSOS {
                     }
 
                 } else {
-                    _StdOut.putText("The disk must be formatted first!");
+                    _StdOut.printInfo("The disk must be formatted first!");
                 }
             }
 
@@ -190,12 +191,12 @@ module TSOS {
 
             // Check if file name is too long
             if ( fileName.length > _Disk.getDataSize() ) {
-                return _Kernel.krnTrapError("File allocation error: File name is too big");
+                return _StdOut.printInfo("File name is too big");
             }
 
             // Check if file already exists
             if ( this.searchFiles(new RegExp(`^${fileName}$`), this.directoryDataInfo)[0] ) {
-                return _Kernel.krnTrapError("File allocation error: File with given name already exists");
+                return _StdOut.printInfo("File with given name already exists");
             }
 
 
@@ -204,7 +205,7 @@ module TSOS {
 
             // No space is available
             if (!key) {
-                return _Kernel.krnTrapError("File allocation error: Insufficient space to create file");
+                return _StdOut.printInfo("Insufficient space to create file");
             }
 
             // Get free data space
@@ -217,9 +218,6 @@ module TSOS {
             // Create the directory in session storage
             this.write(key, block);
 
-            _StdOut.putText("File successfully created");
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
         }
 
         public read(key) {
@@ -274,9 +272,8 @@ module TSOS {
 
             let files = keys.map( key => this.translateFromHex(this.read(key).data) );
 
-            _StdOut.putText( files.join(' ') );
-            _StdOut.advanceLine();
-            _OsShell.putPrompt()
+            _StdOut.printInfo( files.join(' ') );
+
         }
 
         public format(flags) {
@@ -305,10 +302,15 @@ module TSOS {
                             }
                     }
 
+                _StdOut.printInfo("Hard drive quickly formatted");
+
             } else if ( flags.includes('full') || flags.length == 0 ) { // No flags, assume full format
                 _Disk.init();
+
+                _StdOut.printInfo("Hard drive fully formatted");
+
             } else {
-                return _Kernel.krnTrapError("File format error: Supplied flag(s) not valid");
+                return _StdOut.printInfo("Supplied flag(s) not valid");
             }
         }
 
