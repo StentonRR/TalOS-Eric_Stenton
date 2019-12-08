@@ -510,6 +510,10 @@ var TSOS;
             if (args.length > 0) {
                 // Add operation to object
                 args.unshift('create');
+                // Check if file name begins with forbidden character
+                if (_krnFileSystemDriver.forbiddenPrefixes.includes(args.slice(0, 2)[1][0])) {
+                    return _StdOut.putText("File name cannot begin with '" + args.slice(0, 2)[1][0] + "'");
+                }
                 // Create interrupt for file operation
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 2)));
             }

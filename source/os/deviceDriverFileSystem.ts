@@ -53,11 +53,6 @@ module TSOS {
                     switch (action) {
 
                         case 'create': {
-                            // Check if file name begins with forbidden character
-                            if ( this.forbiddenPrefixes.includes(target[0]) ) {
-                                return _StdOut.printInfo(`File name cannot begin with '${target[0]}'`);
-                            }
-
                             this.create(target);
 
                             _StdOut.printInfo("File successfully created");

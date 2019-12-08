@@ -71,11 +71,8 @@ var TSOS;
                 if (this.formatted) {
                     switch (action) {
                         case 'create': {
-                            // Check if file name begins with forbidden character
-                            if (this.forbiddenPrefixes.includes(target[0])) {
-                                return _StdOut.printInfo("File name cannot begin with '" + target[0] + "'");
-                            }
                             this.create(target);
+                            _StdOut.printInfo("File successfully created");
                             break;
                         }
                         case 'read': {
@@ -151,6 +148,7 @@ var TSOS;
                                 this["delete"](currentPointer);
                                 currentPointer = this.keyObjectToString(currentBlock.pointer);
                             }
+                            _StdOut.printInfo("File successfully deleted");
                             break;
                         }
                         case 'list': {
@@ -189,7 +187,6 @@ var TSOS;
             block.data = fileName;
             // Create the directory in session storage
             this.write(key, block);
-            _StdOut.printInfo("File successfully created");
         };
         DeviceDriverFileSystem.prototype.read = function (key) {
             // If key object given, translate to string key
