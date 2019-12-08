@@ -4,16 +4,20 @@ var TSOS;
         function Scheduler(quantum, // Default quantum for processes
         turns, // Number of turns a process has left with round robin
         currentProcess, // Process currently scheduled to run -- mostly for round robin use
-        activeAlgorithm // Current scheduling algorithm in use
-        ) {
+        activeAlgorithm, // Current scheduling algorithm in use
+        availableAlgorithms) {
             if (quantum === void 0) { quantum = 6; }
             if (turns === void 0) { turns = 0; }
             if (currentProcess === void 0) { currentProcess = null; }
             if (activeAlgorithm === void 0) { activeAlgorithm = "rr"; }
+            if (availableAlgorithms === void 0) { availableAlgorithms = { rr: "round robin",
+                fcfs: "first come, first serve",
+                priority: "priority" }; }
             this.quantum = quantum;
             this.turns = turns;
             this.currentProcess = currentProcess;
             this.activeAlgorithm = activeAlgorithm;
+            this.availableAlgorithms = availableAlgorithms;
         }
         // Sort ready queue in order designated by scheduling algorithm -- running process should always be in index 0
         Scheduler.prototype.scheduleProcesses = function () {

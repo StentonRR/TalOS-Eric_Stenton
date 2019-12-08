@@ -4,7 +4,10 @@ module TSOS {
             public quantum: number = 6, // Default quantum for processes
             public turns: number = 0, // Number of turns a process has left with round robin
             public currentProcess: PCB = null, // Process currently scheduled to run -- mostly for round robin use
-            public activeAlgorithm: string = "rr" // Current scheduling algorithm in use
+            public activeAlgorithm: string = "rr", // Current scheduling algorithm in use
+            public availableAlgorithms: any = {rr: "round robin", // Algorithms that are supported
+                                               fcfs: "first come, first serve",
+                                               priority: "priority"}
         ) {
         }
 

@@ -578,12 +578,21 @@ var TSOS;
         };
         Shell.prototype.shellSetSchedule = function (args) {
             if (args.length > 0) {
+                // Check if valid scheduling algorithm
+                if (Object.keys(_Scheduler.availableAlgorithms).includes(args[0])) {
+                    _Scheduler.activeAlgorithm = args[0];
+                    _StdOut.putText("Scheduling algorithm set to " + _Scheduler.availableAlgorithms[args[0]]);
+                }
+                else {
+                    _StdOut.putText("Invalid scheduling algorithm");
+                }
             }
             else {
                 _StdOut.putText("Usage: setschedule <scheduler type (rr, fcfs, or priority)> Please supply a scheduler type.");
             }
         };
         Shell.prototype.shellGetSchedule = function () {
+            _StdOut.putText("The current scheduling algorithm is " + _Scheduler.availableAlgorithms[_Scheduler.activeAlgorithm]);
         };
         return Shell;
     }());
