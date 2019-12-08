@@ -620,7 +620,7 @@ module TSOS {
                 args.unshift('create');
 
                 // Create interrupt for file operation
-                _KernelInterruptQueue.enqueue( new Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 3)) );
+                _KernelInterruptQueue.enqueue( new Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 2)) );
             } else {
                 _StdOut.putText("Usage: create <file name> Please supply a file name.");
             }
@@ -636,6 +636,22 @@ module TSOS {
 
         public shellWrite(args) {
             if (args.length > 0) {
+                let file = args.shift();
+                let indices = [];
+
+                // Combine array to single string then separate on character
+                args = args.join(" ").split(""); console.log(args);
+
+                // Get indices of arguments that contain quotes
+                args.filter(  (el, index) => {
+                    if (el == '"') indices.push(index);
+                });
+
+                // Get text in between quotes
+                let data = args.splice(indices[0]+1, indices[1]-1).join("");
+
+                // Create interrupt for file operation
+                _KernelInterruptQueue.enqueue( new Interrupt(FILE_SYSTEM_IRQ, ['write', file, data]) );
 
             } else {
                 _StdOut.putText('Usage: write "<text>" Please supply a text.');

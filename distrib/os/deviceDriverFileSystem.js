@@ -58,6 +58,7 @@ var TSOS;
             this.status = "loaded";
         };
         DeviceDriverFileSystem.prototype.krnFsDispatchOperation = function (params) {
+            var _this = this;
             var action = params[0]; // Operation to be completed
             var target = params[1]; // Target of operation -- file or directory name
             var data = params[2]; // Any data associated with operation
@@ -78,9 +79,37 @@ var TSOS;
                             break;
                         }
                         case 'write': {
-                            // Break up data
+                            // Break up data into an array of arrays each at most 60 characters in length
+                            data = data.split("");
                             var dataPieces = data.map(function () { return data.splice(0, _Disk.dataSize).filter(function (data) { return data; }); });
-                            this.write(target, data);
+                            // Get directory block
+                            var dirKey = this.searchFiles(new RegExp("^" + target + "$"), this.directoryDataInfo)[0];
+                            var dirBlock = this.read(dirKey);
+                            if (!dirBlock)
+                                return _Kernel.krnTrapError("File write error: File does not exist");
+                            // Get blocks of free memory to store data
+                            var keys = this.findFreeSpace(Object.keys(dataPieces).length, this.fileDataInfo);
+                            var freeBlocks = keys.map(function (key) { return _this.read(key); });
+                            if (freeBlocks.length != Object.keys(dataPieces).length)
+                                return _Kernel.krnTrapError("File write error: Insufficient space");
+                            // Set pointer of directory block to key of first file block
+                            dirBlock.pointer = this.keyStringToObject(keys[0]);
+                            // Update directory block on hard drive
+                            this.write(dirKey, dirBlock);
+                            // Fill file blocks with data and set pointer + availability, then save to hard drive
+                            for (var i = 0; i < freeBlocks.length; i++) {
+                                freeBlocks[i].data = dataPieces[i].join("");
+                                freeBlocks[i].availability = 1;
+                                if (i + 1 != freeBlocks.length)
+                                    freeBlocks[i].pointer = this.keyStringToObject(keys[i + 1]);
+                                this.write(keys[i], freeBlocks[i]);
+                            }
+                            _StdOut.putText("Data successfully written to file");
+                            _StdOut.advanceLine();
+                            _OsShell.putPrompt();
+                            break;
+                        }
+                        case 'delete': {
                             break;
                         }
                         case 'list': {
@@ -98,9 +127,17 @@ var TSOS;
             }
         };
         DeviceDriverFileSystem.prototype.create = function (fileName) {
+            // Check if file name begins with forbidden character
+            if (this.forbiddenPrefixes.includes(fileName[0])) {
+                return _Kernel.krnTrapError("File allocation error: File name cannot begin with " + fileName[0]);
+            }
             // Check if file name is too long
             if (fileName.length > _Disk.getDataSize()) {
                 return _Kernel.krnTrapError("File allocation error: File name is too big");
+            }
+            // Check if file already exists
+            if (this.searchFiles(new RegExp("^" + fileName + "$"), this.directoryDataInfo)[0]) {
+                return _Kernel.krnTrapError("File allocation error: File with given name already exists");
             }
             // Find a free directory space
             var key = this.findFreeSpace(1, this.directoryDataInfo)[0];
@@ -134,8 +171,9 @@ var TSOS;
             // If key object given, translate to string key
             if (typeof key == 'object')
                 key = this.keyObjectToString(key);
-            // Translate data
-            block.data = this.translateToHex(block.data);
+            // Translate data if necesary
+            if (typeof block.data == 'string')
+                block.data = this.translateToHex(block.data);
             // Fill unused bytes in data section with 00's
             if (block.data.length < _Disk.getDataSize()) {
                 var originalDataSize = block.data.length;
@@ -225,7 +263,6 @@ var TSOS;
             return output;
         };
         DeviceDriverFileSystem.prototype.searchFiles = function (re, dataInfo) {
-            console.log(re);
             var key = this.keyStringToObject(dataInfo.start);
             var keyLimit = this.keyStringToObject(dataInfo.end);
             var outputKeys = [];
@@ -238,7 +275,6 @@ var TSOS;
                         if (!block.availability)
                             continue; // Only look at blocks in use
                         block.data = this.translateFromHex(block.data);
-                        console.log(block);
                         // Check if matches search criteria
                         if (re.test(block.data)) {
                             outputKeys.push(this.keyObjectToString({ t: t, s: s, b: b }));

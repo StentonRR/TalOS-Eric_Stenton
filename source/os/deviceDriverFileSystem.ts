@@ -53,6 +53,11 @@ module TSOS {
                     switch (action) {
 
                         case 'create': {
+                            // Check if file name begins with forbidden character
+                            if ( this.forbiddenPrefixes.includes(target[0]) ) {
+                                return _Kernel.krnTrapError(`File allocation error: File name cannot begin with '${target[0]}'`);
+                            }
+
                             this.create(target);
                             break;
                         }
@@ -64,11 +69,44 @@ module TSOS {
 
                         case 'write': {
 
-                            // Break up data
+                            // Break up data into an array of arrays each at most 60 characters in length
+                            data = data.split("");
                             let dataPieces = data.map( () => data.splice(0, _Disk.dataSize).filter(data => data) );
 
+                            // Get directory block
+                            let dirKey = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo)[0];
+                            let dirBlock = this.read(dirKey);
+                            if (!dirBlock) return _Kernel.krnTrapError("File write error: File does not exist");
 
-                            this.write(target, data);
+                            // Get blocks of free memory to store data
+                            let keys = this.findFreeSpace(Object.keys(dataPieces).length, this.fileDataInfo);
+                            let freeBlocks = keys.map( key => this.read(key) );
+                            if (freeBlocks.length != Object.keys(dataPieces).length) return _Kernel.krnTrapError("File write error: Insufficient space");
+
+                            // Set pointer of directory block to key of first file block
+                            dirBlock.pointer = this.keyStringToObject(keys[0]);
+
+                            // Update directory block on hard drive
+                            this.write(dirKey, dirBlock);
+
+                            // Fill file blocks with data and set pointer + availability, then save to hard drive
+                            for (let i = 0; i < freeBlocks.length; i++) {
+                                freeBlocks[i].data = dataPieces[i].join("");
+
+                                freeBlocks[i].availability = 1;
+                                if (i+1 != freeBlocks.length) freeBlocks[i].pointer = this.keyStringToObject(keys[i+1]);
+
+                                this.write(keys[i], freeBlocks[i]);
+                            }
+
+                            _StdOut.putText("Data successfully written to file");
+                            _StdOut.advanceLine();
+                            _OsShell.putPrompt();
+
+                            break;
+                        }
+
+                        case 'delete': {
                             break;
                         }
 
@@ -78,7 +116,6 @@ module TSOS {
                         }
 
                         default: {
-
                             break;
                         }
 
@@ -100,6 +137,12 @@ module TSOS {
                 return _Kernel.krnTrapError("File allocation error: File name is too big");
             }
 
+            // Check if file already exists
+            if ( this.searchFiles(new RegExp(`^${fileName}$`), this.directoryDataInfo)[0] ) {
+                return _Kernel.krnTrapError("File allocation error: File with given name already exists");
+            }
+
+
             // Find a free directory space
             let key = this.findFreeSpace(1, this.directoryDataInfo)[0];
 
@@ -120,7 +163,7 @@ module TSOS {
 
             _StdOut.putText("File successfully created");
             _StdOut.advanceLine();
-            _OsShell.putPrompt()
+            _OsShell.putPrompt();
         }
 
         public read(key) {
@@ -129,7 +172,7 @@ module TSOS {
 
             // Get data block and translate it to an object
             let block = sessionStorage.getItem(key);
-            let blockObj = {'availability': parseInt(block[0]),
+            let blockObj: {'availability': any, 'pointer': any, 'data': any} = {'availability': parseInt(block[0]),
                             'pointer': this.keyStringToObject( block.substring(1, 4) ),
                             'data': block.substring(_Disk.getHeadSize()).match(/.{1,2}/g)};
 
@@ -140,8 +183,8 @@ module TSOS {
             // If key object given, translate to string key
             if (typeof key == 'object') key = this.keyObjectToString(key);
 
-            // Translate data
-            block.data = this.translateToHex(block.data);
+            // Translate data if necesary
+            if (typeof block.data == 'string') block.data = this.translateToHex(block.data);
 
             // Fill unused bytes in data section with 00's
             if (block.data.length < _Disk.getDataSize()) {
@@ -188,11 +231,11 @@ module TSOS {
 
             // Loop until free space found -- label loops to break from them easier
             trackLoop:
-                for (let t = key.t; t <= keyLimit.t; t++) {
+                for (let t:any = key.t; t <= keyLimit.t; t++) {
                         sectorLoop:
-                        for (let s = key.s; s <= keyLimit.s; s++) {
+                        for (let s:any = key.s; s <= keyLimit.s; s++) {
                             blockLoop: // Ternary to skip master book record
-                                for (let b = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
+                                for (let b:any = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
                                     let block = this.read({t, s, b});
 
                                     // Add key to list if it is available
@@ -252,23 +295,23 @@ module TSOS {
             return output;
         }
 
-        public searchFiles(re, dataInfo) { console.log(re)
+        public searchFiles(re, dataInfo) {
             let key = this.keyStringToObject(dataInfo.start);
             let keyLimit = this.keyStringToObject(dataInfo.end);
             let outputKeys = [];
 
             // Loop and find files that match search criteria -- label loops to break from them easier
             trackLoop:
-                for (let t = key.t; t <= keyLimit.t; t++) {
+                for (let t:any = key.t; t <= keyLimit.t; t++) {
                     sectorLoop:
-                        for (let s = key.s; s <= keyLimit.s; s++) {
+                        for (let s:any = key.s; s <= keyLimit.s; s++) {
                             blockLoop: // Ternary to skip master book record
-                                for (let b = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
+                                for (let b:any = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
                                     let block = this.read({t, s, b});
                                     if (!block.availability) continue; // Only look at blocks in use
 
                                     block.data = this.translateFromHex(block.data);
-                                    console.log(block);
+
                                     // Check if matches search criteria
                                     if ( re.test(block.data) ) {
                                         outputKeys.push( this.keyObjectToString({t, s, b}) );

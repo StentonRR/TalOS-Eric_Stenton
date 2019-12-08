@@ -511,7 +511,7 @@ var TSOS;
                 // Add operation to object
                 args.unshift('create');
                 // Create interrupt for file operation
-                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 3)));
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 2)));
             }
             else {
                 _StdOut.putText("Usage: create <file name> Please supply a file name.");
@@ -526,6 +526,20 @@ var TSOS;
         };
         Shell.prototype.shellWrite = function (args) {
             if (args.length > 0) {
+                var file = args.shift();
+                var indices_1 = [];
+                // Combine array to single string then separate on character
+                args = args.join(" ").split("");
+                console.log(args);
+                // Get indices of arguments that contain quotes
+                args.filter(function (el, index) {
+                    if (el == '"')
+                        indices_1.push(index);
+                });
+                // Get text in between quotes
+                var data = args.splice(indices_1[0] + 1, indices_1[1] - 1).join("");
+                // Create interrupt for file operation
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, ['write', file, data]));
             }
             else {
                 _StdOut.putText('Usage: write "<text>" Please supply a text.');
