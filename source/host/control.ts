@@ -118,6 +118,8 @@ module TSOS {
         public static updatePcbDisplay(): void {
             let table = document.getElementById("tablePcb") as HTMLTableElement;
             let newTbody = document.createElement('tbody');
+            table.style.display = 'block';
+            table.style.height = '208px';
 
             // Add rows for each process to tbody
             let row;
@@ -160,6 +162,7 @@ module TSOS {
 
             let table = document.getElementById("tableMemory") as HTMLTableElement;
             let newTbody = document.createElement('tbody');
+            table.style.display = 'block';
 
             // Add memory information -- must work around memory accessor, so need physical to logical address calculations
             let row;
@@ -239,8 +242,50 @@ module TSOS {
             if (highlightedCell) highlightedCell.scrollIntoView({block: 'nearest'});
         }
 
+        public static updateHardDriveDisplay(): void {
+            // Only update if hard drive is formatted
+            if (!_krnFileSystemDriver.formatted) return;
 
-        //
+            let table = document.getElementById("tableHardDrive") as HTMLTableElement;
+            let newTbody = document.createElement('tbody');
+            table.style.display = 'block';
+
+            let row;
+
+            // Loop through all tracks, sectors, and blocks
+            let pointer;
+            for (let t = 0; t < _Disk.getTrackNumber(); t++) {
+                for (let s = 0; s < _Disk.getSectorNumber(); s++) {
+                    for (let b = 0; b < _Disk.getBlockNumber(); b++) {
+                        // Create a row for an entry
+                        row = newTbody.insertRow(-1);
+
+                        // Grab block
+                        let block = sessionStorage.getItem(`${t}:${s}:${b}`);
+
+                        // Insert key
+                        row.insertCell(-1).innerHTML = `${t}:${s}:${b}`;
+
+                        // Insert availability
+                        row.insertCell(-1).innerHTML = block[0];
+
+                        // Insert next pointer
+                        pointer = block.substring(1, 4);
+                        row.insertCell(-1).innerHTML = `${pointer[0]}:${pointer[1]}:${pointer[2]}`;
+
+                        // Insert data
+                        row.insertCell(-1).innerHTML = block.substring(4);
+                    }
+                }
+            }
+
+            // Replace old tbody with new one
+            table.replaceChild(newTbody, table.tBodies[0]);
+        }
+
+
+
+            //
         // Host Events
         //
         public static hostBtnStartOS_click(btn): void {
@@ -263,9 +308,8 @@ module TSOS {
             _Memory = new Memory();
             _Memory.init();
 
-            // ... Create and initialize disk ...
+            // ... Create disk ...
             _Disk = new Disk();
-            _Disk.init();
 
             // ... Create memory accessor ...
             _MemoryAccessor = new TSOS.MemoryAccessor();

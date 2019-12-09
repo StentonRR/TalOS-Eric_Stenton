@@ -20,6 +20,12 @@ module TSOS {
                     }
                 }
             }
+
+            // Fill master boot record
+            let block = _krnFileSystemDriver.read('0:0:0');
+            block.availability = 1;
+            block.data = `In the beginning were words, and words made the world`;
+            _krnFileSystemDriver.write('0:0:0', block);
         }
 
         public initBlock(key) {
@@ -45,6 +51,17 @@ module TSOS {
             return this.headSize;
         }
 
+        public getTrackNumber(): number {
+            return this.trackNumber;
+        }
+
+        public getSectorNumber(): number {
+            return this.sectorNumber;
+        }
+
+        public getBlockNumber(): number {
+            return this.blockNumber;
+        }
 
     }
 }

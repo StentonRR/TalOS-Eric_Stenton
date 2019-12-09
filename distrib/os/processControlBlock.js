@@ -49,6 +49,10 @@ var TSOS;
             _ReadyQueue = _ReadyQueue.filter(function (element) { return element.pid != _this.pid; });
             // Release memory
             _MemoryManager.availability[this.memorySegment.index] = true;
+            // Delete swap file if it exists and process is in hard drive
+            if (this.storageLocation == 'hdd') {
+                _krnFileSystemDriver.deleteFile(this.swapFile, true);
+            }
             // Notify user of termination
             _StdOut.advanceLine();
             _StdOut.putText("Process " + this.pid + " terminated");

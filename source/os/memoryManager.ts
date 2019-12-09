@@ -30,11 +30,16 @@ module TSOS {
                 }
             }
 
-            // Create process control block for program
-            let pcb = new PCB();
-
             // Memory is full ... use hard drive
             if (memorySegment === undefined) {
+                // Hard drive must be formatted first
+                if (!_krnFileSystemDriver.formatted) {
+                    return _StdOut.putText("No free memory available. Format hard drive for more space.");
+                }
+
+                // Create process control block for program
+                let pcb = new PCB();
+
                 let result;
 
                 // Create swap file and store in hard disk
@@ -48,6 +53,9 @@ module TSOS {
                 pcb.storageLocation = 'hdd';
 
             } else {
+                // Create process control block for program
+                let pcb = new PCB();
+
                 // Clear memory in case of remaining process code
                 _MemoryAccessor.clear(this.memoryRegisters[memorySegment]);
 

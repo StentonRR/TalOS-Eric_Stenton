@@ -32,7 +32,7 @@ var TSOS;
         fileDataInfo // Information file directory portion of disk
         ) {
             // Override the base method pointers.
-            if (formatted === void 0) { formatted = true; }
+            if (formatted === void 0) { formatted = false; }
             if (forbiddenPrefixes === void 0) { forbiddenPrefixes = ['@']; }
             if (specialPrefixes === void 0) { specialPrefixes = ['@', '.']; }
             if (masterBootRecord === void 0) { masterBootRecord = '0:0:0'; }
@@ -194,7 +194,10 @@ var TSOS;
             if (!isSwap)
                 data = data.split("");
             // Break up data into an array of arrays each at most 60 characters in length
-            var dataPieces = data.map(function () { return data.splice(0, _Disk.dataSize).filter(function (data) { return data; }); });
+            var dataPieces = [];
+            while (data.length > 0) {
+                dataPieces.push(data.splice(0, _Disk.dataSize));
+            }
             // Get directory block
             var result = this.searchFiles(new RegExp("^" + target + "$"), this.directoryDataInfo);
             if (result.length == 0)
@@ -265,6 +268,9 @@ var TSOS;
         DeviceDriverFileSystem.prototype.format = function (flags) {
             // Check flags
             if (flags.includes('quick')) {
+                // A full format is necessary before a quick one can be done
+                if (!this.formatted)
+                    return { status: 1, msg: "Hard drive must be fully formatted first" };
                 var key = this.keyStringToObject(this.directoryDataInfo.start);
                 var keyLimit = this.keyStringToObject(this.fileDataInfo.end);
                 // Initialize first 4 bytes of all blocks -- label loops to break from them easier
@@ -282,10 +288,23 @@ var TSOS;
                         }
                     }
                 }
+                // Terminate any processes stored on hard disk
+                var processes = _ResidentList.filter(function (proc) { return proc.storageLocation == 'hdd' && proc.state != 'terminated'; });
+                for (var _i = 0, processes_1 = processes; _i < processes_1.length; _i++) {
+                    var proc = processes_1[_i];
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, [proc]));
+                }
                 return { status: 0, msg: "Hard drive quickly formatted" };
             }
             else if (flags.includes('full') || flags.length == 0) { // No flags, assume full format
                 _Disk.init();
+                this.formatted = true;
+                // Terminate any processes stored on hard disk
+                var processes = _ResidentList.filter(function (proc) { return proc.storageLocation == 'hdd' && proc.state != 'terminated'; });
+                for (var _a = 0, processes_2 = processes; _a < processes_2.length; _a++) {
+                    var proc = processes_2[_a];
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, [proc]));
+                }
                 return { status: 0, msg: "Hard drive fully formatted" };
             }
             else {

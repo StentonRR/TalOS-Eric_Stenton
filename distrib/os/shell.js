@@ -138,7 +138,8 @@ var TSOS;
             this.commandList.push(sc);
             // format
             sc = new TSOS.ShellCommand(this.shellFormat, "format", "Initializes data blocks. Quick format only initializes first four bytes while full format " +
-                "initializes the entire block, both header and data portion", "format <-quick, -full>");
+                "initializes the entire block, both header and data portion. Any process stored on hard disk will be " +
+                "terminated.", "format <-quick, -full>");
             this.commandList.push(sc);
             // ls
             sc = new TSOS.ShellCommand(this.shellLs, "ls", "Lists the files in the directory. The -l flag includes special files in output", "ls <-l (optional)>");

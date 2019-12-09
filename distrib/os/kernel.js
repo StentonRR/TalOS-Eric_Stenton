@@ -79,8 +79,9 @@ var TSOS;
                that it has to look for interrupts and process them if it finds any.                           */
             // Have CPU save PCB state to keep visual displays up to date in real time
             _CPU.saveState();
-            // Update the memory and pcb visual displays
+            // Update the memory, hard drive, and pcb visual displays
             TSOS.Control.updateMemoryDisplay();
+            TSOS.Control.updateHardDriveDisplay();
             TSOS.Control.updatePcbDisplay();
             // Check for an interrupt, are any. Page 560
             if (_KernelInterruptQueue.getSize() > 0) {

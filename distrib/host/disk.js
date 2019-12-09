@@ -22,6 +22,11 @@ var TSOS;
                     }
                 }
             }
+            // Fill master boot record
+            var block = _krnFileSystemDriver.read('0:0:0');
+            block.availability = 1;
+            block.data = "In the beginning were words, and words made the world";
+            _krnFileSystemDriver.write('0:0:0', block);
         };
         Disk.prototype.initBlock = function (key) {
             // Build disk data
@@ -39,6 +44,15 @@ var TSOS;
         };
         Disk.prototype.getHeadSize = function () {
             return this.headSize;
+        };
+        Disk.prototype.getTrackNumber = function () {
+            return this.trackNumber;
+        };
+        Disk.prototype.getSectorNumber = function () {
+            return this.sectorNumber;
+        };
+        Disk.prototype.getBlockNumber = function () {
+            return this.blockNumber;
         };
         return Disk;
     }());

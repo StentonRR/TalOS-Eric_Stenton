@@ -15,7 +15,7 @@ module TSOS {
     export class DeviceDriverFileSystem extends DeviceDriver {
 
         constructor(
-            public formatted = true,
+            public formatted = false,
             public forbiddenPrefixes = ['@'], // File names cannot start with these
             public specialPrefixes = ['@', '.'], // Files with names that start with these need the -a flag to list
             public masterBootRecord = '0:0:0', // The key for the master boot record
@@ -213,7 +213,10 @@ module TSOS {
             if (!isSwap) data = data.split("");
 
             // Break up data into an array of arrays each at most 60 characters in length
-            let dataPieces = data.map( () => data.splice(0, _Disk.dataSize).filter(data => data) );
+            let dataPieces = [];
+            while (data.length > 0) {
+                dataPieces.push(data.splice(0, _Disk.dataSize));
+            }
 
             // Get directory block
             let result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
@@ -303,6 +306,9 @@ module TSOS {
 
             // Check flags
             if ( flags.includes('quick') ) {
+                // A full format is necessary before a quick one can be done
+                if (!this.formatted) return {status: 1, msg: "Hard drive must be fully formatted first"};
+
                 let key = this.keyStringToObject(this.directoryDataInfo.start);
                 let keyLimit = this.keyStringToObject(this.fileDataInfo.end);
 
@@ -325,10 +331,23 @@ module TSOS {
                             }
                     }
 
+                // Terminate any processes stored on hard disk
+                let processes = _ResidentList.filter( proc => proc.storageLocation == 'hdd' && proc.state != 'terminated');
+                for (let proc of processes) {
+                    _KernelInterruptQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ, [proc]));
+                }
+
                 return {status: 0, msg: "Hard drive quickly formatted"};
 
             } else if ( flags.includes('full') || flags.length == 0 ) { // No flags, assume full format
                 _Disk.init();
+                this.formatted = true;
+
+                // Terminate any processes stored on hard disk
+                let processes = _ResidentList.filter( proc => proc.storageLocation == 'hdd' && proc.state != 'terminated');
+                for (let proc of processes) {
+                    _KernelInterruptQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ, [proc]));
+                }
 
                 return {status: 0, msg: "Hard drive fully formatted"};
 

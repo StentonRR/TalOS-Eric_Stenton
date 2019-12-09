@@ -210,7 +210,8 @@ module TSOS {
             sc = new ShellCommand(this.shellFormat,
                 "format",
                 "Initializes data blocks. Quick format only initializes first four bytes while full format " +
-                "initializes the entire block, both header and data portion",
+                "initializes the entire block, both header and data portion. Any process stored on hard disk will be " +
+                "terminated.",
                 "format <-quick, -full>");
             this.commandList.push(sc);
 
