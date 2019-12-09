@@ -30,6 +30,8 @@ module TSOS {
                 }
             }
 
+            let pcb;
+
             // Memory is full ... use hard drive
             if (memorySegment === undefined) {
                 // Hard drive must be formatted first
@@ -38,7 +40,7 @@ module TSOS {
                 }
 
                 // Create process control block for program
-                let pcb = new PCB();
+                pcb = new PCB();
 
                 let result;
 
@@ -54,7 +56,7 @@ module TSOS {
 
             } else {
                 // Create process control block for program
-                let pcb = new PCB();
+                pcb = new PCB();
 
                 // Clear memory in case of remaining process code
                 _MemoryAccessor.clear(this.memoryRegisters[memorySegment]);

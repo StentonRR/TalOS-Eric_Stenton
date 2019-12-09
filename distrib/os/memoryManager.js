@@ -29,6 +29,7 @@ var TSOS;
                     break;
                 }
             }
+            var pcb;
             // Memory is full ... use hard drive
             if (memorySegment === undefined) {
                 // Hard drive must be formatted first
@@ -36,7 +37,7 @@ var TSOS;
                     return _StdOut.putText("No free memory available. Format hard drive for more space.");
                 }
                 // Create process control block for program
-                var pcb = new TSOS.PCB();
+                pcb = new TSOS.PCB();
                 var result = void 0;
                 // Create swap file and store in hard disk
                 pcb.swapFile = "@" + pcb.pid;
@@ -50,7 +51,7 @@ var TSOS;
             }
             else {
                 // Create process control block for program
-                var pcb = new TSOS.PCB();
+                pcb = new TSOS.PCB();
                 // Clear memory in case of remaining process code
                 _MemoryAccessor.clear(this.memoryRegisters[memorySegment]);
                 // Load program into free memory segment
