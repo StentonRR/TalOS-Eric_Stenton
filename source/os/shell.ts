@@ -669,8 +669,14 @@ module TSOS {
                     if (el == '"') indices.push(index);
                 });
 
+                // Make sure there are correct amount of quotes
+                if (indices.length < 2) return _StdOut.putText(`No data provided. Ensure data is surrounded by quotes.`);
+
                 // Get text in between quotes
-                let data = args.splice(indices[0]+1, indices[1]-1).join("");
+                let data = args.splice(indices[0]+1, indices[1]-indices[0]-1).join("");
+
+                // If data is empty, put a space in it
+                if (data.length == 0) data = ' ';
 
                 // Create interrupt for file operation
                 _KernelInterruptQueue.enqueue( new Interrupt(FILE_SYSTEM_IRQ, ['write', file, data]) );

@@ -554,8 +554,14 @@ var TSOS;
                     if (el == '"')
                         indices_1.push(index);
                 });
+                // Make sure there are correct amount of quotes
+                if (indices_1.length < 2)
+                    return _StdOut.putText("No data provided. Ensure data is surrounded by quotes.");
                 // Get text in between quotes
-                var data = args.splice(indices_1[0] + 1, indices_1[1] - 1).join("");
+                var data = args.splice(indices_1[0] + 1, indices_1[1] - indices_1[0] - 1).join("");
+                // If data is empty, put a space in it
+                if (data.length == 0)
+                    data = ' ';
                 // Create interrupt for file operation
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, ['write', file, data]));
             }
