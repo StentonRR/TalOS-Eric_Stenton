@@ -391,7 +391,13 @@ module TSOS {
                let pcb = _MemoryManager.load(input, args[0]);
 
                // Print program details if it loaded without error
-               if (pcb) _StdOut.putText(`Program with PID ${pcb.pid} loaded into memory segment ${pcb.memorySegment.index}.`);
+               if (pcb) {
+                   if (pcb.storageLocation == "memory") {
+                       _StdOut.putText(`Program with PID ${pcb.pid} loaded into memory segment ${pcb.memorySegment.index}`);
+                   } else {
+                       _StdOut.putText(`Program with PID ${pcb.pid} loaded into hard drive`);
+                   }
+               }
             } else {
                 _StdOut.putText(`User program is not valid hexadecimal.`);
             }
@@ -647,10 +653,15 @@ module TSOS {
         public shellWrite(args) {
             if (args.length > 0) {
                 let file = args.shift();
+                // Please don't write to swap files
+                if (file[0] == '@') {
+                    return _StdOut.putText(`Swap files cannot be edited`);
+                }
+
                 let indices = [];
 
                 // Combine array to single string then separate on character
-                args = args.join(" ").split(""); console.log(args);
+                args = args.join(" ").split("");
 
                 // Get indices of arguments that contain quotes
                 args.filter(  (el, index) => {
@@ -670,6 +681,11 @@ module TSOS {
 
         public shellDelete(args) {
             if (args.length > 0) {
+                // Please don't delete swap files
+                if (args[0][0] == '@') {
+                    return _StdOut.putText(`Swap files cannot be deleted`);
+                }
+
                 // Add operation to object
                 args.unshift('delete');
 

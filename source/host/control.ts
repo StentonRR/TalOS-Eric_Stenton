@@ -127,6 +127,7 @@ module TSOS {
                 // Add pcb information
                 row.insertCell(-1).innerHTML = _ResidentList[i].pid;
                 row.insertCell(-1).innerHTML = _ResidentList[i].state.toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _ResidentList[i].state == 'terminated' ? '--' : _ResidentList[i].storageLocation;
                 row.insertCell(-1).innerHTML = _ResidentList[i].priority;
                 row.insertCell(-1).innerHTML = _ResidentList[i].PC;
                 row.insertCell(-1).innerHTML = _ResidentList[i].Acc.toString(16).toLocaleUpperCase();

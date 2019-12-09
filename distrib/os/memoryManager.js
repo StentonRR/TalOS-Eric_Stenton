@@ -28,14 +28,58 @@ var TSOS;
                     memorySegment = i;
                     break;
                 }
-                // todo Swapping stuff
             }
-            // Memory is full
+            // Create process control block for program
+            var pcb = new TSOS.PCB();
+            // Memory is full ... use hard drive
             if (memorySegment === undefined) {
-                _Kernel.krnTrapError("There are no free memory segments available");
-                return;
+                var result = void 0;
+                // Create swap file and store in hard disk
+                pcb.swapFile = "@" + pcb.pid;
+                result = _krnFileSystemDriver.create(pcb.swapFile, true);
+                if (result.status)
+                    return _StdOut.putText(result.msg);
+                result = _krnFileSystemDriver.writeFile(pcb.swapFile, program, true);
+                if (result.status)
+                    return _StdOut.putText(result.msg);
+                pcb.storageLocation = 'hdd';
             }
-            // Clear memory in case of remaining process code
+            else {
+                // Clear memory in case of remaining process code
+                _MemoryAccessor.clear(this.memoryRegisters[memorySegment]);
+                // Load program into free memory segment
+                var status_1;
+                for (var i = 0; i < program.length; i++) {
+                    status_1 = _MemoryAccessor.write(this.memoryRegisters[memorySegment], i, program[i]);
+                    // Process terminated if it exceeds memory bounds
+                    if (!status_1) {
+                        return;
+                    }
+                }
+                // Update memory segment's availability
+                this.availability[memorySegment] = false;
+                // Update pcb's memory segment information
+                pcb.memorySegment = this.memoryRegisters[memorySegment];
+            }
+            // Finalize pcb information
+            pcb.priority = parseInt(priority) || 0;
+            pcb.state = "resident";
+            // Add pcb to global list
+            _ResidentList.push(pcb);
+            return pcb;
+        };
+        MemoryManager.prototype.rollIn = function (pcb) {
+            var memorySegment;
+            // Find available memory segment
+            for (var i = 0; i < this.availability.length; i++) {
+                if (this.availability[i]) {
+                    memorySegment = i;
+                    break;
+                }
+            }
+            // Get program from hard drive
+            var program = _krnFileSystemDriver.readFile(pcb.swapFile, true).msg;
+            // Clear memory of remaining process code
             _MemoryAccessor.clear(this.memoryRegisters[memorySegment]);
             // Load program into free memory segment
             var status;
@@ -48,14 +92,31 @@ var TSOS;
             }
             // Update memory segment's availability
             this.availability[memorySegment] = false;
-            // Create process control block for program
-            var pcb = new TSOS.PCB();
+            // Update pcb's memory segment information
             pcb.memorySegment = this.memoryRegisters[memorySegment];
-            pcb.priority = parseInt(priority) || 0;
-            pcb.state = "resident";
-            // Add pcb to global list
-            _ResidentList.push(pcb);
-            return pcb;
+            // Delete swap file
+            _krnFileSystemDriver.deleteFile(pcb.swapFile, true);
+            pcb.swapFile = '';
+            // Update storage location
+            pcb.storageLocation = 'memory';
+            return;
+        };
+        MemoryManager.prototype.rollOut = function (pcb) {
+            // Get program
+            var program = [];
+            for (var i = 0; i < _MemoryAccessor.getSegmentSize(); i++) {
+                program.push(_MemoryAccessor.read(pcb.memorySegment, i));
+            }
+            // Memory segment now available to be used
+            this.availability[pcb.memorySegment.index] = true;
+            // Change PCB information to reflect location change
+            pcb.storageLocation = 'hdd';
+            pcb.memorySegment = {};
+            pcb.swapFile = "@" + pcb.pid;
+            // Create swap file and write program to it
+            _krnFileSystemDriver.create(pcb.swapFile, true);
+            _krnFileSystemDriver.writeFile(pcb.swapFile, program, true);
+            return;
         };
         MemoryManager.prototype.clearAllMem = function (ignoreList) {
             for (var _i = 0, _a = this.memoryRegisters; _i < _a.length; _i++) {

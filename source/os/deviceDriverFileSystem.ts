@@ -42,10 +42,12 @@ module TSOS {
             let target = params[1]; // Target of operation -- file or directory name
             let data = params[2]; // Any data associated with operation
             let flags = params[3]; // Flags that modify action
-            console.table({action, target, data, flags});
+
+            let result;
 
             if (action == 'format') {
-                this.format(flags);
+                result = this.format(flags);
+                _StdOut.printInfo(result.msg);
 
             } else {
 
@@ -53,117 +55,37 @@ module TSOS {
                     switch (action) {
 
                         case 'create': {
-                            this.create(target);
-
-                            _StdOut.printInfo("File successfully created");
+                            result = this.create(target, false);
+                            _StdOut.printInfo(result.msg);
 
                             break;
                         }
 
                         case 'read': {
-                            // Find file with given name
-                            let result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
-                            if (result.length == 0) return _StdOut.printInfo("File does not exist");
-
-                            let dirKey = result[0];
-                            let dirBlock = this.read(dirKey);
-
-
-                            // Get file blocks associated with directory block and concat their data
-                            let output = '';
-                            let currentBlock;
-                            let currentPointer = this.keyObjectToString(dirBlock.pointer);
-                            while (currentPointer != "F:F:F") {
-                                currentBlock = this.read(currentPointer);
-
-                                output += this.translateFromHex(currentBlock.data);
-                                currentPointer = this.keyObjectToString(currentBlock.pointer);
-                            }
-
-                            _StdOut.printInfo(output);
+                            result = this.readFile(target, target[0] == '@');
+                            _StdOut.printInfo( typeof result.msg == 'string' ? result.msg : result.msg.join('') );
 
                             break;
                         }
 
                         case 'write': {
-
-                            // Break up data into an array of arrays each at most 60 characters in length
-                            data = data.split("");
-                            let dataPieces = data.map( () => data.splice(0, _Disk.dataSize).filter(data => data) );
-
-                            // Get directory block
-                            let result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
-                            if (result.length == 0) return _StdOut.printInfo("File does not exist");
-
-                            let dirKey = result[0];
-                            let dirBlock = this.read(dirKey);
-
-                            // If file already written to, reclaim space then allocate new blocks
-                            let currentBlock;
-                            let currentPointer = this.keyObjectToString(dirBlock.pointer);
-                            while (currentPointer != "F:F:F") {
-                                currentBlock = this.read(currentPointer);
-
-                                this.delete(currentPointer);
-
-                                currentPointer = this.keyObjectToString(currentBlock.pointer);
-                            }
-
-                            // Get blocks of free memory to store data
-                            let keys = this.findFreeSpace(Object.keys(dataPieces).length, this.fileDataInfo);
-                            let freeBlocks = keys.map( key => this.read(key) );
-                            if (freeBlocks.length != Object.keys(dataPieces).length) return _StdOut.printInfo("Insufficient space");
-
-                            // Set pointer of directory block to key of first file block
-                            dirBlock.pointer = this.keyStringToObject(keys[0]);
-
-                            // Update directory block on hard drive
-                            this.write(dirKey, dirBlock);
-
-                            // Fill file blocks with data and set pointer + availability, then save to hard drive
-                            for (let i = 0; i < freeBlocks.length; i++) {
-                                freeBlocks[i].data = dataPieces[i].join("");
-
-                                freeBlocks[i].availability = 1;
-                                if (i+1 != freeBlocks.length) freeBlocks[i].pointer = this.keyStringToObject(keys[i+1]);
-
-                                this.write(keys[i], freeBlocks[i]);
-                            }
-
-                            _StdOut.printInfo("Data successfully written to file");
+                            result = this.writeFile(target, data, false);
+                            _StdOut.printInfo(result.msg);
 
                             break;
                         }
 
                         case 'delete': {
-                            // Delete directory block
-                            let result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
-                            if (result.length == 0) return _StdOut.printInfo("File does not exist");
-
-                            let dirKey = result[0];
-                            let dirBlock = this.read(dirKey);
-
-                            this.delete(dirKey);
-
-
-                            // Delete associated file blocks
-                            let currentBlock;
-                            let currentPointer = this.keyObjectToString(dirBlock.pointer);
-                            while (currentPointer != "F:F:F") {
-                                currentBlock = this.read(currentPointer);
-
-                                this.delete(currentPointer);
-
-                                currentPointer = this.keyObjectToString(currentBlock.pointer);
-                            }
-
-                            _StdOut.printInfo("File successfully deleted");
+                            result = this.deleteFile(target, false);
+                            _StdOut.printInfo(result.msg);
 
                             break;
                         }
 
                         case 'list': {
-                            this.list(flags);
+                            result = this.list(flags);
+                            _StdOut.printInfo(result.msg);
+
                             break;
                         }
 
@@ -182,16 +104,13 @@ module TSOS {
 
         }
 
-        public create(fileName) {
-
+        public create(fileName, isSwap) {
             // Check if file name is too long
-            if ( fileName.length > _Disk.getDataSize() ) {
-                return _StdOut.printInfo("File name is too big");
-            }
+            if ( fileName.length > _Disk.getDataSize() ) return {status: 1, msg: `File name '${fileName}' is too big`};
 
             // Check if file already exists
             if ( this.searchFiles(new RegExp(`^${fileName}$`), this.directoryDataInfo)[0] ) {
-                return _StdOut.printInfo("File with given name already exists");
+                return {status: 1, msg: `File with name '${fileName}' already exists`};
             }
 
 
@@ -199,9 +118,8 @@ module TSOS {
             let key = this.findFreeSpace(1, this.directoryDataInfo)[0];
 
             // No space is available
-            if (!key) {
-                return _StdOut.printInfo("Insufficient space to create file");
-            }
+            if (!key) return {status: 1, msg: `Insufficient space to create file '${fileName}'`};
+
 
             // Get free data space
             let block = this.read(key);
@@ -213,6 +131,8 @@ module TSOS {
             // Create the directory in session storage
             this.write(key, block);
 
+
+            return {status: 0, msg: `File '${fileName}' created successfully`};
         }
 
         public read(key) {
@@ -232,7 +152,7 @@ module TSOS {
             // If key object given, translate to string key
             if (typeof key == 'object') key = this.keyObjectToString(key);
 
-            // Translate data if necesary
+            // Translate data if necessary
             if (typeof block.data == 'string') block.data = this.translateToHex(block.data);
 
             // Fill unused bytes in data section with 00's
@@ -251,8 +171,117 @@ module TSOS {
             sessionStorage.setItem( key, data.join('') );
         }
 
+        public readFile(target, isSwap) {
+            // Find file with given name
+            let result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
+            if (result.length == 0) return {status: 1, msg: `File '${target}' does not exist`};
+
+
+            let dirKey = result[0];
+            let dirBlock = this.read(dirKey);
+
+
+            // Get file blocks associated with directory block and concat their data
+            let output = isSwap ? [] : '';
+            let currentBlock;
+            let currentPointer = this.keyObjectToString(dirBlock.pointer);
+            while (currentPointer != "F:F:F") {
+                currentBlock = this.read(currentPointer);
+
+                // Program hex should not be translated
+                if(!isSwap) {
+                    output += this.translateFromHex(currentBlock.data);
+                } else {
+                    output = output.concat(currentBlock.data);
+                }
+
+                currentPointer = this.keyObjectToString(currentBlock.pointer);
+            }
+
+            // Get rid of extra 00's if program
+            if (isSwap && typeof output == 'object') {
+                while ( output[output.length-1] == '00' && (output[output.length-2] && output[output.length-2] == '00') ) {
+                    output.pop();
+                }
+            }
+
+            return {status: 0, msg: output};
+        }
+
+        public writeFile(target, data, isSwap) {
+            // If swap file, don't break up like regular characters; it's already broken up 
+            if (!isSwap) data = data.split("");
+
+            // Break up data into an array of arrays each at most 60 characters in length
+            let dataPieces = data.map( () => data.splice(0, _Disk.dataSize).filter(data => data) );
+
+            // Get directory block
+            let result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
+            if (result.length == 0) return {status: 1, msg: `File '${target}' does not exist`};
+
+            let dirKey = result[0];
+            let dirBlock = this.read(dirKey);
+
+            // If file already written to, reclaim space then allocate new blocks
+            let currentBlock;
+            let currentPointer = this.keyObjectToString(dirBlock.pointer);
+            while (currentPointer != "F:F:F") {
+                currentBlock = this.read(currentPointer);
+                this.delete(currentPointer);
+                currentPointer = this.keyObjectToString(currentBlock.pointer);
+            }
+
+            // Get blocks of free memory to store data
+            let keys = this.findFreeSpace(Object.keys(dataPieces).length, this.fileDataInfo);
+            let freeBlocks = keys.map( key => this.read(key) );
+            if (freeBlocks.length != Object.keys(dataPieces).length) return {status: 1, msg: `Insufficient space`};
+
+            // Set pointer of directory block to key of first file block
+            dirBlock.pointer = this.keyStringToObject(keys[0]);
+
+            // Update directory block on hard drive
+            this.write(dirKey, dirBlock);
+
+            // Fill file blocks with data and set pointer + availability, then save to hard drive
+            for (let i = 0; i < freeBlocks.length; i++) {
+                freeBlocks[i].data = isSwap ? dataPieces[i] : dataPieces[i].join(""); // Don't join if swap file to avoid hex translation
+
+                freeBlocks[i].availability = 1;
+                if (i+1 != freeBlocks.length) freeBlocks[i].pointer = this.keyStringToObject(keys[i+1]);
+
+                this.write(keys[i], freeBlocks[i]);
+            }
+
+            return {status: 0, msg: `Data successfully written to file '${target}'`};
+        }
+
         public delete(key) {
             _Disk.initBlock(key);
+        }
+
+        public deleteFile(target, isSwap) {
+            // Delete directory block
+            let result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
+            if (result.length == 0) return {status: 1, msg: `File '${target}' does not exist`};
+
+            let dirKey = result[0];
+            let dirBlock = this.read(dirKey);
+
+            this.delete(dirKey);
+
+
+            // Delete associated file blocks
+            let currentBlock;
+            let currentPointer = this.keyObjectToString(dirBlock.pointer);
+            while (currentPointer != "F:F:F") {
+                currentBlock = this.read(currentPointer);
+
+                this.delete(currentPointer);
+
+                currentPointer = this.keyObjectToString(currentBlock.pointer);
+            }
+
+           return {status: 0, msg: `File '${target}' successfully deleted`};
         }
 
         public list(flags) {
@@ -267,8 +296,7 @@ module TSOS {
 
             let files = keys.map( key => this.translateFromHex(this.read(key).data) );
 
-            _StdOut.printInfo( files.join(' ') );
-
+           return {status: 0, msg: files.join(' ')};
         }
 
         public format(flags) {
@@ -297,15 +325,15 @@ module TSOS {
                             }
                     }
 
-                _StdOut.printInfo("Hard drive quickly formatted");
+                return {status: 0, msg: "Hard drive quickly formatted"};
 
             } else if ( flags.includes('full') || flags.length == 0 ) { // No flags, assume full format
                 _Disk.init();
 
-                _StdOut.printInfo("Hard drive fully formatted");
+                return {status: 0, msg: "Hard drive fully formatted"};
 
             } else {
-                return _StdOut.printInfo("Supplied flag(s) not valid");
+                return {status: 1, msg: "Supplied flag(s) not valid"};
             }
         }
 

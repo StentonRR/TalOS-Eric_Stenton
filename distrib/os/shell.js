@@ -289,8 +289,14 @@ var TSOS;
                 var input = programInput.match(/.{2}/g);
                 var pcb = _MemoryManager.load(input, args[0]);
                 // Print program details if it loaded without error
-                if (pcb)
-                    _StdOut.putText("Program with PID " + pcb.pid + " loaded into memory segment " + pcb.memorySegment.index + ".");
+                if (pcb) {
+                    if (pcb.storageLocation == "memory") {
+                        _StdOut.putText("Program with PID " + pcb.pid + " loaded into memory segment " + pcb.memorySegment.index);
+                    }
+                    else {
+                        _StdOut.putText("Program with PID " + pcb.pid + " loaded into hard drive");
+                    }
+                }
             }
             else {
                 _StdOut.putText("User program is not valid hexadecimal.");
@@ -535,10 +541,13 @@ var TSOS;
         Shell.prototype.shellWrite = function (args) {
             if (args.length > 0) {
                 var file = args.shift();
+                // Please don't write to swap files
+                if (file[0] == '@') {
+                    return _StdOut.putText("Swap files cannot be edited");
+                }
                 var indices_1 = [];
                 // Combine array to single string then separate on character
                 args = args.join(" ").split("");
-                console.log(args);
                 // Get indices of arguments that contain quotes
                 args.filter(function (el, index) {
                     if (el == '"')
@@ -555,6 +564,10 @@ var TSOS;
         };
         Shell.prototype.shellDelete = function (args) {
             if (args.length > 0) {
+                // Please don't delete swap files
+                if (args[0][0] == '@') {
+                    return _StdOut.putText("Swap files cannot be deleted");
+                }
                 // Add operation to object
                 args.unshift('delete');
                 // Create interrupt for file operation

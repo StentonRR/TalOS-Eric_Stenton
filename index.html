@@ -132,16 +132,28 @@
       </label>
    </div>
 
-   <div id="divQuote">
-      <label>
-         Quotes
-         <br>
-         <textarea name="taQuoteLog"
-                   id  ="taQuoteLog"
-                   rows="8"
-                   cols="48"
-         ></textarea>
-      </label>
+   <div id="floatDiv">
+      <div id="divHardDrive">
+         <label>
+            Hard Drive Display
+            <br>
+            <table id="tableHardDrive">
+               <tbody></tbody>
+            </table>
+         </label>
+      </div>
+
+      <div id="divQuote">
+         <label>
+            Quotes
+            <br>
+            <textarea name="taQuoteLog"
+                      id  ="taQuoteLog"
+                      rows="8"
+                      cols="48"
+            ></textarea>
+         </label>
+      </div>
    </div>
 
    <div id="divMemory" style="margin-left:520px;">
@@ -192,6 +204,7 @@
                <tr>
                   <th>PID</th>
                   <th>State</th>
+                  <th>Location</th>
                   <th>Priority</th>
                   <th>PC</th>
                   <th>Acc</th>

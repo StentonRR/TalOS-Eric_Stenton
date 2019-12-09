@@ -44,6 +44,27 @@ var TSOS;
         Scheduler.prototype.runProcess = function () {
             // Make sure process isn't already running
             if (!this.currentProcess || this.currentProcess.pid !== _ReadyQueue[0].pid) {
+                // Roll in process if on hard drive, roll out process in memory set to be ran furthest from now if needed
+                if (_ReadyQueue[0].storageLocation == 'hdd') {
+                    // Check if there is memory available for process already
+                    var memorySegment = void 0;
+                    for (var i = 0; i < _MemoryManager.availability.length; i++) {
+                        if (_MemoryManager.availability[i]) {
+                            memorySegment = i;
+                            break;
+                        }
+                    }
+                    // No memory available -- roll out a process
+                    if (memorySegment === undefined) {
+                        _Kernel.krnTrace("Rolling out process");
+                        var inMemProcesses = _ResidentList.filter(function (process) {
+                            return process.storageLocation == 'memory' && (process.state == 'ready' || process.state == 'resident');
+                        });
+                        _MemoryManager.rollOut(inMemProcesses[inMemProcesses.length - 1]);
+                    }
+                    _Kernel.krnTrace("Rolling in process");
+                    _MemoryManager.rollIn(_ReadyQueue[0]);
+                }
                 // Run process through interrupt and dispatcher
                 _Kernel.krnTrace("Issuing context switch");
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(RUN_PROCESS_IRQ, [_ReadyQueue[0]]));

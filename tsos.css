@@ -92,9 +92,14 @@ table thead th:first-child {
   width: 350px;
 }
 
-#divQuote {
+#floatDiv {
   float: left;
 }
+
+#tableHardDrive {
+  width: 500px;
+  overflow-y: scroll;
+  height: 320px;}
 
 .normal_button {
   width: 100px;
