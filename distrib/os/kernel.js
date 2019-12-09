@@ -36,6 +36,11 @@ var TSOS;
             _krnKeyboardDriver = new TSOS.DeviceDriverKeyboard(); // Construct it.
             _krnKeyboardDriver.driverEntry(); // Call the driverEntry() initialization routine.
             this.krnTrace(_krnKeyboardDriver.status);
+            // Load the File System Driver
+            this.krnTrace("Loading the file system driver.");
+            _krnFileSystemDriver = new TSOS.DeviceDriverFileSystem();
+            _krnFileSystemDriver.driverEntry();
+            this.krnTrace(_krnFileSystemDriver.status);
             // Initialize memory manager
             _MemoryManager = new TSOS.MemoryManager();
             _MemoryManager.init();
@@ -72,8 +77,11 @@ var TSOS;
                This is NOT the same as a TIMER, which causes an interrupt and is handled like other interrupts.
                This, on the other hand, is the clock pulse from the hardware / VM / host that tells the kernel
                that it has to look for interrupts and process them if it finds any.                           */
-            // Update the memory and pcb visual displays
+            // Have CPU save PCB state to keep visual displays up to date in real time
+            _CPU.saveState();
+            // Update the memory, hard drive, and pcb visual displays
             TSOS.Control.updateMemoryDisplay();
+            TSOS.Control.updateHardDriveDisplay();
             TSOS.Control.updatePcbDisplay();
             // Check for an interrupt, are any. Page 560
             if (_KernelInterruptQueue.getSize() > 0) {
@@ -108,9 +116,6 @@ var TSOS;
                 this.krnTrace("Scheduler active");
                 _Scheduler.scheduleProcesses();
             }
-            // Change this here to allow scheduler to work with single-step mode
-            if (_NextStep)
-                _NextStep = false;
         };
         //
         // Interrupt Handling
@@ -163,6 +168,9 @@ var TSOS;
                 case TERMINATE_PROCESS_IRQ: // Terminate specified process -- use dispatcher if process is running
                     var pcb = params[0];
                     pcb.state == 'running' ? _Dispatcher.terminateCurrentProcess() : pcb.terminate();
+                    break;
+                case FILE_SYSTEM_IRQ: // Run file operation
+                    _krnFileSystemDriver.isr(params); // Kernel mode device driver
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");

@@ -47,6 +47,9 @@ var TSOS;
         MemoryAccessor.prototype.dump = function () {
             return _Memory.mainMemory;
         };
+        MemoryAccessor.prototype.dumpSegment = function (base, limit) {
+            return _Memory.mainMemory.slice(base, limit);
+        };
         return MemoryAccessor;
     }());
     TSOS.MemoryAccessor = MemoryAccessor;

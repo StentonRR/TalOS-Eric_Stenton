@@ -102,6 +102,8 @@ var TSOS;
         Control.updatePcbDisplay = function () {
             var table = document.getElementById("tablePcb");
             var newTbody = document.createElement('tbody');
+            table.style.display = 'block';
+            table.style.height = '208px';
             // Add rows for each process to tbody
             var row;
             for (var i = 0; i < _ResidentList.length; i++) {
@@ -109,6 +111,7 @@ var TSOS;
                 // Add pcb information
                 row.insertCell(-1).innerHTML = _ResidentList[i].pid;
                 row.insertCell(-1).innerHTML = _ResidentList[i].state.toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _ResidentList[i].state == 'terminated' ? '--' : _ResidentList[i].storageLocation.toLocaleUpperCase();
                 row.insertCell(-1).innerHTML = _ResidentList[i].priority;
                 row.insertCell(-1).innerHTML = _ResidentList[i].PC;
                 row.insertCell(-1).innerHTML = _ResidentList[i].Acc.toString(16).toLocaleUpperCase();
@@ -138,6 +141,7 @@ var TSOS;
             };
             var table = document.getElementById("tableMemory");
             var newTbody = document.createElement('tbody');
+            table.style.display = 'block';
             // Add memory information -- must work around memory accessor, so need physical to logical address calculations
             var row;
             var rowLabel = "0x000";
@@ -202,6 +206,38 @@ var TSOS;
             if (highlightedCell)
                 highlightedCell.scrollIntoView({ block: 'nearest' });
         };
+        Control.updateHardDriveDisplay = function () {
+            // Only update if hard drive is formatted
+            if (!_krnFileSystemDriver.formatted)
+                return;
+            var table = document.getElementById("tableHardDrive");
+            var newTbody = document.createElement('tbody');
+            table.style.display = 'block';
+            var row;
+            // Loop through all tracks, sectors, and blocks
+            var pointer;
+            for (var t = 0; t < _Disk.getTrackNumber(); t++) {
+                for (var s = 0; s < _Disk.getSectorNumber(); s++) {
+                    for (var b = 0; b < _Disk.getBlockNumber(); b++) {
+                        // Create a row for an entry
+                        row = newTbody.insertRow(-1);
+                        // Grab block
+                        var block = sessionStorage.getItem(t + ":" + s + ":" + b);
+                        // Insert key
+                        row.insertCell(-1).innerHTML = t + ":" + s + ":" + b;
+                        // Insert availability
+                        row.insertCell(-1).innerHTML = block[0];
+                        // Insert next pointer
+                        pointer = block.substring(1, 4);
+                        row.insertCell(-1).innerHTML = pointer[0] + ":" + pointer[1] + ":" + pointer[2];
+                        // Insert data
+                        row.insertCell(-1).innerHTML = block.substring(4);
+                    }
+                }
+            }
+            // Replace old tbody with new one
+            table.replaceChild(newTbody, table.tBodies[0]);
+        };
         //
         // Host Events
         //
@@ -220,6 +256,8 @@ var TSOS;
             // ... Create and initialize memory ...
             _Memory = new TSOS.Memory();
             _Memory.init();
+            // ... Create disk ...
+            _Disk = new TSOS.Disk();
             // ... Create memory accessor ...
             _MemoryAccessor = new TSOS.MemoryAccessor();
             // ... Create dispatcher ...

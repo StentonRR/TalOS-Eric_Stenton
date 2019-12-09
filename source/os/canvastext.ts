@@ -153,7 +153,7 @@ module TSOS {
             ctx.save();
             ctx.lineCap = "round";
             ctx.lineWidth = 2.0 * mag;
-            ctx.strokeStyle = "black";
+            ctx.strokeStyle = "white";
 
             for (let i = 0; i < len; i++) {
                 let c = CanvasTextFunctions.letter(str.charAt(i));
