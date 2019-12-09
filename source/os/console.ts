@@ -188,6 +188,13 @@ module TSOS {
              }
          }
 
+         public printInfo(text) {
+            this.deletePrompt();
+            this.putText(text);
+            this.advanceLine();
+            _OsShell.putPrompt();
+         }
+
         public deleteText(text, bufferLength): void {
             // Remove the text or characters from console; called when back space is pressed
 
@@ -205,6 +212,11 @@ module TSOS {
 
             // Set the x coordinate back
             this.currentXPosition -= _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+        }
+
+        public deletePrompt(): void {
+            // Deletes the prompt from the screen for information or an error to be printed
+            this.deleteText(_OsShell.promptStr, _OsShell.promptStr.length);
         }
 
         public deleteLine(): void {

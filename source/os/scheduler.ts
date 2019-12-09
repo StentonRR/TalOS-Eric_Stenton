@@ -4,7 +4,10 @@ module TSOS {
             public quantum: number = 6, // Default quantum for processes
             public turns: number = 0, // Number of turns a process has left with round robin
             public currentProcess: PCB = null, // Process currently scheduled to run -- mostly for round robin use
-            public activeAlgorithm: string = "rr" // Current scheduling algorithm in use
+            public activeAlgorithm: string = "rr", // Current scheduling algorithm in use
+            public availableAlgorithms: any = {rr: "round robin", // Algorithms that are supported
+                                               fcfs: "first come, first serve",
+                                               priority: "priority"}
         ) {
         }
 
@@ -25,7 +28,7 @@ module TSOS {
                     _Kernel.krnTrace("Scheduling with first come, first serve");
                     this.roundRobinScheduler(Infinity); // Doesn't need function of its own, just a high quantum
                     break;
-                case "p": // Priority
+                case "priority": // Priority
                     _Kernel.krnTrace("Scheduling with priority");
                     this.priorityScheduler();
                     break;
@@ -36,6 +39,30 @@ module TSOS {
         public runProcess() {
             // Make sure process isn't already running
             if (!this.currentProcess ||  this.currentProcess.pid !== _ReadyQueue[0].pid) {
+                // Roll in process if on hard drive, roll out process in memory set to be ran furthest from now if needed
+                if (_ReadyQueue[0].storageLocation == 'hdd') {
+                    // Check if there is memory available for process already
+                    let memorySegment;
+                    for (let i = 0; i < _MemoryManager.availability.length; i++) {
+                        if (_MemoryManager.availability[i]){
+                            memorySegment = i;
+                            break;
+                        }
+                    }
+
+                    // No memory available -- roll out a process
+                    if (memorySegment === undefined) {
+                        _Kernel.krnTrace("Rolling out process");
+                        let inMemProcesses = _ResidentList .filter( (process) => {
+                            return process.storageLocation == 'memory' && (process.state == 'ready' || process.state == 'resident');
+                        });
+                        _MemoryManager.rollOut(inMemProcesses[inMemProcesses.length-1]);
+                    }
+
+                    _Kernel.krnTrace("Rolling in process");
+                    _MemoryManager.rollIn(_ReadyQueue[0]);
+                }
+
                 // Run process through interrupt and dispatcher
                 _Kernel.krnTrace("Issuing context switch");
                 _KernelInterruptQueue.enqueue(new Interrupt(RUN_PROCESS_IRQ, [_ReadyQueue[0]]));
@@ -56,18 +83,21 @@ module TSOS {
             // Processes should be 'pushed' to ready queue, so they are already in order of arrival,
             // so no need to reorder them
             if (this.currentProcess && _ReadyQueue[0].pid === this.currentProcess.pid) {
+
                 if (this.turns <= 0) { // Reorder ready queue and run next process because turns ran out
                     let process = _ReadyQueue.splice(0, 1);
                     _ReadyQueue.push(process[0]);
 
                     this.turns = quantum;
+                } else {
+                    this.turns--;
                 }
+
             } else { // Run next process because previous one terminated or this is the first one to run -- quantum reset
                 this.turns = quantum;
             }
 
             this.runProcess();
-            this.turns--;
         }
 
         public priorityScheduler() {

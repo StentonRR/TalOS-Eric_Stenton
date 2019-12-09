@@ -10,7 +10,7 @@ var TSOS;
         pid, // Process id
         priority, // Priority of the process
         memorySegment, // The segment of memory the program resides
-        storageLocation, // Where the program is currently stored
+        swapFile, storageLocation, // Where the program is currently stored
         // Accounting information
         waitTime, // Time the program spent waiting
         turnAroundTime // Time it took for the program to execute
@@ -24,6 +24,7 @@ var TSOS;
             if (pid === void 0) { pid = _PidCounter++; }
             if (priority === void 0) { priority = 0; }
             if (memorySegment === void 0) { memorySegment = {}; }
+            if (swapFile === void 0) { swapFile = ''; }
             if (storageLocation === void 0) { storageLocation = "memory"; }
             if (waitTime === void 0) { waitTime = 0; }
             if (turnAroundTime === void 0) { turnAroundTime = 0; }
@@ -36,6 +37,7 @@ var TSOS;
             this.pid = pid;
             this.priority = priority;
             this.memorySegment = memorySegment;
+            this.swapFile = swapFile;
             this.storageLocation = storageLocation;
             this.waitTime = waitTime;
             this.turnAroundTime = turnAroundTime;
@@ -47,6 +49,10 @@ var TSOS;
             _ReadyQueue = _ReadyQueue.filter(function (element) { return element.pid != _this.pid; });
             // Release memory
             _MemoryManager.availability[this.memorySegment.index] = true;
+            // Delete swap file if it exists and process is in hard drive
+            if (this.storageLocation == 'hdd') {
+                _krnFileSystemDriver.deleteFile(this.swapFile, true);
+            }
             // Notify user of termination
             _StdOut.advanceLine();
             _StdOut.putText("Process " + this.pid + " terminated");

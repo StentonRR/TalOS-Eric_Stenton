@@ -53,5 +53,9 @@ module TSOS {
         public dump(): any {
             return _Memory.mainMemory;
         }
+
+        public dumpSegment(base, limit): any {
+            return _Memory.mainMemory.slice(base, limit);
+        }
     }
 }

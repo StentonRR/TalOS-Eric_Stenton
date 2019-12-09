@@ -124,6 +124,32 @@ var TSOS;
             // quantum <int>
             sc = new TSOS.ShellCommand(this.shellQuantum, "quantum", "Sets the Round Robin quantum", "quantum <int>");
             this.commandList.push(sc);
+            // create <file name>
+            sc = new TSOS.ShellCommand(this.shellCreate, "create", "Creates a new file with the given name", "create <file name>");
+            this.commandList.push(sc);
+            // read <file name>
+            sc = new TSOS.ShellCommand(this.shellRead, "read", "Prints contents of a file", "read <file name>");
+            this.commandList.push(sc);
+            // write <file name>
+            sc = new TSOS.ShellCommand(this.shellWrite, "write", "Writes provided data to file. Make sure to put data in quotes.", 'write "<text>"');
+            this.commandList.push(sc);
+            // delete <file name>
+            sc = new TSOS.ShellCommand(this.shellDelete, "delete", "Deletes the file with given name", "delete <file name>");
+            this.commandList.push(sc);
+            // format
+            sc = new TSOS.ShellCommand(this.shellFormat, "format", "Initializes data blocks. Quick format only initializes first four bytes while full format " +
+                "initializes the entire block, both header and data portion. Any process stored on hard disk will be " +
+                "terminated.", "format <-quick, -full>");
+            this.commandList.push(sc);
+            // ls
+            sc = new TSOS.ShellCommand(this.shellLs, "ls", "Lists the files in the directory. The -l flag includes special files in output", "ls <-l (optional)>");
+            this.commandList.push(sc);
+            // setschedule <schedule type>
+            sc = new TSOS.ShellCommand(this.shellSetSchedule, "setschedule", "Changes the current scheduler. Options are round robin, first come first serve, and priority", "setschedule <scheduler type (rr, fcfs, or priority)>");
+            this.commandList.push(sc);
+            // getschedule
+            sc = new TSOS.ShellCommand(this.shellGetSchedule, "getschedule", "Returns the current scheduling algorithm", "getschedule");
+            this.commandList.push(sc);
             // Display the initial prompt.
             this.putPrompt();
         };
@@ -264,8 +290,14 @@ var TSOS;
                 var input = programInput.match(/.{2}/g);
                 var pcb = _MemoryManager.load(input, args[0]);
                 // Print program details if it loaded without error
-                if (pcb)
-                    _StdOut.putText("Program with PID " + pcb.pid + " loaded into memory segment " + pcb.memorySegment.index + ".");
+                if (pcb) {
+                    if (pcb.storageLocation == "memory") {
+                        _StdOut.putText("Program with PID " + pcb.pid + " loaded into memory segment " + pcb.memorySegment.index);
+                    }
+                    else {
+                        _StdOut.putText("Program with PID " + pcb.pid + " loaded into hard drive");
+                    }
+                }
             }
             else {
                 _StdOut.putText("User program is not valid hexadecimal.");
@@ -354,6 +386,10 @@ var TSOS;
         };
         Shell.prototype.shellQuantum = function (args) {
             if (args.length > 0) {
+                // Quantum cannot be 0 or negative
+                if (parseInt(args[0]) <= 0 || isNaN(args[0])) {
+                    return _StdOut.putText("Invalid quantum given!");
+                }
                 _Scheduler.quantum = parseInt(args[0]);
                 _StdOut.putText("Quantum is now " + args[0]);
             }
@@ -476,6 +512,101 @@ var TSOS;
                     }
                 });
             });
+        };
+        Shell.prototype.shellCreate = function (args) {
+            if (args.length > 0) {
+                // Add operation to object
+                args.unshift('create');
+                // Check if file name begins with forbidden character
+                if (_krnFileSystemDriver.forbiddenPrefixes.includes(args.slice(0, 2)[1][0])) {
+                    return _StdOut.putText("File name cannot begin with '" + args.slice(0, 2)[1][0] + "'");
+                }
+                // Create interrupt for file operation
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 2)));
+            }
+            else {
+                _StdOut.putText("Usage: create <file name> Please supply a file name.");
+            }
+        };
+        Shell.prototype.shellRead = function (args) {
+            if (args.length > 0) {
+                // Add operation to object
+                args.unshift('read');
+                // Create interrupt for file operation
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 2)));
+            }
+            else {
+                _StdOut.putText("Usage: read <file name> Please supply a file name.");
+            }
+        };
+        Shell.prototype.shellWrite = function (args) {
+            if (args.length > 0) {
+                var file = args.shift();
+                // Please don't write to swap files
+                if (file[0] == '@') {
+                    return _StdOut.putText("Swap files cannot be edited");
+                }
+                var indices_1 = [];
+                // Combine array to single string then separate on character
+                args = args.join(" ").split("");
+                // Get indices of arguments that contain quotes
+                args.filter(function (el, index) {
+                    if (el == '"')
+                        indices_1.push(index);
+                });
+                // Get text in between quotes
+                var data = args.splice(indices_1[0] + 1, indices_1[1] - 1).join("");
+                // Create interrupt for file operation
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, ['write', file, data]));
+            }
+            else {
+                _StdOut.putText('Usage: write "<text>" Please supply a text.');
+            }
+        };
+        Shell.prototype.shellDelete = function (args) {
+            if (args.length > 0) {
+                // Please don't delete swap files
+                if (args[0][0] == '@') {
+                    return _StdOut.putText("Swap files cannot be deleted");
+                }
+                // Add operation to object
+                args.unshift('delete');
+                // Create interrupt for file operation
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 2)));
+            }
+            else {
+                _StdOut.putText("Usage: delete <file name> Please supply a file name.");
+            }
+        };
+        Shell.prototype.shellFormat = function (args) {
+            // Get all flags if any and remove dashes
+            args = args.filter(function (el) { return el[0] == '-'; }).map(function (flag) { return flag.substring(1); });
+            // Create interrupt for file operation
+            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, ['format', null, null, args]));
+        };
+        Shell.prototype.shellLs = function (args) {
+            // Get all flags if any and remove dashes
+            args = args.filter(function (el) { return el[0] == '-'; }).map(function (flag) { return flag.substring(1); });
+            // Create interrupt for file operation
+            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, ['list', null, null, args]));
+        };
+        Shell.prototype.shellSetSchedule = function (args) {
+            if (args.length > 0) {
+                // Check if valid scheduling algorithm
+                if (Object.keys(_Scheduler.availableAlgorithms).includes(args[0])) {
+                    _Scheduler.activeAlgorithm = args[0];
+                    _StdOut.putText("Scheduling algorithm set to " + _Scheduler.availableAlgorithms[args[0]]);
+                }
+                else {
+                    _StdOut.putText("Invalid scheduling algorithm");
+                }
+            }
+            else {
+                _StdOut.putText("Usage: setschedule <scheduler type (rr, fcfs, or priority)> Please supply a scheduler type.");
+            }
+        };
+        Shell.prototype.shellGetSchedule = function () {
+            _StdOut.putText("The current scheduling algorithm is " + _Scheduler.availableAlgorithms[_Scheduler.activeAlgorithm]);
         };
         return Shell;
     }());

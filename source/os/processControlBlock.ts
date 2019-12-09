@@ -10,6 +10,7 @@ module TSOS {
             public pid: number = _PidCounter++, // Process id
             public priority: number = 0, // Priority of the process
             public memorySegment: any = {}, // The segment of memory the program resides
+            public swapFile: string = '',
             public storageLocation: string = "memory", // Where the program is currently stored
 
             // Accounting information
@@ -26,6 +27,11 @@ module TSOS {
 
             // Release memory
             _MemoryManager.availability[this.memorySegment.index] = true;
+
+            // Delete swap file if it exists and process is in hard drive
+            if (this.storageLocation == 'hdd') {
+                _krnFileSystemDriver.deleteFile(this.swapFile, true);
+            }
 
             // Notify user of termination
             _StdOut.advanceLine();
