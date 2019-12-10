@@ -196,7 +196,7 @@ module TSOS {
             sc = new ShellCommand(this.shellWrite,
                 "write",
                 "Writes provided data to file. Make sure to put data in quotes.",
-                'write "<text>"');
+                'write <file name> "<text>"');
             this.commandList.push(sc);
 
             // delete <file name>
@@ -670,7 +670,7 @@ module TSOS {
                 });
 
                 // Make sure there are correct amount of quotes
-                if (indices.length < 2) return _StdOut.putText(`No data provided. Ensure data is surrounded by quotes.`);
+                if (indices.length < 2) return _StdOut.putText(`Data formatted incorrectly. Ensure file specified and data is surrounded by quotes.`);
 
                 // Get text in between quotes
                 let data = args.splice(indices[0]+1, indices[1]-indices[0]-1).join("");
@@ -682,7 +682,7 @@ module TSOS {
                 _KernelInterruptQueue.enqueue( new Interrupt(FILE_SYSTEM_IRQ, ['write', file, data]) );
 
             } else {
-                _StdOut.putText('Usage: write "<text>" Please supply a text.');
+                _StdOut.putText('Usage: write <file name> "<text>" Please supply a text.');
             }
         }
 

@@ -131,7 +131,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellRead, "read", "Prints contents of a file", "read <file name>");
             this.commandList.push(sc);
             // write <file name>
-            sc = new TSOS.ShellCommand(this.shellWrite, "write", "Writes provided data to file. Make sure to put data in quotes.", 'write "<text>"');
+            sc = new TSOS.ShellCommand(this.shellWrite, "write", "Writes provided data to file. Make sure to put data in quotes.", 'write <file name> "<text>"');
             this.commandList.push(sc);
             // delete <file name>
             sc = new TSOS.ShellCommand(this.shellDelete, "delete", "Deletes the file with given name", "delete <file name>");
@@ -556,7 +556,7 @@ var TSOS;
                 });
                 // Make sure there are correct amount of quotes
                 if (indices_1.length < 2)
-                    return _StdOut.putText("No data provided. Ensure data is surrounded by quotes.");
+                    return _StdOut.putText("Data formatted incorrectly. Ensure file specified and data is surrounded by quotes.");
                 // Get text in between quotes
                 var data = args.splice(indices_1[0] + 1, indices_1[1] - indices_1[0] - 1).join("");
                 // If data is empty, put a space in it
@@ -566,7 +566,7 @@ var TSOS;
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, ['write', file, data]));
             }
             else {
-                _StdOut.putText('Usage: write "<text>" Please supply a text.');
+                _StdOut.putText('Usage: write <file name> "<text>" Please supply a text.');
             }
         };
         Shell.prototype.shellDelete = function (args) {
